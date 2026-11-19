@@ -20,29 +20,20 @@
 import QtQuick
 import Vedder.vesc.utility 1.0
 
-// How much the filtered gyro offsets changed over the last second (largest axis), on a log scale.
-// The offsets are a 0.99 / 0.01 low-pass per IMU reply, so once the IMU is still the change decays
-// along a straight line on this scale and the dashed line predicts when it drops below the limit
+// How much the gyro moved over the last half second (largest axis) on a log scale, against the
+// still limit. The offsets are taken once it stays under the limit for the whole window
 Item {
     id: plot
-    property real gyroX
-    property real gyroY
-    property real gyroZ
+    property real motion: NaN       // °/s
+    property real limit: 3          // °/s
+    property real countdown: -1     // s until the capture, -1 while moving
+    property bool captured: false
     property bool running: true
-    property var samples: []                // [x, y, z] at 10 Hz, newest last
-    property real limit: 0.02               // °/s per second
-    readonly property real past: 8          // s shown before now
-    readonly property real future: 4        // s shown after now
+    property var samples: []        // motion at 10 Hz, newest last
 
-    readonly property real now: change(samples.length - 1)
-    readonly property bool settled: samples.length > 10 && now < limit
-    // Measured decay per half second, as the reply rate depends on the link. NaN unless decaying
-    readonly property real ratio: decayRatio()
-    readonly property real tau: -0.5 / Math.log(ratio)
-    readonly property real eta: !settled && ratio > 0 ? tau * Math.log(now / limit) : -1
-
-    readonly property real minV: 0.005
-    readonly property real maxV: 10
+    readonly property real past: 8  // s shown
+    readonly property real minV: 0.1
+    readonly property real maxV: 1000
     readonly property real padL: 34
     readonly property real padT: 22
     readonly property real plotW: width - padL - 4
@@ -51,29 +42,7 @@ Item {
     implicitWidth: 360
     implicitHeight: 140
 
-    // Largest spread of any axis over the second up to sample i
-    function change(i) {
-        if (i < 10) return NaN
-        var r = 0
-        for (var k = 0; k < 3; k++) {
-            var w = samples.slice(i - 10, i + 1).map(function(s) { return s[k] })
-            r = Math.max(r, Math.max.apply(null, w) - Math.min.apply(null, w))
-        }
-        return r
-    }
-    // A still IMU's change shrinks by the same ratio every half second, 0.78 at 50 replies per
-    // second. Only predict when the last 2 s follow that, so a moving IMU gets no countdown. Near
-    // the limit sensor noise breaks the pattern, so the status falls back to "Almost still" there
-    function decayRatio() {
-        var n = samples.length - 1, p = 1
-        for (var j = 0; j < 4; j++) {
-            var r = change(n - 5 * j) / change(n - 5 * j - 5)
-            if (!(r > 0.6 && r < 0.92)) return NaN
-            p *= r
-        }
-        return Math.pow(p, 0.25)
-    }
-    function xOf(t) { return padL + (t + past) / (past + future) * plotW }
+    function xOf(t) { return padL + (t + past) / past * plotW }
     function yOf(v) {
         var l = Math.log(Math.min(Math.max(v, minV), maxV)) / Math.LN10
         var l0 = Math.log(minV) / Math.LN10, l1 = Math.log(maxV) / Math.LN10
@@ -81,6 +50,7 @@ Item {
     }
 
     onSamplesChanged: canvas.requestPaint()
+    onLimitChanged: canvas.requestPaint()
     onWidthChanged: canvas.requestPaint()
     onHeightChanged: canvas.requestPaint()
 
@@ -90,22 +60,21 @@ Item {
     Timer {
         interval: 100
         repeat: true
-        running: plot.running
-        onTriggered: plot.samples = plot.samples.concat([[plot.gyroX, plot.gyroY, plot.gyroZ]]).slice(-120)
+        running: plot.running && !isNaN(plot.motion)
+        onTriggered: plot.samples = plot.samples.concat([plot.motion]).slice(-plot.past * 10)
     }
 
     Text {
-        text: "Offset change in 1 s (\u00B0/s)"
+        text: "Motion (\u00B0/s)"
         color: Utility.getAppHexColor("normalText")
         font.pointSize: 9
     }
     Text {
         anchors.right: parent.right
-        text: plot.samples.length <= 10 ? "Waiting for data" :
-              plot.settled ? "Still, ready to save" :
-              plot.eta > 0 ? "Ready in ~" + Math.ceil(plot.eta) + " s" :
-              plot.now < 4 * plot.limit ? "Almost still" : "Keep it still"
-        color: Utility.getAppHexColor(plot.settled ? "positiveText" : "warningText")
+        text: !plot.running || plot.samples.length === 0 ? "Waiting for data" :
+              plot.captured ? "Captured, tap Save" :
+              plot.countdown >= 0 ? "Hold still, " + Math.ceil(plot.countdown) + " s" : "Keep it still"
+        color: Utility.getAppHexColor(plot.captured ? "positiveText" : "warningText")
         font.pointSize: 9
         font.weight: Font.Medium
         font.features: { "tnum": 1 }
@@ -129,50 +98,34 @@ Item {
             ctx.lineWidth = 1
             ctx.strokeStyle = Utility.getAppHexColor("raisedBackground")
             ctx.beginPath()
-            ;[0.1, 1, 10].forEach(function(v) { ctx.moveTo(x0, plot.yOf(v)); ctx.lineTo(x1, plot.yOf(v)) })
+            ;[1, 10, 100, 1000].forEach(function(v) { ctx.moveTo(x0, plot.yOf(v)); ctx.lineTo(x1, plot.yOf(v)) })
             ctx.moveTo(x0, yb); ctx.lineTo(x1, yb)
-            ctx.moveTo(plot.xOf(0), plot.padT); ctx.lineTo(plot.xOf(0), yb)
             ctx.stroke()
 
             ctx.strokeStyle = Utility.getAppHexColor("positiveText")
             ctx.beginPath(); ctx.moveTo(x0, yl); ctx.lineTo(x1, yl); ctx.stroke()
 
-            // History
             var n = plot.samples.length
+            if (n === 0) return
             ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
             ctx.lineWidth = 2
             ctx.lineJoin = "round"
             ctx.beginPath()
-            var first = true
-            for (var i = Math.max(10, n - plot.past * 10 - 1); i < n; i++) {
-                var x = plot.xOf((i - n + 1) / 10), y = plot.yOf(plot.change(i))
-                if (first) ctx.moveTo(x, y); else ctx.lineTo(x, y)
-                first = false
+            for (var i = 0; i < n; i++) {
+                var x = plot.xOf((i - n + 1) / 10), y = plot.yOf(plot.samples[i])
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y)
             }
             ctx.stroke()
-            if (n <= 10) return
 
-            // Prediction if kept still
-            var yn = plot.yOf(plot.now)
-            if (plot.eta > 0) {
-                var te = Math.min(plot.eta, plot.future)
-                ctx.setLineDash([3, 3])
-                ctx.lineWidth = 1.5
-                ctx.beginPath()
-                ctx.moveTo(plot.xOf(0), yn)
-                ctx.lineTo(plot.xOf(te), plot.yOf(plot.now * Math.exp(-te / plot.tau)))
-                ctx.stroke()
-                ctx.setLineDash([])
-            }
-
-            ctx.fillStyle = Utility.getAppHexColor(plot.settled ? "positiveText" : "warningText")
-            ctx.beginPath(); ctx.arc(plot.xOf(0), yn, 4, 0, 2 * Math.PI); ctx.fill()
+            var still = plot.samples[n - 1] < plot.limit
+            ctx.fillStyle = Utility.getAppHexColor(plot.captured || still ? "positiveText" : "warningText")
+            ctx.beginPath(); ctx.arc(x1 - 4, plot.yOf(plot.samples[n - 1]), 4, 0, 2 * Math.PI); ctx.fill()
         }
     }
 
     // Axis labels
     Repeater {
-        model: [10, 1, 0.1]
+        model: [1000, 100, 10, 1]
         Text {
             x: plot.padL - 6 - width
             y: plot.yOf(modelData) - height / 2
@@ -180,13 +133,6 @@ Item {
             color: Utility.getAppHexColor("normalText")
             font.pointSize: 8
         }
-    }
-    Text {
-        x: plot.padL - 6 - width
-        y: plot.yOf(plot.limit) - height / 2
-        text: plot.limit
-        color: Utility.getAppHexColor("positiveText")
-        font.pointSize: 8
     }
     Text {
         x: plot.padL + plot.plotW - width - 4
@@ -203,16 +149,9 @@ Item {
         font.pointSize: 8
     }
     Text {
-        x: plot.xOf(0) - width / 2
-        y: plot.padT + plot.plotH + 2
-        text: "now"
-        color: Utility.getAppHexColor("normalText")
-        font.pointSize: 8
-    }
-    Text {
         x: plot.padL + plot.plotW - width
         y: plot.padT + plot.plotH + 2
-        text: "+" + plot.future + " s"
+        text: "now"
         color: Utility.getAppHexColor("normalText")
         font.pointSize: 8
     }

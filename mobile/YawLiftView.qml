@@ -20,23 +20,21 @@
 import QtQuick
 import Vedder.vesc.utility 1.0
 
-// Yaw step, side and top view. Left: how far the nose is lifted against the 45° target. Right:
-// the IMU X axis and the direction of the lifted nose found from the lift, seen from above.
-// yawOffset is -calculatedYawOffset in degrees. As in the firmware, a lifted +X end reads as
-// negative pitch, so the search turns X' to point away from the nose
+// Yaw step, side and top view. Left: how far the nose is lifted against the 25-80° target. Right:
+// the IMU X axis and the direction of the lifted nose, seen from above. yawOffset is rot_yaw in
+// degrees. As in the firmware, a lifted +X end reads as negative pitch, so rot_yaw turns X' to
+// point away from the nose
 Item {
     id: view
-    property real pitch: 0
-    property real roll: 0
+    property real tilt: 0           // degrees from level
     property real yawOffset: 0
+    property bool captured: false
 
-    // Total tilt from level, independent of how the IMU is turned on the board
-    readonly property real tilt: Math.acos(Math.cos(roll * Math.PI / 180) * Math.cos(pitch * Math.PI / 180)) * 180 / Math.PI
     readonly property bool lifted: tilt > 15
-    readonly property bool inTarget: tilt >= 35 && tilt <= 55
+    readonly property bool inTarget: tilt >= 25 && tilt <= 80
     // Lifted nose seen from above, clockwise from the IMU X axis
     readonly property real nose: yawOffset > 0 ? yawOffset - 180 : yawOffset + 180
-    readonly property string liftColor: Utility.getAppHexColor(inTarget ? "positiveText" : tilt > 55 ? "warningText" : "lightAccent")
+    readonly property string liftColor: Utility.getAppHexColor(inTarget ? "positiveText" : tilt > 80 ? "warningText" : "lightAccent")
 
     implicitWidth: 360
     implicitHeight: 140
@@ -50,6 +48,7 @@ Item {
     }
     onTiltChanged: repaint()
     onYawOffsetChanged: repaint()
+    onCapturedChanged: repaint()
     onVisibleChanged: repaint()
 
     component Caption: Text {
@@ -68,8 +67,8 @@ Item {
         // Caption doubles as the instruction, so the user knows when to stop
         Caption {
             id: sideCap
-            text: !view.lifted ? "Lift the nose" : view.tilt < 35 ? "Keep lifting" :
-                  view.inTarget ? "Hold, then Save" : "Too far"
+            text: view.captured ? "Captured, tap Save" : !view.lifted ? "Lift the front" :
+                  view.tilt < 25 ? "Keep lifting" : view.inTarget ? "Hold still" : "Too far"
             color: view.lifted ? view.liftColor : Utility.getAppHexColor("normalText")
         }
         Text {
@@ -90,32 +89,23 @@ Item {
             antialiasing: true
             readonly property real x0: 4
             readonly property real y0: height - 4
-            readonly property real len: Math.min(width - 44, (height - 8) / Math.sin(65 * Math.PI / 180))
-            readonly property real shown: Math.min(view.tilt, 80) * Math.PI / 180
+            readonly property real len: Math.min(width - 44, height - 8)
+            readonly property real shown: Math.min(view.tilt, 90) * Math.PI / 180
 
             onPaint: {
                 var ctx = getContext("2d")
                 ctx.reset()
                 var rad = a => -a * Math.PI / 180
 
-                // Target wedge 35-55° with the 45° line
+                // Target wedge 25-80°
                 ctx.globalAlpha = 0.15
                 ctx.fillStyle = Utility.getAppHexColor("positiveText")
                 ctx.beginPath()
                 ctx.moveTo(x0, y0)
-                ctx.arc(x0, y0, len, rad(35), rad(55), true)
+                ctx.arc(x0, y0, len, rad(25), rad(80), true)
                 ctx.closePath()
                 ctx.fill()
                 ctx.globalAlpha = 1
-
-                ctx.strokeStyle = Utility.getAppHexColor("positiveText")
-                ctx.lineWidth = 1
-                ctx.setLineDash([4, 3])
-                ctx.beginPath()
-                ctx.moveTo(x0, y0)
-                ctx.lineTo(x0 + len * Math.cos(rad(45)), y0 + len * Math.sin(rad(45)))
-                ctx.stroke()
-                ctx.setLineDash([])
 
                 // Ground
                 ctx.strokeStyle = Utility.getAppHexColor("lightestBackground")
@@ -144,16 +134,8 @@ Item {
         Text {
             x: sideCanvas.x + sideCanvas.x0 + sideCanvas.len * Math.cos(sideCanvas.shown) + 6
             y: sideCanvas.y + sideCanvas.y0 - sideCanvas.len * Math.sin(sideCanvas.shown) - height + 2
-            text: "Nose"
+            text: "Front"
             color: view.liftColor
-            font.pointSize: 9
-        }
-        Text {
-            x: sideCanvas.x + sideCanvas.x0 + (sideCanvas.len + 4) * Math.cos(Math.PI / 4) - width / 2
-            y: sideCanvas.y + sideCanvas.y0 - (sideCanvas.len + 4) * Math.sin(Math.PI / 4) - height
-            visible: view.tilt < 40 || view.tilt > 50
-            text: "45°"
-            color: Utility.getAppHexColor("positiveText")
             font.pointSize: 9
         }
     }
@@ -168,7 +150,7 @@ Item {
         Caption {
             anchors.left: parent.left
             anchors.leftMargin: 8
-            text: "Nose seen from above"
+            text: "Front seen from above"
         }
 
         Canvas {

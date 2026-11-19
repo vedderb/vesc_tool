@@ -25,28 +25,21 @@ Item {
     property var dialogParent: Overlay.overlay
 
     property bool workingIMU: false
+    // IMU replies since the dialog opened, workingIMU is only known after a few
+    property int imuReplies: 0
+    property double lastReply: 0
+    readonly property bool imuChecked: imuReplies > 25
     property int imuType: 0
     property string imuString: "Unknown"
     property var configuratorRestore: ({})
     property var orientationRestore: ({})
     property var filteredIMUValues: {
-        'roll': 0.0,
-        'pitch': 0.0,
-        'yaw': 0.0,
         'accX': 0.0,
         'accY': 0.0,
         'accZ': 0.0,
-        'gyroX': 0.0,
-        'gyroY': 0.0,
-        'gyroZ': 0.0,
         'gyroXNoise': 0.0,
         'gyroXPrevious': 0.0,
     }
-    property var maxAccelValues: {
-        'x': -10.0, 'y': -10.0, 'z': -10.0
-    }
-    property real calculatedYawOffset: 0.0
-    readonly property string accelHint: "Avoid sharp movements and bumps. If the reading overshoots, tap Clear Max. Save once the max is stable."
 
     property var pages: {
         'menu': 0,
@@ -56,46 +49,310 @@ Item {
         'configurator': 4
     }
 
-    // The axis the open calibration is on, and what was saved for the ones before it
+    // Tasks saved this session, for the ticks on the menu, and whether the tasks run one after
+    // the other instead of returning to the menu
+    property var doneTasks: ({})
+    property bool flowMode: false
+
+    // Gyro: raw replies [time ms, x, y, z] while on the page, newest last, and the absolute
+    // offsets taken once they stayed still
+    property var gyroWindow: []
+    property var gyroMean: null
+    property var gyroCapture: null
+    property real gyroMotion: NaN
+    property real gyroLimit: 3
+    property real gyroCountdown: -1
+
+    // Captured accelerometer readings per axis, [up, down], NaN until captured
+    property var accelFaces: [[NaN, NaN], [NaN, NaN], [NaN, NaN]]
+
+    // Orientation: step 0 the level, 1 the yaw, and what was stored for each
     property int calAxis: 0
     property var calResults: []
+    // The yaw is only taken after the vehicle has been level in the new frame
+    property real liftYaw: 0
+    property real capturedYaw: NaN
+    property var yawHold: ({ref: 0, start: 0})
 
-    // Moves on to the next axis, or back to the menu after the last one
-    function nextAxis(result) {
-        var r = calResults.slice()
-        r[calAxis] = result
-        calResults = r
-        if (calAxis < 2) {
-            calAxis++
+    // Configurator
+    property bool searching: false
+    property int searchType: 0
+    property int searchPreviousApp: 0
+    property int profileIndex: -1
+    readonly property var profiles: [
+        {name: "Default", mode: 0, decay: 1.0, kp: 0.3, accZ: 0.0, fast: false},
+        {name: "Logs", mode: 1, decay: 1.0, kp: 0.3, accZ: 0.0, fast: false},
+        {name: "Balance Unicycle", mode: 1, decay: 1.0, kp: 0.2, accZ: 0.0, fast: true},
+        {name: "Balance Skateboard", mode: 1, decay: 0.02, kp: 2.0, accZ: 1.0, fast: true}
+    ]
+
+    function openDialog() {
+        imuReplies = 0
+        filteredIMUValues.gyroXNoise = 0
+        dialog.open()
+        openTimer.start()
+    }
+
+    // Resets the state of a task and shows it
+    function openTask(page) {
+        if (page === pages.configurator) {
+            configuratorRestore = {
+                "type": mAppConf.getParamEnum("imu_conf.type"),
+                "sample_rate_hz": mAppConf.getParamInt("imu_conf.sample_rate_hz"),
+                "mode": mAppConf.getParamEnum("imu_conf.mode"),
+                "accel_confidence_decay": mAppConf.getParamDouble("imu_conf.accel_confidence_decay"),
+                "mahony_kp": mAppConf.getParamDouble("imu_conf.mahony_kp"),
+                "accel_lowpass_filter_z": mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z"),
+                "gyro_lowpass_filter": mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter")
+            }
+            updateIMUType()
+            profileIndex = matchingProfile()
+            profileTiles.model = profileTiles.getModel()
+        } else if (page === pages.gyro) {
+            gyroWindow = []
+            gyroMean = null
+            gyroCapture = null
+            gyroMotion = NaN
+            gyroCountdown = -1
+        } else if (page === pages.accelerometer) {
+            accelFaces = [[NaN, NaN], [NaN, NaN], [NaN, NaN]]
+        } else if (page === pages.orientation) {
+            orientationRestore = {
+                "rot_roll": mAppConf.getParamDouble("imu_conf.rot_roll"),
+                "rot_pitch": mAppConf.getParamDouble("imu_conf.rot_pitch"),
+                "rot_yaw": mAppConf.getParamDouble("imu_conf.rot_yaw"),
+                "gyro_offsets__0": mAppConf.getParamDouble("imu_conf.gyro_offsets__0"),
+                "gyro_offsets__1": mAppConf.getParamDouble("imu_conf.gyro_offsets__1"),
+                "gyro_offsets__2": mAppConf.getParamDouble("imu_conf.gyro_offsets__2"),
+                "accel_offsets__0": mAppConf.getParamDouble("imu_conf.accel_offsets__0"),
+                "accel_offsets__1": mAppConf.getParamDouble("imu_conf.accel_offsets__1"),
+                "accel_offsets__2": mAppConf.getParamDouble("imu_conf.accel_offsets__2"),
+            }
+            // Measure in the frame of the IMU itself
+            mAppConf.updateParamDouble("imu_conf.rot_roll", 0, null)
+            mAppConf.updateParamDouble("imu_conf.rot_pitch", 0, null)
+            mAppConf.updateParamDouble("imu_conf.rot_yaw", 0, null)
+            applyRotationToCalibrationConfig(0, 0, -orientationRestore.rot_yaw * pi/180)
+            applyRotationToCalibrationConfig(0, -orientationRestore.rot_pitch * pi/180, 0)
+            applyRotationToCalibrationConfig(-orientationRestore.rot_roll * pi/180, 0, 0)
+            rotateFiltered(0, 0, -orientationRestore.rot_yaw * pi/180)
+            rotateFiltered(0, -orientationRestore.rot_pitch * pi/180, 0)
+            rotateFiltered(-orientationRestore.rot_roll * pi/180, 0, 0)
+            mCommands.setAppConfNoStore()
+            calAxis = 0
+            calResults = []
+            capturedYaw = NaN
+        }
+        stackLayout.currentIndex = page
+    }
+
+    // Leaves a task, marking it done when saved, and opens the next one when running them all
+    function finishTask(page, saved) {
+        if (saved) {
+            var d = Object.assign({}, doneTasks)
+            d[page] = true
+            // The level depends on the accelerometer offsets
+            if (page === pages.accelerometer) {
+                delete d[pages.orientation]
+            }
+            doneTasks = d
+        }
+        var next = page === pages.gyro ? pages.accelerometer : page === pages.accelerometer ? pages.orientation : -1
+        if (flowMode && next >= 0) {
+            openTask(next)
         } else {
+            flowMode = false
             stackLayout.currentIndex = pages.menu
         }
     }
 
-    // Offset in degrees that saving the roll, pitch or yaw step applies. Only the asked axis is
-    // read, so bindings on roll do not update with the yaw search
-    function orientationOffset(axis) {
-        if (axis === 0) {
-            return -filteredIMUValues.roll * 180.0/pi - orientationRestore.rot_roll
-        } else if (axis === 1) {
-            return filteredIMUValues.pitch * 180.0/pi - orientationRestore.rot_pitch
+    // Offsets are the mean of the last 150 replies once all of them stayed within the still limit
+    function updateGyro() {
+        var w = gyroWindow
+        if (w.length < 2) {
+            gyroMotion = NaN
+            return
         }
-        return -calculatedYawOffset * 180.0/pi - orientationRestore.rot_yaw
+        // 3 °/s, or 8 times the reply to reply noise for noisy IMUs, at most 8 °/s so that holding
+        // it in a hand does not raise it
+        var d = []
+        for (var i = 1; i < w.length; i++) {
+            for (var k = 1; k < 4; k++) {
+                d.push(Math.abs(w[i][k] - w[i - 1][k]))
+            }
+        }
+        d.sort((a, b) => a - b)
+        gyroLimit = Math.min(8, Math.max(3, 8 * d[Math.floor(d.length / 2)]))
+
+        // Largest axis spread over the newest n replies
+        var spread = n => Math.max(...[1, 2, 3].map(k => {
+            var v = w.slice(-n).map(s => s[k])
+            return Math.max(...v) - Math.min(...v)
+        }))
+        var run = 1
+        while (run < w.length && spread(run + 1) < gyroLimit) {
+            run++
+        }
+        gyroMotion = spread(25)
+        gyroMean = [1, 2, 3].map(k => w.reduce((s, x) => s + x[k], 0) / w.length)
+        var interval = (w[w.length - 1][0] - w[0][0]) / (w.length - 1)
+        gyroCountdown = gyroMotion < gyroLimit ? (150 - run) * interval / 1000 : -1
+        if (w.length === 150 && run === 150) {
+            gyroCapture = [0, 1, 2].map(k => mAppConf.getParamDouble("imu_conf.gyro_offsets__" + k) + gyroMean[k])
+        }
     }
 
-    function applyOrientationOffset(axis, offset) {
-        if (axis === 0) {
-            applyRollOffset(offset)
-        } else if (axis === 1) {
-            applyPitchOffset(offset)
+    // The offset Save writes for a gyro axis
+    function gyroOffset(axis) {
+        return gyroCapture ? gyroCapture[axis] : gyroMean ? mAppConf.getParamDouble("imu_conf.gyro_offsets__" + axis) + gyroMean[axis] : NaN
+    }
+
+    // Captured sides of each axis for the rows, empty when none
+    function accelResults() {
+        return accelFaces.map(f => [f[0], f[1]].filter(v => !isNaN(v)).map(v => (v > 0 ? "+" : "\u2212") + Math.abs(v).toFixed(3))
+                              .join(" / ") + (isNaN(f[0]) && isNaN(f[1]) ? "" : " g"))
+    }
+
+    // Accelerometer offset change for an axis. Up should read +1 g and down -1 g, with both the
+    // offset is their mean, which a scale error does not move
+    function accelOffsetChange(f) {
+        return !isNaN(f[0]) && !isNaN(f[1]) ? (f[0] + f[1]) / 2 : !isNaN(f[0]) ? f[0] - 1 : f[1] + 1
+    }
+
+    // Gravity seen by the IMU in g, filtered
+    function acc() {
+        return [filteredIMUValues.accX, filteredIMUValues.accY, filteredIMUValues.accZ]
+    }
+
+    function levelOk() {
+        var a = acc()
+        return workingIMU && Math.abs(Math.hypot(a[0], a[1], a[2]) - 1) < 0.1
+    }
+
+    // rot_roll and rot_pitch in degrees that level the gravity reading, with the rotation zeroed
+    function levelAngles() {
+        var a = acc()
+        return [Math.atan2(a[1], a[2]) * 180 / pi, Math.atan2(-a[0], Math.hypot(a[1], a[2])) * 180 / pi]
+    }
+
+    // How far the board is tilted from the level, in degrees
+    function liftTilt() {
+        var a = acc()
+        return Math.acos(Math.max(-1, Math.min(1, a[2] / Math.max(1e-6, Math.hypot(a[0], a[1], a[2]))))) * 180 / pi
+    }
+
+    // Stores the level live and moves on to the yaw, which persists both
+    function captureLevel(roll, pitch, result) {
+        mAppConf.updateParamDouble("imu_conf.rot_roll", roll, null)
+        mAppConf.updateParamDouble("imu_conf.rot_pitch", pitch, null)
+        applyRotationToCalibrationConfig(roll * pi/180, pitch * pi/180, 0)
+        rotateFiltered(roll * pi/180, pitch * pi/180, 0)
+        mCommands.setAppConfNoStore()
+        calResults = [result]
+        calAxis = 1
+        capturedYaw = NaN
+        yawHold = {ref: 0, start: Date.now(), armed: false}
+    }
+
+    function storeYaw(yaw, result) {
+        applyYawOffset(yaw * pi/180)
+        calResults = [calResults[0], result]
+        finishTask(pages.orientation, true)
+    }
+
+    // rot_yaw that turns the lifted nose to -X, so that it reads as positive pitch like in the
+    // firmware. Taken once it holds within 2° for 1.5 s with the nose lifted 25-80°
+    function updateYaw() {
+        var a = acc()
+        var tilt = liftTilt()
+        liftYaw = Math.atan2(a[1], -a[0]) * 180 / pi
+        if (!yawHold.armed || tilt < 25 || tilt > 80 || Math.abs(((liftYaw - yawHold.ref + 540) % 360) - 180) >= 2) {
+            yawHold = {ref: liftYaw, start: Date.now(), armed: yawHold.armed || tilt < 15}
+        } else if (Date.now() - yawHold.start > 1500) {
+            capturedYaw = snapYaw(liftYaw)
+        }
+    }
+
+    // The filtered gravity follows a rotation change at once, as the firmware readings do,
+    // instead of sweeping through other directions that could pass for a lift
+    function rotateFiltered(roll, pitch, yaw) {
+        var r = rotateEulerAngles({"roll": filteredIMUValues.accX, "pitch": filteredIMUValues.accY, "yaw": filteredIMUValues.accZ},
+                                  {"roll": roll, "pitch": pitch, "yaw": yaw})
+        filteredIMUValues.accX = r.roll
+        filteredIMUValues.accY = r.pitch
+        filteredIMUValues.accZ = r.yaw
+    }
+
+    // A square mounting lands on a multiple of 90° when the lift was a little crooked. Not with a
+    // steep level pitch, then the roll of the level step folds into the yaw
+    function snapYaw(yaw) {
+        var s = Math.round(yaw / 90) * 90
+        if (s === -180) {
+            s = 180
+        }
+        return Math.abs(yaw - s) < 8 && Math.abs(mAppConf.getParamDouble("imu_conf.rot_pitch")) < 45 ? s : Math.round(yaw)
+    }
+
+    // Profile that matches the current settings, -1 when none
+    function matchingProfile() {
+        var near = (a, b) => Math.abs(a - b) < 1e-4
+        return profiles.findIndex(p => p.mode === mAppConf.getParamEnum("imu_conf.mode") &&
+                                  near(p.decay, mAppConf.getParamDouble("imu_conf.accel_confidence_decay")) &&
+                                  near(p.kp, mAppConf.getParamDouble("imu_conf.mahony_kp")) &&
+                                  near(p.accZ, mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z")) &&
+                                  near(0, mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter")))
+    }
+
+    function applyProfile(index) {
+        var p = profiles[index]
+        // The balance profiles run as fast as the IMU allows
+        mAppConf.updateParamInt("imu_conf.sample_rate_hz", !p.fast ? 200 : imuType === 4 ? 800 : imuType === 5 ? 833 : 1000)
+        mAppConf.updateParamEnum("imu_conf.mode", p.mode)
+        mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", p.decay)
+        mAppConf.updateParamDouble("imu_conf.mahony_kp", p.kp)
+        mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", p.accZ)
+        mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
+        profileIndex = index
+        profileTiles.model = profileTiles.getModel()
+    }
+
+    // Tries each IMU type for 2 s with the app off, so that it does not hold the COMM port
+    function startSearch() {
+        searchPreviousApp = mAppConf.getParamEnum("app_to_use")
+        mAppConf.updateParamEnum("app_to_use", 0)
+        searchType = 1
+        mAppConf.updateParamEnum("imu_conf.type", searchType)
+        mCommands.setAppConfNoStore()
+        updateIMUType()
+        searching = true
+        searchTimer.start()
+    }
+
+    function searchStep() {
+        if (workingIMU) {
+            stopSearch(true)
+        } else if (searchType < mAppConf.getParamEnumNames("imu_conf.type").length - 1) {
+            searchType++
+            mAppConf.updateParamEnum("imu_conf.type", searchType)
+            mCommands.setAppConfNoStore()
+            updateIMUType()
         } else {
-            applyYawOffset(offset)
+            stopSearch(false)
         }
     }
 
-    function openDialog() {
-        dialog.open()
-        openTimer.start()
+    function stopSearch(found) {
+        searchTimer.stop()
+        searching = false
+        if (!found) {
+            mAppConf.updateParamEnum("imu_conf.type", configuratorRestore.type)
+        }
+        mAppConf.updateParamEnum("app_to_use", searchPreviousApp)
+        mCommands.setAppConfNoStore()
+        updateIMUType()
+        if (profileIndex >= 0) {
+            applyProfile(profileIndex)
+        }
     }
 
     Timer {
@@ -111,67 +368,34 @@ Item {
     }
 
     Timer {
-        id: delayTimer
-        repeat: false
-
-    }
-    function delay(delayTime, cb) {
-        delayTimer.interval = delayTime
-        delayTimer.triggered.connect(cb)
-        delayTimer.start()
+        id: searchTimer
+        interval: 2000
+        repeat: true
+        onTriggered: searchStep()
     }
 
     Connections {
         target: mCommands
 
-        //        IMU_VALUES() {
-        //            roll = 0; pitch = 0; yaw = 0;
-        //            accX = 0; accY = 0; accZ = 0;
-        //            gyroX = 0; gyroY = 0; gyroZ = 0;
-        //            magX = 0; magY = 0; magZ = 0;
-        //            q0 = 1; q1 = 0; q2 = 0; q3 = 0;
-        //            vesc_id = 0;
-        //        }
         function onValuesImuReceived(values) {
-
-            // Update values
-            filteredIMUValues.roll = values.roll
-            filteredIMUValues.pitch = values.pitch
-            filteredIMUValues.yaw = values.yaw
+            imuReplies++
+            lastReply = Date.now()
             filteredIMUValues.accX = (filteredIMUValues.accX * .98) + (values.accX * .02)
             filteredIMUValues.accY = (filteredIMUValues.accY * .98) + (values.accY * .02)
             filteredIMUValues.accZ = (filteredIMUValues.accZ * .98) + (values.accZ * .02)
-            filteredIMUValues.gyroX = (filteredIMUValues.gyroX * .99) + (values.gyroX * .01)
-            filteredIMUValues.gyroY = (filteredIMUValues.gyroY * .99) + (values.gyroY * .01)
-            filteredIMUValues.gyroZ = (filteredIMUValues.gyroZ * .99) + (values.gyroZ * .01)
 
-            // Update peak accel values
-            maxAccelValues.x = Math.max(maxAccelValues.x, filteredIMUValues.accX)
-            maxAccelValues.y = Math.max(maxAccelValues.y, filteredIMUValues.accY)
-            maxAccelValues.z = Math.max(maxAccelValues.z, filteredIMUValues.accZ)
-
-            // Search for reccomended yaw offset
-            var currentMaxPitch = getPitchForYawOffset(calculatedYawOffset)
-            if(getPitchForYawOffset(calculatedYawOffset + 0.261799387798) > currentMaxPitch){
-                calculatedYawOffset += 0.261799387798
-            }else if (getPitchForYawOffset(calculatedYawOffset - 0.261799387798) > currentMaxPitch){
-                calculatedYawOffset -= 0.261799387798
-            }
-            if(calculatedYawOffset > pi){
-                calculatedYawOffset = -pi
-            }else if(calculatedYawOffset < -pi){
-                calculatedYawOffset = pi
+            if (stackLayout.currentIndex === pages.gyro) {
+                gyroWindow.push([Date.now(), values.gyroX, values.gyroY, values.gyroZ])
+                if (gyroWindow.length > 150) {
+                    gyroWindow.shift()
+                }
             }
 
             // Detect working IMU based on noise levels of the gyro X axis
             var noise = Math.abs(values.gyroX - filteredIMUValues.gyroXPrevious)
             filteredIMUValues.gyroXPrevious = values.gyroX
             filteredIMUValues.gyroXNoise = (filteredIMUValues.gyroXNoise * .9) + (noise * .1)
-            if(filteredIMUValues.gyroXNoise < 0.01){
-                workingIMU = false
-            } else {
-                workingIMU = true
-            }
+            workingIMU = filteredIMUValues.gyroXNoise >= 0.01
         }
     }
 
@@ -182,8 +406,18 @@ Item {
         running: dialog.visible
 
         onTriggered: {
+            // Frozen readings would pass every steadiness test
+            if (Date.now() - lastReply > 300) {
+                workingIMU = false
+            }
+            if (stackLayout.currentIndex === pages.gyro) {
+                updateGyro()
+            } else if (stackLayout.currentIndex === pages.orientation) {
+                if (calAxis === 1) {
+                    updateYaw()
+                }
+            }
             filteredIMUValuesChanged()
-            maxAccelValuesChanged()
         }
     }
 
@@ -236,112 +470,107 @@ Item {
                 width: parent.width
                 height: parent.height
 
-                // The tasks as a 2x2 grid on landscape phones
+                // The three calibrations side by side on landscape phones
                 GridLayout {
                     width: parent.width
                     height: parent.height
-                    columns: phoneLandscape ? 2 : 1
+                    columns: phoneLandscape ? 3 : 1
                     rowSpacing: 10
                     columnSpacing: 10
                     uniformCellWidths: true
 
                     TaskIntro {
-                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        Layout.columnSpan: phoneLandscape ? 3 : 1
                         title: "IMU Wizard"
-                        instruction: "Run the tasks in order the first time"
-                        hint: "Each task can also be run on its own later, in any order."
+                        instruction: "Set up the IMU, then calibrate it"
+                        hint: "Calibrate all runs the three calibrations one after the other, each can also be run on its own. " +
+                              "Run the accelerometer before the orientation, the level depends on it."
+                    }
+                    Text {
+                        Layout.columnSpan: phoneLandscape ? 3 : 1
+                        visible: !imuChecked
+                        text: "Checking IMU\u2026"
+                        color: Utility.getAppHexColor("normalText")
                     }
                     WarningBanner {
-                        id: welcomeText3
-                        Layout.columnSpan: phoneLandscape ? 2 : 1
+                        Layout.columnSpan: phoneLandscape ? 3 : 1
                         Layout.fillWidth: true
-                        visible: !workingIMU
+                        visible: imuChecked && !workingIMU
                         text: "We have detected that your IMU is not working. The IMU Configurator can help set it up."
                     }
                     ImageButton {
-                        id: configuratorButton
+                        Layout.columnSpan: phoneLandscape ? 3 : 1
                         Layout.fillWidth: true
                         Layout.preferredHeight: 62
-                        buttonText: "1. IMU Configurator"
-                        hintText: "Find the IMU and choose a profile"
+                        buttonText: "IMU Configurator"
+                        hintText: (doneTasks[pages.configurator] ? "\u2713 Saved. " : "") + "Find the IMU and choose a profile"
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Search-96.png"
-                        badge: !workingIMU
+                        badge: imuChecked && !workingIMU
 
                         onClicked: {
-                            configuratorRestore = {
-                                "type": mAppConf.getParamEnum("imu_conf.type"),
-                                "sample_rate_hz": mAppConf.getParamInt("imu_conf.sample_rate_hz"),
-                                "mode": mAppConf.getParamEnum("imu_conf.mode"),
-                                "accel_confidence_decay": mAppConf.getParamDouble("imu_conf.accel_confidence_decay"),
-                                "mahony_kp": mAppConf.getParamDouble("imu_conf.mahony_kp"),
-                                "accel_lowpass_filter_z": mAppConf.getParamDouble("imu_conf.accel_lowpass_filter_z"),
-                                "gyro_lowpass_filter": mAppConf.getParamDouble("imu_conf.gyro_lowpass_filter")
-                            }
-                            configuratorRadioDefault.checked = true
-                            configuratorRadioDefault.onClicked()
-                            updateIMUType()
-                            stackLayout.currentIndex = pages.configurator
+                            flowMode = false
+                            openTask(pages.configurator)
+                        }
+                    }
+                    // Calibrate all runs the three tasks below it
+                    SectionHeader {
+                        Layout.columnSpan: phoneLandscape ? 3 : 1
+                        Layout.topMargin: 6
+                        text: "Calibration"
+                    }
+                    Button {
+                        Layout.columnSpan: phoneLandscape ? 3 : 1
+                        Layout.fillWidth: true
+                        text: "Calibrate all"
+                        highlighted: true
+                        enabled: imuChecked && workingIMU
+
+                        onClicked: {
+                            flowMode = true
+                            openTask(pages.gyro)
                         }
                     }
                     ImageButton {
-                        id: gyroCalibrationButton
                         Layout.fillWidth: true
                         Layout.preferredHeight: 62
-                        buttonText: "2. Gyroscope Calibration"
-                        hintText: "Measure the gyro offsets at rest"
+                        buttonText: "Gyroscope Calibration"
+                        hintText: (doneTasks[pages.gyro] ? "\u2713 Saved. " : "") + "Measure the gyro offsets at rest"
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Gyroscope-96.png"
+                        locked: !imuChecked || !workingIMU
+                        lockedText: "Needs a working IMU"
 
                         onClicked: {
-                            stackLayout.currentIndex = pages.gyro
+                            flowMode = false
+                            openTask(pages.gyro)
                         }
                     }
                     ImageButton {
-                        id: accelerometerCalibrationButton
                         Layout.fillWidth: true
                         Layout.preferredHeight: 62
-                        buttonText: "3. Accelerometer Calibration"
-                        hintText: "Find the peak reading on each axis"
+                        buttonText: "Accelerometer Calibration"
+                        hintText: (doneTasks[pages.accelerometer] ? "\u2713 Saved. " : "") + "Hold each side up, usually not needed"
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/Offset-96.png"
+                        locked: !imuChecked || !workingIMU
+                        lockedText: "Needs a working IMU"
 
                         onClicked: {
-                            maxAccelValues.x = -10
-                            maxAccelValues.y = -10
-                            maxAccelValues.z = -10
-                            calAxis = 0
-                            calResults = []
-                            stackLayout.currentIndex = pages.accelerometer
+                            flowMode = false
+                            openTask(pages.accelerometer)
                         }
                     }
                     ImageButton {
-                        id: orientationCalibrationButton
                         Layout.fillWidth: true
                         Layout.preferredHeight: 62
-                        buttonText: "4. Orientation Calibration"
-                        hintText: "Level roll and pitch, then set yaw"
+                        buttonText: "Orientation Calibration"
+                        hintText: doneTasks[pages.orientation] ? "\u2713 Saved. Level it, then lift the front" :
+                                  doneTasks[pages.accelerometer] ? "Redo, the accelerometer offsets changed" : "Level it, then lift the front"
                         imageSrc: "qrc" + Utility.getThemePath() + "icons/icons8-target-96.png"
+                        locked: !imuChecked || !workingIMU
+                        lockedText: "Needs a working IMU"
 
                         onClicked: {
-                            orientationRestore = {
-                                "rot_roll": mAppConf.getParamDouble("imu_conf.rot_roll"),
-                                "rot_pitch": mAppConf.getParamDouble("imu_conf.rot_pitch"),
-                                "rot_yaw": mAppConf.getParamDouble("imu_conf.rot_yaw"),
-                                "gyro_offsets__0": mAppConf.getParamDouble("imu_conf.gyro_offsets__0"),
-                                "gyro_offsets__1": mAppConf.getParamDouble("imu_conf.gyro_offsets__1"),
-                                "gyro_offsets__2": mAppConf.getParamDouble("imu_conf.gyro_offsets__2"),
-                                "accel_offsets__0": mAppConf.getParamDouble("imu_conf.accel_offsets__0"),
-                                "accel_offsets__1": mAppConf.getParamDouble("imu_conf.accel_offsets__1"),
-                                "accel_offsets__2": mAppConf.getParamDouble("imu_conf.accel_offsets__2"),
-                            }
-                            mAppConf.updateParamDouble("imu_conf.rot_roll", 0, null)
-                            mAppConf.updateParamDouble("imu_conf.rot_pitch", 0, null)
-                            mAppConf.updateParamDouble("imu_conf.rot_yaw", 0, null)
-                            applyRotationToCalibrationConfig(0, 0, -orientationRestore.rot_yaw * pi/180)
-                            applyRotationToCalibrationConfig(0, -orientationRestore.rot_pitch * pi/180, 0)
-                            applyRotationToCalibrationConfig(-orientationRestore.rot_roll * pi/180, 0, 0)
-                            mCommands.setAppConfNoStore()
-                            calAxis = 0
-                            calResults = []
-                            stackLayout.currentIndex = pages.orientation
+                            flowMode = false
+                            openTask(pages.orientation)
                         }
                     }
 
@@ -365,8 +594,8 @@ Item {
                     TaskIntro {
                         Layout.columnSpan: phoneLandscape ? 2 : 1
                         title: "Gyroscope Calibration"
-                        instruction: "Leave the IMU completely still"
-                        hint: "Any orientation works, but avoid vibration. Save once the offsets have settled."
+                        instruction: "Set it down and leave it still for 3 seconds"
+                        hint: "Best in its riding position. The offsets are taken automatically."
                     }
                     GridLayout {
                         Layout.fillWidth: true
@@ -375,23 +604,17 @@ Item {
                         columnSpacing: 8
                         uniformCellWidths: true
 
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "X offset"
-                            value: filteredIMUValues.gyroX.toFixed(2)
-                            unit: "\u00B0/s"
-                        }
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Y offset"
-                            value: filteredIMUValues.gyroY.toFixed(2)
-                            unit: "\u00B0/s"
-                        }
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "Z offset"
-                            value: filteredIMUValues.gyroZ.toFixed(2)
-                            unit: "\u00B0/s"
+                        Repeater {
+                            model: ["X", "Y", "Z"]
+
+                            ValueTile {
+                                readonly property real offset: gyroOffset(index)
+                                Layout.fillWidth: true
+                                title: modelData + " offset"
+                                value: isNaN(offset) ? "\u2013" : offset.toFixed(2)
+                                unit: "\u00B0/s"
+                                valueColor: Utility.getAppHexColor(gyroCapture ? "positiveText" : "normalText")
+                            }
                         }
                     }
                     ColumnLayout {
@@ -399,13 +622,13 @@ Item {
                         spacing: 6
 
                         GyroDriftPlot {
-                            id: gyroPlot
                             Layout.fillWidth: true
                             Layout.preferredHeight: implicitHeight
                             running: dialog.visible && stackLayout.currentIndex === pages.gyro && workingIMU
-                            gyroX: filteredIMUValues.gyroX
-                            gyroY: filteredIMUValues.gyroY
-                            gyroZ: filteredIMUValues.gyroZ
+                            motion: gyroMotion
+                            limit: gyroLimit
+                            countdown: gyroCountdown
+                            captured: gyroCapture !== null
                         }
                         Text {
                             visible: !workingIMU
@@ -420,7 +643,7 @@ Item {
                 width: parent.width
                 height: parent.height
 
-                // Clear Max and Skip beside the axes on landscape phones
+                // The level beside the axes on landscape phones
                 GridLayout {
                     width: parent.width
                     columns: phoneLandscape ? 2 : 1
@@ -430,52 +653,32 @@ Item {
                     TaskIntro {
                         Layout.columnSpan: phoneLandscape ? 2 : 1
                         title: "Accelerometer Calibration"
-                        step: "Step " + (calAxis + 1) + " of 3"
-                        hint: accelHint
+                        step: accelResults().filter(r => r).length + " of 3 axes"
+                        hint: "Turn the vehicle or controller onto each side in any order and hold it still. Each axis needs one side facing up or down, " +
+                              "both sides also cancel scale errors. Save is ready once all three axes are captured" +
+                              (flowMode ? ", Skip leaves it out, it is usually not needed." : ".")
                     }
                     AxisSteps {
-                        current: calAxis
+                        current: accelLevel.hasData ? accelLevel.axis : -1
+                        currentDone: accelLevel.steady
                         titles: ["Accel X", "Accel Y", "Accel Z"]
-                        values: [filteredIMUValues.accX, filteredIMUValues.accY, filteredIMUValues.accZ].map(v => v.toFixed(3) + " g")
-                        results: calResults
-                        instructions: ["X", "Y", "Z"].map(a => "Point +" + a + " straight up and hold it until Max stops rising")
+                        // A captured side shows its locked value, like the level
+                        values: acc().map((v, i) => (i === accelLevel.axis && accelLevel.steady ? accelLevel.value : v).toFixed(3) + " g")
+                        results: accelResults()
+                        instructions: ["X", "Y", "Z"].map(a => "Keep " + a + " within 2° of vertical until the reading turns green")
                     }
-                    ColumnLayout {
+                    AccelLevel {
+                        id: accelLevel
                         Layout.fillWidth: true
-                        spacing: 6
-
-                        AccelLevel {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: implicitHeight
-                            running: dialog.visible && stackLayout.currentIndex === pages.accelerometer
-                            axis: calAxis
-                            acc: [filteredIMUValues.accX, filteredIMUValues.accY, filteredIMUValues.accZ]
-                            max: maxAccelValues["xyz"[calAxis]]
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-
-                            Button {
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 500
-                                text: "Clear Max"
-                                flat: true
-
-                                onClicked: {
-                                    // Scale down filtered value so it looks like something happened
-                                    var a = "XYZ"[calAxis]
-                                    filteredIMUValues["acc" + a] = filteredIMUValues["acc" + a] * .9
-                                    maxAccelValues[a.toLowerCase()] = -10.0
-                                }
-                            }// Button clear
-                            Button {
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 500
-                                text: "Skip"
-                                flat: true
-
-                                onClicked: nextAxis("Skipped")
-                            }// Button
+                        Layout.preferredHeight: implicitHeight
+                        running: dialog.visible && stackLayout.currentIndex === pages.accelerometer && workingIMU
+                        acc: [filteredIMUValues.accX, filteredIMUValues.accY, filteredIMUValues.accZ]
+                        faces: accelFaces
+                        onCaptured: (axis, sign, value) => {
+                            var f = accelFaces.slice()
+                            f[axis] = f[axis].slice()
+                            f[axis][sign > 0 ? 0 : 1] = value
+                            accelFaces = f
                         }
                     }
                 }// Grid Layout
@@ -495,52 +698,69 @@ Item {
                     TaskIntro {
                         Layout.columnSpan: phoneLandscape ? 2 : 1
                         title: "Orientation Calibration"
-                        step: "Step " + (calAxis + 1) + " of 3"
-                        hint: calAxis < 2 ? "Both pitch and roll should be level. Save once the offset has settled." :
-                                                    "Keep the IMU stable. Save once the offset has settled."
+                        step: "Step " + (calAxis + 1) + " of 2"
+                        hint: calAxis === 0 ? "Level is the pose the IMU reports as 0\u00B0 roll and pitch, normally the riding pose, see the examples. " +
+                                              "Save takes it once it holds still." :
+                                              "The front is the end that reads positive pitch when lifted. The yaw is taken once the lift holds still, Save stores the level and the yaw, Cancel discards both."
                     }
-                    AxisSteps {
-                        current: calAxis
-                        titles: ["Roll offset", "Pitch offset", "Yaw offset"]
-                        // Only the open row shows a live value, so the others do not follow the yaw search
-                        values: [0, 1, 2].map(i => i === calAxis ? orientationOffset(i).toFixed(2) + "\u00B0" : "")
-                        results: calResults
-                        instructions: ["Place the IMU level on a flat, stable surface",
-                            "Keep the IMU level on a flat, stable surface",
-                            "Raise the pitch to roughly <font color=\"" + Utility.getAppHexColor("warningText") + "\">45 degrees</font>, roll still level"]
+                    // The examples under the rows, beside the trace on landscape phones
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        spacing: 10
+
+                        AxisSteps {
+                            current: calAxis
+                            titles: ["Level", "Yaw offset"]
+                            // Only the open row shows a live value
+                            values: [calAxis === 0 ? levelAngles().map(v => v.toFixed(1) + "\u00B0").join(" / ") : "",
+                                     calAxis !== 1 ? "" : !isNaN(capturedYaw) ? capturedYaw.toFixed(0) + "\u00B0" :
+                                                          liftTilt() >= 25 ? liftYaw.toFixed(0) + "\u00B0" : ""]
+                            results: calResults
+                            instructions: ["Set it in the pose that should read 0\u00B0 roll and pitch, usually how it sits when ridden, and let go",
+                                "Rest the back on the ground and lift the front <font color=\"" + Utility.getAppHexColor("warningText") +
+                                "\">25\u00B0 or more</font>, keeping it straight"]
+                        }
+                        LevelExamples {
+                            Layout.fillWidth: true
+                            lift: calAxis === 1
+                        }
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
                         spacing: 6
 
                         LevelTrace {
+                            id: levelTrace
                             Layout.fillWidth: true
                             Layout.preferredHeight: implicitHeight
-                            visible: calAxis < 2
-                            running: dialog.visible && stackLayout.currentIndex === pages.orientation && calAxis < 2
-                            axis: calAxis
-                            // The offsets Save stores, as in the rows. Once roll is saved the IMU reports
-                            // the new mounting, so the roll strip shows what is left of it
-                            roll: orientationOffset(0) + (calAxis > 0 ? orientationRestore.rot_roll : 0)
-                            pitch: orientationOffset(1)
+                            visible: calAxis === 0
+                            running: dialog.visible && stackLayout.currentIndex === pages.orientation && calAxis === 0
+                            roll: levelAngles()[0]
+                            pitch: levelAngles()[1]
+                            // Roll is barely defined with X near vertical
+                            rollWeight: Math.hypot(acc()[1], acc()[2]) / Math.max(1e-6, Math.hypot(...acc()))
                         }
                         YawLiftView {
                             Layout.fillWidth: true
                             Layout.preferredHeight: implicitHeight
-                            visible: calAxis === 2
-                            roll: filteredIMUValues.roll * 180 / pi
-                            pitch: filteredIMUValues.pitch * 180 / pi
-                            yawOffset: -calculatedYawOffset * 180 / pi
+                            visible: calAxis === 1
+                            tilt: liftTilt()
+                            yawOffset: isNaN(capturedYaw) ? liftYaw : capturedYaw
+                            captured: !isNaN(capturedYaw)
                         }
                         Button {
                             Layout.fillWidth: true
-                            text: "Skip"
+                            text: calAxis === 0 ? "Keep current level" : "Keep current yaw"
                             flat: true
 
                             onClicked: {
-                                var restore = [orientationRestore.rot_roll, orientationRestore.rot_pitch, orientationRestore.rot_yaw][calAxis] * pi/180
-                                applyOrientationOffset(calAxis, restore)
-                                nextAxis("Skipped")
+                                if (calAxis === 0) {
+                                    captureLevel(orientationRestore.rot_roll, orientationRestore.rot_pitch, "Kept")
+                                } else {
+                                    storeYaw(orientationRestore.rot_yaw, "Kept")
+                                }
                             }
                         }// Button
                     }
@@ -555,7 +775,7 @@ Item {
                 GridLayout {
                     width: parent.width
                     flow: GridLayout.TopToBottom
-                    rows: phoneLandscape ? 5 : -1
+                    rows: phoneLandscape ? 4 : -1
                     rowSpacing: 10
                     columnSpacing: 16
                     uniformCellWidths: true
@@ -568,118 +788,26 @@ Item {
                         Layout.topMargin: 0
                         text: "Detection"
                     }
-                    GridLayout {
-                        Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: 8
-                        uniformCellWidths: true
-
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "IMU detected"
-                            value: workingIMU ? "True" : "False"
-                            valueColor: Utility.getAppHexColor(workingIMU ? "positiveText" : "dangerText")
-                        }
-                        ValueTile {
-                            Layout.fillWidth: true
-                            title: "IMU type"
-                            value: imuString
-                        }
-                    }
                     Text {
-                        id: configuratorText3
-                        color: Utility.getAppHexColor("normalText")
+                        Layout.fillWidth: true
                         wrapMode: Text.Wrap
-                        font.pointSize: 11
-                        Layout.fillWidth: true
-                        text: "After searching, IMU Type of \"Off\" indicates your IMU is not connected (properly). " +
-                        "If IMU Detected is \"true\" but changes to \"false\" after searching, the configured app has a conflicting comm port use."
-                    }// Text
+                        font.pointSize: 13
+                        color: Utility.getAppHexColor(searching ? "lightText" : workingIMU ? "positiveText" : "warningText")
+                        text: searching ? "Searching, trying " + mAppConf.getParamEnumNames("imu_conf.type")[searchType] + "\u2026" :
+                              !imuChecked ? "Checking IMU\u2026" : workingIMU ? "Found: " + imuString :
+                              "No IMU found. Check the wiring, an app using the COMM port can block an external IMU."
+                    }
                     Button {
-                        id: searchIMUButton
                         Layout.fillWidth: true
-                        text: "Search for IMU"
+                        text: searching ? "Searching\u2026" : "Search for IMU"
+                        enabled: !searching
                         flat: false
-                        highlighted: !workingIMU
-
-                        function onIMUSearchCompleted(previousApp) {
-                            searchIMUButton.enabled = true
-                            searchIMUButton.text = "Search for IMU"
-                            mAppConf.updateParamEnum("app_to_use", previousApp)
-                            mCommands.setAppConfNoStore()
-                            updateIMUType()
-                            if(configuratorRadioDefault.checked){
-                                configuratorRadioDefault.onClicked()
-                            }else if(configuratorRadioLogs.checked){
-                                configuratorRadioLogs.onClicked()
-                            }else if(configuratorRadioBUni.checked){
-                                configuratorRadioBUni.onClicked()
-                            }else if(configuratorRadioBSkate.checked){
-                                configuratorRadioBSkate.onClicked()
-                            }
-                        }
-
-                        onClicked: {
-                            searchIMUButton.enabled = false
-                            searchIMUButton.text = "Searching...."
-
-                            var previousApp = mAppConf.getParamEnum("app_to_use")
-                            mAppConf.updateParamEnum("app_to_use", 0)
-                            mAppConf.updateParamEnum("imu_conf.type", 1)
-                            mCommands.setAppConfNoStore()
-                            updateIMUType()
-                            delay(2000, function(){
-                                delayTimer.stop()
-                                if(!workingIMU){
-                                    mAppConf.updateParamEnum("imu_conf.type", 2)
-                                    mCommands.setAppConfNoStore()
-                                    updateIMUType()
-                                    delay(2000, function(){
-                                        delayTimer.stop()
-                                        if(!workingIMU){
-                                            mAppConf.updateParamEnum("imu_conf.type", 3)
-                                            mCommands.setAppConfNoStore()
-                                            updateIMUType()
-                                            delay(2000, function(){
-                                                delayTimer.stop()
-                                                if(!workingIMU){
-                                                    mAppConf.updateParamEnum("imu_conf.type", 4)
-                                                    mCommands.setAppConfNoStore()
-                                                    updateIMUType()
-                                                    delay(2000, function(){
-                                                        delayTimer.stop()
-                                                        if(!workingIMU){
-                                                            mAppConf.updateParamEnum("imu_conf.type", 5)
-                                                            mCommands.setAppConfNoStore()
-                                                            updateIMUType()
-                                                            delay(2000, function(){
-                                                                delayTimer.stop()
-                                                                if(!workingIMU){
-                                                                    mAppConf.updateParamEnum("imu_conf.type", 0)
-                                                                }
-                                                                onIMUSearchCompleted(previousApp)
-                                                            })
-                                                        }else{
-                                                            onIMUSearchCompleted(previousApp)
-                                                        }
-                                                    })
-                                                }else{
-                                                    onIMUSearchCompleted(previousApp)
-                                                }
-                                            })
-                                        }else{
-                                            onIMUSearchCompleted(previousApp)
-                                        }
-                                    })
-                                }else{
-                                    onIMUSearchCompleted(previousApp)
-                                }
-                            })
-                        }
-                    }// Button
+                        highlighted: imuChecked && !workingIMU && !searching
+                        onClicked: startSearch()
+                    }
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.rowSpan: phoneLandscape ? 5 : 1
+                        Layout.rowSpan: phoneLandscape ? 4 : 1
                         Layout.alignment: Qt.AlignTop
                         spacing: 10
 
@@ -688,70 +816,26 @@ Item {
                         }
                         GridLayout {
                             columns: 2
-                            RadioButton {
-                                id: configuratorRadioDefault
-                                text: "Default"
-                                onClicked: {
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
-                                    mAppConf.updateParamEnum("imu_conf.mode", 0)
-                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
-                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.3)
-                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
-                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                    profileTiles.model = profileTiles.getModel()
-                                }
-                            }
-                            RadioButton {
-                                id: configuratorRadioLogs
-                                text: "Logs"
-                                onClicked: {
-                                    mAppConf.updateParamInt("imu_conf.sample_rate_hz", 200)
-                                    mAppConf.updateParamEnum("imu_conf.mode", 1)
-                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
-                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.3)
-                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
-                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                    profileTiles.model = profileTiles.getModel()
-                                }
-                            }
-                            RadioButton {
-                                id: configuratorRadioBUni
-                                text: "Balance Unicycle"
-                                onClicked: {
-                                    if(imuType == 4){
-                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
-                                    }else if(imuType == 5){
-                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 833)
-                                    }else{
-                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
+
+                            Repeater {
+                                model: profiles
+
+                                RadioButton {
+                                    text: modelData.name
+                                    checked: profileIndex === index
+                                    onClicked: {
+                                        applyProfile(index)
+                                        checked = Qt.binding(() => profileIndex === index)
                                     }
-                                    mAppConf.updateParamEnum("imu_conf.mode", 1)
-                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 1.0)
-                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 0.2)
-                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 0.0)
-                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                    profileTiles.model = profileTiles.getModel()
                                 }
                             }
-                            RadioButton {
-                                id: configuratorRadioBSkate
-                                text: "Balance Skateboard"
-                                onClicked: {
-                                    if(imuType == 4){
-                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 800)
-                                    }else if(imuType == 5){
-                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 832)
-                                    }else{
-                                        mAppConf.updateParamInt("imu_conf.sample_rate_hz", 1000)
-                                    }
-                                    mAppConf.updateParamEnum("imu_conf.mode", 1)
-                                    mAppConf.updateParamDouble("imu_conf.accel_confidence_decay", 0.02)
-                                    mAppConf.updateParamDouble("imu_conf.mahony_kp", 2.0)
-                                    mAppConf.updateParamDouble("imu_conf.accel_lowpass_filter_z", 1.0)
-                                    mAppConf.updateParamDouble("imu_conf.gyro_lowpass_filter", 0.0)
-                                    profileTiles.model = profileTiles.getModel()
-                                }
-                            }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            visible: profileIndex < 0
+                            wrapMode: Text.Wrap
+                            text: "The current settings match none of the profiles, they stay unless one is picked."
+                            color: Utility.getAppHexColor("normalText")
                         }
                         GridLayout {
                             Layout.fillWidth: true
@@ -826,13 +910,6 @@ Item {
             }
         }
 
-//        header: Rectangle {
-//            color: {
-//                color = Utility.getAppHexColor("lightText")
-//            }
-//            height: tabBar.implicitHeight
-//            width: parent.width
-//        }//Header
 
         footer: RowLayout {
             spacing: 0
@@ -847,10 +924,14 @@ Item {
                 flat: true
 
                 onClicked: {
+                    flowMode = false
                     if (stackLayout.currentIndex === pages.menu) {
                         dialog.close()
                         openTimer.stop()
                     } else if(stackLayout.currentIndex === pages.configurator){
+                        if (searching) {
+                            stopSearch(false)
+                        }
                         mAppConf.updateParamEnum("imu_conf.type", configuratorRestore.type)
                         mAppConf.updateParamInt("imu_conf.sample_rate_hz", configuratorRestore.sample_rate_hz)
                         mAppConf.updateParamEnum("imu_conf.mode", configuratorRestore.mode)
@@ -878,56 +959,67 @@ Item {
                 }
             }
 
+            // Running all tasks, the accelerometer can be left out, it is usually not needed
+            Button {
+                Layout.margins: 10
+                Layout.leftMargin: 5
+                Layout.rightMargin: 5
+                Layout.fillWidth: true
+                Layout.preferredWidth: 500
+                visible: flowMode && stackLayout.currentIndex === pages.accelerometer
+                text: "Skip"
+                flat: true
+                onClicked: finishTask(pages.accelerometer, false)
+            }
+
             Button {
                 id: nextButton
                 Layout.margins: 10
                 Layout.leftMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
-                text: "Save"
-                highlighted: stackLayout.currentIndex !== pages.gyro || (gyroPlot.settled && workingIMU)
-                visible: (stackLayout.currentIndex != 0) ? true : false
+                text: flowMode && (stackLayout.currentIndex === pages.gyro || stackLayout.currentIndex === pages.accelerometer) ?
+                          "Save && next" : "Save"
+                visible: stackLayout.currentIndex !== pages.menu
+                // Only once there is something good to save
+                readonly property bool ready: {
+                    var page = stackLayout.currentIndex
+                    return page === pages.gyro ? gyroCapture !== null && workingIMU :
+                           page === pages.accelerometer ? accelResults().every(r => r) :
+                           page === pages.orientation ? (calAxis === 0 ? levelTrace.steady && levelOk() : !isNaN(capturedYaw)) :
+                           !searching
+                }
+                enabled: ready
+                highlighted: ready
 
                 onClicked: {
                     if(stackLayout.currentIndex === pages.gyro){
-                        // Save Gyro Offsets
-                        mAppConf.updateParamDouble(
-                        "imu_conf.gyro_offsets__0",
-                        (mAppConf.getParamDouble("imu_conf.gyro_offsets__0") + filteredIMUValues.gyroX),
-                        null
-                        )
-                        mAppConf.updateParamDouble(
-                        "imu_conf.gyro_offsets__1",
-                        (mAppConf.getParamDouble("imu_conf.gyro_offsets__1") + filteredIMUValues.gyroY),
-                        null
-                        )
-                        mAppConf.updateParamDouble(
-                        "imu_conf.gyro_offsets__2",
-                        (mAppConf.getParamDouble("imu_conf.gyro_offsets__2") + filteredIMUValues.gyroZ),
-                        null
-                        )
-
+                        for (var k = 0; k < 3; k++) {
+                            mAppConf.updateParamDouble("imu_conf.gyro_offsets__" + k, gyroCapture[k], null)
+                        }
                         mCommands.setAppConf()
-                        stackLayout.currentIndex = pages.menu
-
+                        finishTask(pages.gyro, true)
                     }else if(stackLayout.currentIndex === pages.accelerometer){
-                        // Save Accelerometer Offset
-                        var key = "imu_conf.accel_offsets__" + calAxis
-                        var max = maxAccelValues["xyz"[calAxis]]
-                        mAppConf.updateParamDouble(key, mAppConf.getParamDouble(key) + max - 1, null)
+                        // Save the captured axes
+                        for (var i = 0; i < 3; i++) {
+                            if (!isNaN(accelFaces[i][0]) || !isNaN(accelFaces[i][1])) {
+                                var key = "imu_conf.accel_offsets__" + i
+                                mAppConf.updateParamDouble(key, mAppConf.getParamDouble(key) + accelOffsetChange(accelFaces[i]), null)
+                            }
+                        }
                         mCommands.setAppConf()
-                        nextAxis(max.toFixed(3) + " g")
+                        finishTask(pages.accelerometer, true)
                     }else if(stackLayout.currentIndex === pages.orientation){
-                        var offset = orientationOffset(calAxis).toFixed(2) + "\u00B0"
-                        applyOrientationOffset(calAxis, [-filteredIMUValues.roll, filteredIMUValues.pitch, -calculatedYawOffset][calAxis])
-                        nextAxis(offset)
+                        if (calAxis === 0) {
+                            var l = levelAngles()
+                            captureLevel(l[0], l[1], l.map(v => v.toFixed(1) + "\u00B0").join(" / "))
+                        } else {
+                            storeYaw(capturedYaw, capturedYaw.toFixed(0) + "\u00B0")
+                        }
                     }else if(stackLayout.currentIndex === pages.configurator){
                         mCommands.setAppConf()
-                        stackLayout.currentIndex = pages.menu
-                    }else{
-                        stackLayout.currentIndex = pages.menu
+                        finishTask(pages.configurator, true)
                     }
-                    // updateButtonText()
                 }
             }
         }//Footer
@@ -983,11 +1075,12 @@ Item {
         }
     }
 
-    // One row per axis. Rows that are done show what was saved, the current one opens with its
-    // instruction and live value, and the ones after it wait greyed out
+    // One row per axis. Rows with a result show it, the current one opens with its instruction and
+    // live value, and the others wait greyed out
     component AxisSteps: ColumnLayout {
         id: axisSteps
         property int current: 0
+        property bool currentDone: false    // the open row already has its result, it stays green
         property var titles: []
         property var values: []
         property var results: []
@@ -1001,9 +1094,10 @@ Item {
 
             Rectangle {
                 id: axisRow
-                readonly property bool done: index < axisSteps.current
                 readonly property bool active: index === axisSteps.current
+                readonly property bool done: !active && !!axisSteps.results[index]
                 readonly property bool skipped: done && axisSteps.results[index] === "Skipped"
+                readonly property bool locked: active && axisSteps.currentDone
 
                 Layout.fillWidth: true
                 implicitHeight: axisCol.implicitHeight + 20
@@ -1012,7 +1106,7 @@ Item {
                 clip: true
                 color: Utility.getAppHexColor("cardBackground")
                 border.width: active ? 2 : 1
-                border.color: Utility.getAppHexColor(active ? "lightAccent" : "raisedBackground")
+                border.color: Utility.getAppHexColor(locked ? "positiveText" : active ? "lightAccent" : "raisedBackground")
                 opacity: active || done ? 1.0 : 0.45
                 Behavior on opacity { NumberAnimation { duration: 250 } }
 
@@ -1032,12 +1126,12 @@ Item {
                             implicitWidth: 26
                             implicitHeight: 26
                             radius: 13
-                            color: Utility.getAppHexColor(axisRow.skipped ? "raisedBackground" : axisRow.done ? "positiveText" :
+                            color: Utility.getAppHexColor(axisRow.skipped ? "raisedBackground" : axisRow.done || axisRow.locked ? "positiveText" :
                                                           axisRow.active ? "lightAccent" : "raisedBackground")
 
                             Text {
                                 anchors.centerIn: parent
-                                text: axisRow.skipped ? "\u2013" : axisRow.done ? "\u2713" : index + 1
+                                text: axisRow.skipped ? "\u2013" : axisRow.done || axisRow.locked ? "\u2713" : index + 1
                                 color: Utility.getAppHexColor(axisRow.skipped ? "normalText" : axisRow.done || axisRow.active ? "darkBackground" : "normalText")
                                 font.weight: Font.Bold
                                 font.pointSize: 11
@@ -1053,7 +1147,7 @@ Item {
                         }
                         Text {
                             text: axisRow.done ? (axisSteps.results[index] || "") : axisRow.active ? axisSteps.values[index] : ""
-                            color: Utility.getAppHexColor(axisRow.skipped ? "normalText" : axisRow.done ? "positiveText" : "titleText")
+                            color: Utility.getAppHexColor(axisRow.skipped ? "normalText" : axisRow.done || axisRow.locked ? "positiveText" : "titleText")
                             font.pointSize: axisRow.active ? 15 : 12
                             font.features: { "tnum": 1 }
                         }
@@ -1069,26 +1163,6 @@ Item {
                     }
                 }
             }
-        }
-    }
-
-    function constrainDegrees(degrees){
-        if(degrees > 360){
-            return degrees - 360
-        }else if (degrees < -360){
-            return degrees + 360
-        }else{
-            return degrees
-        }
-    }
-
-    function constrainRadians(radians){
-        if(radians > 360){
-            return radians - 360
-        }else if (radians < -360){
-            return radians + 360
-        }else{
-            return radians
         }
     }
 
@@ -1142,18 +1216,6 @@ Item {
         }
     }
 
-    function applyRollOffset(roll){
-        mAppConf.updateParamDouble("imu_conf.rot_roll", roll * 180.0/pi, null)
-        applyRotationToCalibrationConfig(roll, 0, 0)
-        mCommands.setAppConfNoStore()
-    }
-
-    function applyPitchOffset(pitch){
-        mAppConf.updateParamDouble("imu_conf.rot_pitch", pitch * 180.0/pi, null)
-        applyRotationToCalibrationConfig(0, pitch, 0)
-        mCommands.setAppConfNoStore()
-    }
-
     function applyYawOffset(yaw){
         mAppConf.updateParamDouble("imu_conf.rot_yaw", yaw * 180.0/pi, null)
         applyRotationToCalibrationConfig(0, 0, yaw)
@@ -1190,42 +1252,18 @@ Item {
         mAppConf.updateParamDouble("imu_conf.accel_offsets__2", rotatedAccelOffsets.yaw, null)
     }
 
-    function getPitchForYawOffset(yaw){
-        var rotated = rotateEulerAngles(
-                    {"roll": filteredIMUValues.roll, "pitch": filteredIMUValues.pitch, "yaw": filteredIMUValues.yaw},
-                    {"roll": 0, "pitch": 0, "yaw": yaw}
-        )
-
-        return rotated.pitch
-    }
-
     function updateIMUType(){
         imuType = mAppConf.getParamEnum("imu_conf.type")
-        if(imuType === 0){ //off
+        if (imuType === 0) {
             imuString = "Off"
-        }else if(imuType === 1){ //internal
-            var internalTypeString = Utility.readInternalImuType(VescIf)
-            imuString = "Internal " + internalTypeString
-            if(internalTypeString === "MPU6050"){
-                imuType = 2
-            }else if(internalTypeString === "ICM20948"){
-                imuType = 3
-            }else if(internalTypeString === "BMI160"){
-                imuType = 4
-            }else if(internalTypeString === "LSM6DS3"){
-                imuType = 5
-            }else if(internalTypeString === "Timeout"){
-                imuString = "Internal: Read error, redo search."
-                imuType = 1
-            }
-        }else if(imuType === 2){ //MPU6050
-            imuString = "MPU6050"
-        }else if(imuType === 3){ //ICM20948
-            imuString = "ICM20948"
-        }else if(imuType === 4){ //BMI160
-            imuString = "BMI160"
-        }else if(imuType === 5){ //LSM6DS2(tr-c?)
-            imuString = "LSM6DS3"
+        } else if (imuType === 1) {
+            var internal = Utility.readInternalImuType(VescIf)
+            imuString = internal === "Timeout" ? "Internal: Read error, redo search." : "Internal " + internal
+            // As the external type of the same chip, for the rate of the profiles
+            imuType = internal.startsWith("MPU") ? 2 : internal === "ICM20948" ? 3 : internal.startsWith("BMI160") ? 4 :
+                      internal.startsWith("LSM6DS3") ? 5 : 1
+        } else {
+            imuString = mAppConf.getParamEnumNames("imu_conf.type")[imuType]
         }
     }
 

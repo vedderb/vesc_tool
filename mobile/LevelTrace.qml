@@ -20,23 +20,30 @@
 import QtQuick
 import Vedder.vesc.utility 1.0
 
-// Roll and pitch over the last 5 s. On the axis being saved, the shaded band is the spread
-// of the last 2 s: it turns green once the reading holds still. A saved axis shows its step
-// to the dashed zero line
+// Roll and pitch over the last 5 s. The shaded band is the spread of the last 2 s, it turns
+// green once the reading holds still
 Item {
     id: trace
 
     property real roll              // degrees
     property real pitch             // degrees
-    property int axis: 0            // 0 roll, 1 pitch, 2 both saved
     property real steadyLimit: 0.2  // peak to peak over the last 2 s
     property bool running: true
+    property real rollWeight: 1     // how much roll moves the gravity direction, 0 with X vertical
     property var history: []        // [roll, pitch] at 10 Hz, newest last
+    readonly property bool steady: history.length >= 20 && axisStill(0, 20) && axisStill(1, 20)
+
+    // Spread of the newest n samples of an axis within the limit. Roll wraps at ±180° and barely
+    // moves gravity with X near vertical
+    function axisStill(k, n) {
+        var l = history.slice(-n).map(p => p[k]), d = l.map(v => ((v - l[l.length - 1] + 540) % 360) - 180)
+        return (Math.max(...d) - Math.min(...d)) * (k === 0 ? rollWeight : 1) <= steadyLimit
+    }
 
     implicitWidth: 360
     implicitHeight: 140
 
-    // A new run starts empty, and the step from roll to pitch stays as it runs on through both
+    // A new run starts empty
     onRunningChanged: if (running) history = []
 
     Timer {
@@ -56,13 +63,11 @@ Item {
             Item {
                 id: strip
 
-                readonly property bool active: index === trace.axis
-                readonly property bool saved: index < trace.axis
                 readonly property var v: trace.history.length ? trace.history.map(p => p[index]) : [0]
                 readonly property var last: v.slice(-20)
                 readonly property real lastMin: Math.min(...last)
                 readonly property real lastMax: Math.max(...last)
-                readonly property bool steady: last.length === 20 && lastMax - lastMin <= trace.steadyLimit
+                readonly property bool steady: last.length === 20 && trace.axisStill(index, 20)
                 // At least 1° tall, limits on 0.5° steps
                 readonly property real vMin: Math.min(...v)
                 readonly property real vMax: Math.max(...v)
@@ -74,7 +79,6 @@ Item {
 
                 width: parent.width
                 height: (parent.height - parent.spacing) / 2
-                opacity: active || saved ? 1 : 0.6
 
                 Column {
                     id: label
@@ -84,17 +88,16 @@ Item {
 
                     Text {
                         text: modelData
-                        color: Utility.getAppHexColor(strip.active ? "lightAccent" : "normalText")
+                        color: Utility.getAppHexColor("lightAccent")
                         font.pointSize: 9
                         font.letterSpacing: 0.5
                         font.capitalization: Font.AllUppercase
                     }
                     Text {
-                        text: strip.saved ? "saved" : !strip.active ? "next" : strip.steady ? "steady" : "moving"
-                        color: Utility.getAppHexColor(strip.saved || (strip.active && strip.steady) ? "positiveText" :
-                                                      strip.active ? "warningText" : "normalText")
+                        text: strip.steady ? "steady" : "moving"
+                        color: Utility.getAppHexColor(strip.steady ? "positiveText" : "warningText")
                         font.pointSize: 12
-                        font.weight: strip.active ? Font.Medium : Font.Normal
+                        font.weight: Font.Medium
                     }
                 }
 
@@ -121,7 +124,7 @@ Item {
                         ctx.lineWidth = 1
                         ctx.strokeStyle = Utility.getAppHexColor("raisedBackground")
                         ctx.strokeRect(0.5, 0.5, width - 1, height - 1)
-                        // Zero is where a saved axis lands
+                        // Zero is level
                         if (lo < 0 && hi > 0) {
                             var z = Math.round(strip.toY(0)) + 0.5
                             ctx.strokeStyle = Utility.getAppHexColor("lightestBackground")
@@ -133,7 +136,7 @@ Item {
                             ctx.setLineDash([])
                         }
 
-                        if (strip.active && strip.last.length === 20) {
+                        if (strip.last.length === 20) {
                             var x0 = x(strip.v.length - 20), top = strip.toY(strip.lastMax)
                             ctx.globalAlpha = 0.25
                             ctx.fillStyle = Utility.getAppHexColor(strip.steady ? "positiveText" : "warningText")
@@ -143,7 +146,7 @@ Item {
 
                         ctx.lineWidth = 1.5
                         ctx.lineJoin = "round"
-                        ctx.strokeStyle = Utility.getAppHexColor(strip.active ? "lightAccent" : "normalText")
+                        ctx.strokeStyle = Utility.getAppHexColor("lightAccent")
                         ctx.beginPath()
                         for (var i = 0; i < strip.v.length; i++)
                             ctx.lineTo(x(i), strip.toY(strip.v[i]))

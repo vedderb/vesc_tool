@@ -24,6 +24,7 @@
         <file>GyroDriftPlot.qml</file>
         <file>AccelLevel.qml</file>
         <file>LevelTrace.qml</file>
+        <file>LevelExamples.qml</file>
         <file>YawLiftView.qml</file>
         <file>DetectFocEncoder.qml</file>
         <file>DetectBldc.qml</file>

@@ -20,41 +20,63 @@
 import QtQuick
 import Vedder.vesc.utility 1.0
 
-// Bubble level seen from above, looking down the axis being calibrated. The dot is
-// gravity's share on the other two axes and points at the high side; it sits in the
-// middle when the axis points straight up, which is where the axis reads its 1 g peak.
-// Done = dot inside the 3 deg ring, the max has risen less than 0.5 mg for 2 s and the
-// reading is still at the max, so a bump that overshot it is not taken
+// Bubble level seen from above, looking along whichever axis is closest to vertical. The dot is
+// gravity's share on the other two axes and points at the high side. Once that axis has been
+// within 2° of vertical and steady for 2 s, the average reading is captured for that side. A
+// captured side keeps its value
 Item {
     id: lvl
-    property int axis: 0            // 0..2 = X, Y, Z
     property var acc: [0, 0, 1]     // live accel x, y, z in g
-    property real max: -10          // running max of the axis, -10 = cleared
     property bool running: true
+    property var faces: [[NaN, NaN], [NaN, NaN], [NaN, NaN]]  // captured [up, down] per axis
+    signal captured(int axis, int sign, real value)
 
+    // All zeros when the IMU is off, which would otherwise read as level
+    readonly property bool hasData: Math.hypot(acc[0], acc[1], acc[2]) > 0.5
+    readonly property int axis: {
+        var a = acc.map(Math.abs)
+        return a[0] >= a[1] && a[0] >= a[2] ? 0 : a[1] >= a[2] ? 1 : 2
+    }
+    readonly property int sign: acc[axis] >= 0 ? 1 : -1
     // Right-handed: with the axis toward the viewer, b points right and c up
     readonly property int b: (axis + 1) % 3
     readonly property int c: (axis + 2) % 3
-    readonly property real tilt: Math.atan2(Math.hypot(acc[b], acc[c]), acc[axis]) * 180 / Math.PI
-    // All zeros when the IMU is off, which would otherwise read as level
-    readonly property bool hasData: Math.hypot(acc[0], acc[1], acc[2]) > 0.5
-    readonly property bool level: hasData && tilt < 3
-    readonly property bool overshot: max - acc[axis] > 0.002
-    readonly property bool done: level && held >= 2 && !overshot
+    readonly property real tilt: Math.atan2(Math.hypot(acc[b], acc[c]), Math.abs(acc[axis])) * 180 / Math.PI
+    readonly property bool level: hasData && tilt < 2
+    readonly property string face: (sign > 0 ? "+" : "\u2212") + "XYZ"[axis]
     readonly property string hint: {
-        if (tilt > 45)
-            return "Raise the +" + "XYZ"[axis] + " side"
         var i = Math.abs(acc[b]) > Math.abs(acc[c]) ? b : c
         return "Lower the " + (acc[i] > 0 ? "+" : "\u2212") + "XYZ"[i] + " side"
     }
 
-    // Seconds since the max last rose by more than 0.5 mg
-    property real held: 0
-    property real peak: -10
-    onMaxChanged: if (max < peak || max > peak + 0.0005) { peak = max; held = 0 }
-    Timer { interval: 100; repeat: true; running: lvl.running && lvl.max > -10; onTriggered: lvl.held += 0.1 }
+    readonly property real value: faces[axis][sign > 0 ? 0 : 1]
+    readonly property bool steady: !isNaN(value)
+    readonly property bool allAxes: faces.every(f => !isNaN(f[0]) || !isNaN(f[1]))
+
+    // Readings of the vertical axis at 10 Hz while it stays level and still on a side that is not
+    // captured yet. Moving starts it over, so it only counts up
+    property var history: []
+    readonly property real progress: history.length / 20
+    Timer {
+        interval: 100
+        repeat: true
+        running: lvl.running
+        onTriggered: {
+            var x = lvl.acc[lvl.axis]
+            var h = lvl.level && !lvl.steady && lvl.history.length && lvl.history[0][0] === (lvl.axis + 1) * lvl.sign &&
+                    Math.abs(x - lvl.history[0][1]) < 0.003 ? lvl.history : []
+            h = lvl.level && !lvl.steady ? h.concat([[(lvl.axis + 1) * lvl.sign, x]]) : []
+            if (h.length === 20) {
+                lvl.captured(lvl.axis, lvl.sign, h.reduce((s, v) => s + v[1], 0) / 20)
+                h = []
+            }
+            lvl.history = h
+        }
+    }
+    onRunningChanged: history = []
+
     // Square root spreads out the last few degrees, where the reading barely changes
-    function ringR(deg) { return (dial.width / 2 - 24) * Math.sqrt(Math.min(deg, 90) / 90) }
+    function ringR(deg) { return (dial.width / 2 - 24) * Math.sqrt(Math.min(deg, 60) / 60) }
 
     implicitWidth: 360
     implicitHeight: 150
@@ -66,60 +88,73 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         Repeater {
-            model: [90, 45, 3]
+            model: [60, 20, 2]
 
             Rectangle {
-                readonly property bool target: modelData === 3
-                // The dot fits inside the target ring exactly when the tilt is under 3 deg
+                readonly property bool target: modelData === 2
+                // The dot fits inside the target ring exactly when the tilt is under 2 deg
                 width: (lvl.ringR(modelData) + (target ? dot.width / 2 + 1 : 0)) * 2
                 height: width
                 radius: width / 2
                 anchors.centerIn: parent
                 color: "transparent"
                 border.width: target ? 2 : 1.5
-                border.color: Utility.getAppHexColor(target && lvl.level ? "positiveText" : target ? "normalText" : "raisedBackground")
+                border.color: Utility.getAppHexColor(target && (lvl.level || lvl.steady) ? "positiveText" : target ? "normalText" : "raisedBackground")
             }
         }
-        Rectangle { anchors.centerIn: parent; width: lvl.ringR(90) * 2; height: 1; color: Utility.getAppHexColor("raisedBackground") }
-        Rectangle { anchors.centerIn: parent; width: 1; height: lvl.ringR(90) * 2; color: Utility.getAppHexColor("raisedBackground") }
+        Rectangle {
+            anchors.centerIn: parent
+            width: lvl.ringR(60) * 2
+            height: 1
+            color: Utility.getAppHexColor("raisedBackground")
+        }
+        Rectangle {
+            anchors.centerIn: parent
+            width: 1
+            height: lvl.ringR(60) * 2
+            color: Utility.getAppHexColor("raisedBackground")
+        }
 
         Text {
-            x: parent.width / 2 + lvl.ringR(45) * 0.71 + 2
-            y: parent.height / 2 - lvl.ringR(45) * 0.71 - height + 2
-            text: "45°"
+            x: parent.width / 2 + lvl.ringR(20) * 0.71 + 2
+            y: parent.height / 2 - lvl.ringR(20) * 0.71 - height + 2
+            text: "20°"
             color: Utility.getAppHexColor("disabledText")
             font.pointSize: 8
         }
-        // Outside the rim, clear of the dot when it parks there
+        // Outside the rim, clear of the dot when it parks there. Seen from above an axis that
+        // points down, c points down
         Text {
-            x: parent.width / 2 + lvl.ringR(90) + 9
+            x: parent.width / 2 + lvl.ringR(60) + 9
             anchors.verticalCenter: parent.verticalCenter
+            visible: lvl.hasData
             text: "+" + "XYZ"[lvl.b]
             color: Utility.getAppHexColor("normalText")
             font.pointSize: 9
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            y: parent.height / 2 - lvl.ringR(90) - height - 8
+            y: parent.height / 2 - lvl.sign * (lvl.ringR(60) + 8) - (lvl.sign > 0 ? height : 0)
+            visible: lvl.hasData
             text: "+" + "XYZ"[lvl.c]
             color: Utility.getAppHexColor("normalText")
             font.pointSize: 9
         }
 
-        // Past 90° the axis points down and the dot parks on the rim, hollow
         Rectangle {
             id: dot
-            visible: lvl.hasData
-            readonly property real a: Math.atan2(lvl.acc[lvl.c], lvl.acc[lvl.b])
+            readonly property real h: Math.max(1e-6, Math.hypot(lvl.acc[lvl.b], lvl.acc[lvl.c]))
             readonly property real r: lvl.ringR(lvl.tilt)
-            x: parent.width / 2 + r * Math.cos(a) - width / 2
-            y: parent.height / 2 - r * Math.sin(a) - height / 2
+            visible: lvl.hasData
+            x: parent.width / 2 + r * lvl.acc[lvl.b] / h - width / 2
+            y: parent.height / 2 - lvl.sign * r * lvl.acc[lvl.c] / h - height / 2
             width: 12
             height: 12
             radius: 6
-            color: lvl.tilt > 90 ? Utility.getAppHexColor("cardBackground") : border.color
+            color: border.color
             border.width: 2
-            border.color: Utility.getAppHexColor(lvl.level ? "positiveText" : "lightAccent")
+            // Green while level, and on a side that is captured already
+            border.color: Utility.getAppHexColor(lvl.level || lvl.steady ? "positiveText" : "lightAccent")
         }
     }
 
@@ -128,43 +163,63 @@ Item {
         anchors.right: parent.right
         anchors.leftMargin: 8
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 4
+        spacing: 2
 
-        Row {
-            spacing: 6
-            Text {
-                id: tiltText
-                text: lvl.hasData ? lvl.tilt.toFixed(1) + "°" : "\u2013"
-                color: Utility.getAppHexColor(lvl.level ? "positiveText" : "titleText")
-                font.pointSize: 15
-                font.weight: Font.Medium
-                font.features: { "tnum": 1 }
-            }
-            Text {
-                anchors.baseline: tiltText.baseline
-                text: "from vertical"
-                color: Utility.getAppHexColor("normalText")
-                font.pointSize: 10
-            }
+        Text {
+            text: lvl.hasData ? lvl.face + " up" : "No IMU data"
+            color: Utility.getAppHexColor(lvl.hasData ? "normalText" : "warningText")
+            font.pointSize: 11
+        }
+        Text {
+            visible: lvl.hasData
+            // The result, so it is the largest text here
+            text: (lvl.steady ? lvl.value : lvl.acc[lvl.axis]).toFixed(3) + " g"
+            color: Utility.getAppHexColor(lvl.steady ? "positiveText" : "titleText")
+            font.pointSize: 22
+            font.weight: Font.Medium
+            font.features: { "tnum": 1 }
         }
         Text {
             width: parent.width
-            text: !lvl.hasData ? "No IMU data" : lvl.done ? "Done, Max has stopped rising" :
-                  lvl.level && lvl.held >= 2 ? "Max overshot, tap Clear Max" : lvl.level ? "Centered, hold still" : lvl.hint
-            color: Utility.getAppHexColor(lvl.done ? "positiveText" :
-                                          !lvl.hasData || (lvl.level && lvl.held >= 2) ? "warningText" : "lightText")
+            visible: lvl.hasData
+            text: lvl.steady ? (lvl.allAxes ? "Captured, all axes done" : "Captured, turn to another side") :
+                  lvl.level ? "Hold still, " + ((20 - lvl.history.length) / 10).toFixed(1) + " s" : lvl.hint + ", " + lvl.tilt.toFixed(1) + "° off"
+            color: Utility.getAppHexColor(lvl.steady ? "positiveText" : "lightText")
             font.pointSize: 11
             wrapMode: Text.Wrap
         }
-        Text {
+        // How long it has been held, it fills in 2 s
+        Rectangle {
+            visible: lvl.hasData && lvl.level && !lvl.steady
             width: parent.width
-            // Save stores max - 1 g as the offset
-            wrapMode: Text.Wrap
-            text: lvl.max <= -10 ? "Expect about 1 g at the top"
-                  : "Max " + lvl.max.toFixed(3) + " g" + (lvl.done ? ", offset " + (lvl.max >= 1 ? "+" : "\u2212") + Math.abs(lvl.max - 1).toFixed(3) + " g" : "")
-            color: Utility.getAppHexColor("normalText")
-            font.pointSize: 10
-            font.features: { "tnum": 1 }
+            height: 4
+            radius: 2
+            color: Utility.getAppHexColor("raisedBackground")
+
+            Rectangle {
+                width: parent.width * lvl.progress
+                height: parent.height
+                radius: 2
+                color: Utility.getAppHexColor("positiveText")
+            }
+        }
+        // The six sides, green once captured, the one facing up in bold
+        Row {
+            visible: lvl.hasData
+            spacing: 8
+
+            Repeater {
+                model: 6
+
+                Text {
+                    readonly property int ax: Math.floor(index / 2)
+                    readonly property int sg: index % 2 === 0 ? 1 : -1
+                    text: (sg > 0 ? "+" : "\u2212") + "XYZ"[ax]
+                    color: Utility.getAppHexColor(!isNaN(lvl.faces[ax][sg > 0 ? 0 : 1]) ? "positiveText" : "normalText")
+                    font.pointSize: 10
+                    font.weight: ax === lvl.axis && sg === lvl.sign ? Font.Bold : Font.Normal
+                }
+            }
         }
     }
 }

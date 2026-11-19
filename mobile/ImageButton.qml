@@ -29,6 +29,7 @@ Item {
     property string buttonText: ""
     property string hintText: ""
     property bool locked: false
+    property string lockedText: qsTr("Connect to use")
     property bool badge: false
     signal clicked()
 
@@ -110,7 +111,7 @@ Item {
                     Text {
                         Layout.fillWidth: true
                         visible: text !== ""
-                        text: rootItem.locked ? qsTr("Connect to use") : hintText
+                        text: rootItem.locked ? rootItem.lockedText : hintText
                         elide: Text.ElideRight
                         font.pointSize: 9
                         color: Utility.getAppHexColor("normalText")

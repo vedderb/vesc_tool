@@ -392,7 +392,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
         return false;
     }
 
-    auto waitWriteRes = [this]() {
+    auto waitWriteRes = [this](quint32 expectedOffset) {
         int res = -10;
 
         QEventLoop loop;
@@ -400,10 +400,11 @@ bool CodeLoader::lispUpload(VByteArray vb)
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(1000);
         auto conn = connect(mVesc->commands(), &Commands::lispWriteCodeRx,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
+                            [&res,&loop,expectedOffset](bool erRes, quint32 offset) {
+            if (offset == expectedOffset) {
+                res = erRes ? 1 : -1;
+                loop.quit();
+            }
         });
 
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
@@ -418,7 +419,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
         int res = -10;
         while (tries > 0) {
             mVesc->commands()->lispWriteCode(data, offset);
-            if ((res = waitWriteRes()) >= 0) {
+            if ((res = waitWriteRes(offset)) >= 0) {
                 return res;
             }
             tries--;
@@ -445,6 +446,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
 
         offset += sz;
         data.remove(0, sz);
+        emit codeChunkWritten(sz);
     }
 
     if (mAbortDownloadUpload) {
@@ -745,7 +747,7 @@ QByteArray CodeLoader::qmlCompress(QString script)
 
 bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
 {
-    auto waitWriteRes = [this]() {
+    auto waitWriteRes = [this](quint32 expectedOffset) {
         int res = -10;
 
         QEventLoop loop;
@@ -753,10 +755,11 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(1000);
         auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
+                            [&res,&loop,expectedOffset](bool erRes, quint32 offset) {
+            if (offset == expectedOffset) {
+                res = erRes ? 1 : -1;
+                loop.quit();
+            }
         });
 
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
@@ -771,7 +774,7 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
         int res = -10;
         while (tries > 0) {
             mVesc->commands()->qmlUiWrite(data, offset);
-            if ((res = waitWriteRes()) >= 0) {
+            if ((res = waitWriteRes(offset)) >= 0) {
                 return res;
             }
             tries--;
@@ -809,6 +812,7 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
 
         offset += sz;
         data.remove(0, sz);
+        emit codeChunkWritten(sz);
     }
 
     return ok;
@@ -1019,13 +1023,14 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
 
     if (!pkg.qmlFileQt6.isEmpty()) {
         qml = qmlCompress(pkg.qmlFileQt6);
-        res = qmlErase(qml.size() + 100);
-
-        if (res) {
-            res = qmlUpload(qml, pkg.qmlIsFullscreen);
-        }
     } else if (!pkg.qmlFile.isEmpty()) {
         qml = qmlCompress(pkg.qmlFile);
+    }
+
+    // Include the size and CRC headers and the QML fullscreen flag.
+    emit packageInstallStarted((qml.isEmpty() ? 0 : qml.size() + 8) +
+                               (pkg.lispData.isEmpty() ? 0 : pkg.lispData.size() + 6));
+    if (!qml.isEmpty()) {
         res = qmlErase(qml.size() + 100);
 
         if (res) {

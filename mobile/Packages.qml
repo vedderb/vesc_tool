@@ -38,6 +38,7 @@ Item {
     // Wide enough to show the selected package beside the list
     readonly property bool split: mainIsTablet && width >= 700
     property int selectedInd: -1
+    property bool installing: false
 
     onSplitChanged: installFromPathDialog.close()
 
@@ -58,6 +59,8 @@ Item {
 
     CodeLoader {
         id: mLoader
+        onPackageInstallStarted: function(bytesTotal) { installProgress.to = bytesTotal }
+        onCodeChunkWritten: function(bytes) { installProgress.value += bytes }
         Component.onCompleted: {
             mLoader.setVesc(VescIf)
         }
@@ -379,6 +382,7 @@ Item {
     }
 
     function enableDialog() {
+        if (installing) return
         dlDialog.close()
         column.enabled = true
     }
@@ -386,6 +390,14 @@ Item {
     BusyDialog {
         id: dlDialog
         title: "Processing..."
+        spinner: !installing
+
+        ProgressBar {
+            id: installProgress
+            visible: installing
+            Layout.fillWidth: true
+            indeterminate: to === 0
+        }
     }
 
     SheetDialog {
@@ -440,6 +452,9 @@ Item {
                     text: "Install Package"
 
                     onClicked: {
+                        installing = true
+                        installProgress.to = 0
+                        installProgress.value = 0
                         disableDialog()
                         installFromPathDialog.close()
                         workaroundTimerInstall.start()
@@ -466,13 +481,14 @@ Item {
                 repeat: false
                 running: false
                 onTriggered: {
-                    if (mLoader.installVescPackage(pkg.compressedData)) {
-                        enableDialog()
+                    var ok = mLoader.installVescPackage(pkg.compressedData)
+                    installing = false
+                    enableDialog()
+                    if (ok) {
                         VescIf.emitMessageDialog("Install Package",
                                                  "Installation Done!",
                                                  true, false)
                     } else {
-                        enableDialog()
                         VescIf.emitMessageDialog("Install Package",
                                                  "Installation failed",
                                                  false, false)

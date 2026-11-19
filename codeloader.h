@@ -74,6 +74,8 @@ public:
 signals:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void lispUploadProgress(qint64 bytes, qint64 bytesTotal);
+    void packageInstallStarted(int bytesTotal);
+    void codeChunkWritten(int bytes);
 
 private:
     VescInterface *mVesc;

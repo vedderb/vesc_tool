@@ -1229,7 +1229,7 @@ public:
     Q_PROPERTY(bool loadOk MEMBER loadOk)
     Q_PROPERTY(QByteArray compressedData MEMBER compressedData)
     Q_PROPERTY(QByteArray icon MEMBER icon)
-    Q_PROPERTY(QByteArray iconLight MEMBER icon)
+    Q_PROPERTY(QByteArray iconLight MEMBER iconLight)
 
     VescPackage () {
         name = "VESC Package Name";

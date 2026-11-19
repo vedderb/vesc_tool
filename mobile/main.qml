@@ -514,13 +514,17 @@ ApplicationWindow {
             snapMode: ListView.SnapOneItem
             boundsBehavior: Flickable.StopAtBounds
 
-            highlightRangeMode: ListView.StrictlyEnforceRange
+            // Only a swipe picks the page from the scroll position. Rotation resizes the pages
+            // in several steps, and the old offset would otherwise show or select another page.
+            highlightRangeMode: moving ? ListView.StrictlyEnforceRange : ListView.ApplyRange
             preferredHighlightBegin: 0
             preferredHighlightEnd: 0
             highlightMoveDuration: 250
 
             maximumFlickVelocity: 8 * (mainSwipeView.orientation ===
                                        Qt.Horizontal ? width : height)
+
+            onContentWidthChanged: positionViewAtIndex(currentIndex, ListView.Beginning)
         }
 
         Page {
@@ -585,13 +589,16 @@ ApplicationWindow {
                     snapMode: ListView.SnapOneItem
                     boundsBehavior: Flickable.StopAtBounds
 
-                    highlightRangeMode: ListView.StrictlyEnforceRange
+                    // Same as for mainSwipeView, this one is vertical
+                    highlightRangeMode: moving ? ListView.StrictlyEnforceRange : ListView.ApplyRange
                     preferredHighlightBegin: 0
                     preferredHighlightEnd: 0
                     highlightMoveDuration: 250
 
                     maximumFlickVelocity: 8 * (rtSwipeView.orientation ===
                                                Qt.Horizontal ? width : height)
+
+                    onContentHeightChanged: positionViewAtIndex(currentIndex, ListView.Beginning)
                 }
 
                 Page {

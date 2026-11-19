@@ -29,8 +29,6 @@ import Vedder.vesc.utility 1.0
 Item {
     id:terminalPageItem
     property Commands mCommands: VescIf.commands()
-    property var history: []
-    property int historyIndex: -1
 
     // Dims the key of "key : value" lines and shows firmware fault codes in red
     function formatLine(html) {
@@ -59,8 +57,7 @@ Item {
 
         appendOutput("\u203A " + cmd, Utility.getAppHexColor("infoText"))
         mCommands.sendTerminalCmd(cmd)
-        history = [cmd].concat(history.filter(h => h !== cmd))
-        historyIndex = -1
+        stringInput.add(cmd)
     }
 
     GridLayout {
@@ -136,7 +133,7 @@ Item {
         RowLayout {
             Layout.fillWidth: true
 
-            InputField {
+            HistoryInputField {
                 id: stringInput
                 Layout.fillWidth: true
                 placeholderText: "Terminal Command"
@@ -146,23 +143,14 @@ Item {
                     send(text)
                     text = ""
                 }
-                Keys.onUpPressed: {
-                    if (historyButton.enabled) {
-                        historyButton.clicked()
-                    }
-                }
             }
 
             ToolButton {
-                id: historyButton
                 text: "\u2191"
                 font.pointSize: 18
-                enabled: history.length > 0
+                enabled: stringInput.history.length > 0
                 Accessible.name: qsTr("Previous command")
-                onClicked: {
-                    historyIndex = (historyIndex + 1) % history.length
-                    stringInput.text = history[historyIndex]
-                }
+                onClicked: stringInput.older()
             }
 
             Button {

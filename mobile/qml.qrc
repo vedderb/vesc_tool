@@ -90,5 +90,6 @@
         <file>BusyDialog.qml</file>
         <file>InputBackground.qml</file>
         <file>InputField.qml</file>
+        <file>HistoryInputField.qml</file>
     </qresource>
 </RCC>

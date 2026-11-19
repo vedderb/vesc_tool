@@ -562,18 +562,29 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
 
-                    InputField {
+                    HistoryInputField {
                         id: replInput
                         Layout.fillWidth: true
                         Layout.topMargin: 5
                         Layout.bottomMargin: 5
                         placeholderText: "REPL command"
+                        font.family: "DejaVu Sans Mono"
+                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
                         onAccepted: {
                             if (text.length > 0) {
                                 mCommands.lispSendReplCmd(text)
+                                add(text)
                                 text = ""
                             }
                         }
+                    }
+
+                    ToolButton {
+                        text: "\u2191"
+                        font.pointSize: 18
+                        enabled: replInput.history.length > 0
+                        Accessible.name: qsTr("Previous command")
+                        onClicked: replInput.older()
                     }
 
                     Button {
@@ -581,6 +592,7 @@ Item {
                         onClicked: {
                             if (replInput.text.length > 0) {
                                 mCommands.lispSendReplCmd(replInput.text)
+                                replInput.add(replInput.text)
                                 replInput.text = ""
                             }
                         }

@@ -476,6 +476,46 @@ bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
     return res;
 }
 
+QString Utility::faultToDescription(mc_fault_code fault)
+{
+    switch (fault) {
+    case FAULT_CODE_OVER_VOLTAGE: return "Input voltage rose above Maximum Input Voltage. Usually regenerative braking on a full battery, or a BMS that cuts off charging. Reduce Battery Current Max Regen, or brake gently when full.";
+    case FAULT_CODE_UNDER_VOLTAGE: return "Input voltage dropped below Minimum Input Voltage. Usually an empty or sagging battery, a BMS cutting out, a loose connection or Minimum Input Voltage set too high. On a power supply, raise its current limit.";
+    case FAULT_CODE_DRV: return "The gate driver detected a problem and shut off the MOSFETs. Check the motor wires and connectors for shorts. If it repeats with the motor unplugged, the controller is likely damaged.";
+    case FAULT_CODE_ABS_OVER_CURRENT: return "Motor current spiked above Absolute Maximum Current. Usually motor settings that don't match the motor, Motor Current Max set too close to this limit, or a sensor or wiring problem.";
+    case FAULT_CODE_OVER_TEMP_FET: return "The MOSFETs reached MOSFET Temp Cutoff End. Let the controller cool down, improve its cooling or lower the current limits. If the controller is cold, its temperature sensor may be faulty.";
+    case FAULT_CODE_OVER_TEMP_MOTOR: return "The motor reached Motor Temp Cutoff End. If the motor isn't actually hot, check Motor Temperature Sensor Type and the sensor wiring, as a wrong type or a faulty wire gives false readings.";
+    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "The supply voltage of the gate driver is too high. This points to a hardware problem in the controller.";
+    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "The supply voltage of the gate driver is too low to switch the MOSFETs safely. This points to a hardware problem in the controller.";
+    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "The 3.3 V supply of the processor dropped too low. Check accessories on the 3.3 V and 5 V outputs for shorts or too much load.";
+    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "The firmware stopped responding and the watchdog restarted the controller. Normal once after a firmware update. If it repeats, a script may be blocking the firmware. Scripts stay stopped until the next restart.";
+    case FAULT_CODE_ENCODER_SPI: return "Communication with the encoder failed. Check the encoder wiring and connector, its supply, and that Sensor Port Mode matches the encoder.";
+    case FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: return "The sin/cos encoder signal is too weak. Check the encoder wiring, the magnet position, and that Sine Amplitude and Cosine Amplitude match the encoder.";
+    case FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: return "The sin/cos encoder signal is too strong. Check that Sine Amplitude and Cosine Amplitude match the encoder, and that the magnet is not too close.";
+    case FAULT_CODE_FLASH_CORRUPTION: return "The firmware failed its integrity check. Upload the firmware again before using the controller.";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: return "Current sensor 1 reads far from zero when no current flows. This usually means the current sensing hardware is damaged.";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "Current sensor 2 reads far from zero when no current flows. This usually means the current sensing hardware is damaged.";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "Current sensor 3 reads far from zero when no current flows. This usually means the current sensing hardware is damaged.";
+    case FAULT_CODE_UNBALANCED_CURRENTS: return "The currents measured in the three motor wires don't add up to zero. This usually means a current sensor is damaged or disconnected.";
+    case FAULT_CODE_BRK: return "The hardware overcurrent protection shut off the MOSFETs. Usually a short in the motor wires or a damaged power stage. The controller stays off until it is restarted.";
+    case FAULT_CODE_RESOLVER_LOT: return "The encoder lost track of the rotor position or sent invalid data. Check the encoder wiring and shielding.";
+    case FAULT_CODE_RESOLVER_DOS: return "The resolver signal is degraded. Check the resolver wiring and shielding.";
+    case FAULT_CODE_RESOLVER_LOS: return "The resolver signal was lost. Check that the resolver is connected.";
+    case FAULT_CODE_FLASH_CORRUPTION_APP_CFG: return "The stored app configuration failed its checksum, so defaults are loaded. Restore a backup or set up the inputs again.";
+    case FAULT_CODE_FLASH_CORRUPTION_MC_CFG: return "The stored motor configuration failed its checksum, so defaults are loaded. Restore a backup or run the motor setup again before riding.";
+    case FAULT_CODE_ENCODER_NO_MAGNET: return "The encoder doesn't detect the magnet. Check that the magnet is in place, centered and close enough to the encoder.";
+    case FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: return "The magnet is too strong or too close to the encoder. Increase the gap between them.";
+    case FAULT_CODE_PHASE_FILTER: return "The measured motor voltage didn't match the commanded output at low speed. Usually a fault in the controller's voltage sensing or power stage, though some motors also trigger it.";
+    case FAULT_CODE_ENCODER_FAULT: return "The encoder reported an error or too many communication errors. Check the encoder wiring, its supply and the magnet alignment.";
+    case FAULT_CODE_LV_OUTPUT_FAULT: return "The protection on the 3.3 V or 5 V output tripped. Check accessories on those outputs for shorts or too much load.";
+    case FAULT_CODE_ENCODER_SLIP: return "The encoder and the sensorless observer disagreed on the rotor angle for 0.5 s. Usually a slipping encoder or magnet, or a wrong Encoder Offset. Only checked when Encoder Slip is enabled in Additional Faults.";
+    case FAULT_CODE_OVERSPEED: return "Motor speed went above Max ERPM. Only checked when Overspeed is enabled in Additional Faults.";
+    case FAULT_CODE_UNDERSPEED: return "Reverse motor speed went past Max ERPM Reverse. Only checked when Underspeed is enabled in Additional Faults.";
+    case FAULT_CODE_ABS_OVERSPEED: return "Motor speed went above ERPM ABS Overspeed. Only checked when Absolute Overspeed is enabled in Additional Faults.";
+    default: return "";
+    }
+}
+
 QString Utility::detectAllFoc(VescInterface *vesc,
                               bool detect_can, double max_power_loss, double min_current_in,
                               double max_current_in, double openloop_rpm, double sl_erpm)
@@ -611,36 +651,12 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -50: reason = "CAN detection timeout"; break;
             case -51: reason = "CAN detection failed"; break;
             case -100 + FAULT_CODE_NONE: reason = "No fault, detection failed for an unknown reason"; break;
-            case -100 + FAULT_CODE_OVER_VOLTAGE: reason = "Over voltage fault, check voltage is below set limit"; break;
-            case -100 + FAULT_CODE_UNDER_VOLTAGE: reason = "Under voltage fault, check voltage is above set limit. If using a power supply make sure the current limit is high enough."; break;
-            case -100 + FAULT_CODE_DRV: reason = "DRV fault, hardware fault occured. Check there are no shorts"; break;
-            case -100 + FAULT_CODE_ABS_OVER_CURRENT: reason = "Overcurrent fault, Check there are no shorts and ABS Overcurrent limit is sensible"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_FET: reason = "Mosfet Overtemperature fault, Mosfets overheated, check for shorts. Cool down device"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheated, is the current limit OK?"; break;
-            case -100 + FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: reason = "Gate Driver over voltage, check for hardware failure"; break;
-            case -100 + FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: reason = "Gate Driver under voltage, check for hardware failure"; break;
-            case -100 + FAULT_CODE_MCU_UNDER_VOLTAGE: reason = "MCU under voltage, check for hardware failure, shorts on outputs"; break;
-            case -100 + FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: reason = "Boot from watchdog reset, software locked up check for firmware corruption"; break;
-            case -100 + FAULT_CODE_ENCODER_SPI: reason = "Encoder SPI fault, check encoder connections"; break;
-            case -100 + FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: reason = "Encoder SINCOS below min amplitude, check encoder connections and magnet alignment / distance"; break;
-            case -100 + FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: reason = "Encoder SINCOS above max amplitude, check encoder connections and magnet alignment / distance"; break;
-            case -100 + FAULT_CODE_FLASH_CORRUPTION: reason = "Flash corruption, reflash firmware immediately!"; break;
-            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: reason = "High offset on current sensor 1, check for hardware failure"; break;
-            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: reason = "High offset on current sensor 2, check for hardware failure"; break;
-            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: reason = "High offset on current sensor 3, check for hardware failure"; break;
-            case -100 + FAULT_CODE_UNBALANCED_CURRENTS: reason = "Unbalanced currents, check for hardware failure"; break;
-            case -100 + FAULT_CODE_BRK: reason = "BRK, hardware protection triggered, check for shorts or possible hardware failure"; break;
-            case -100 + FAULT_CODE_RESOLVER_LOT: reason = "Encoder/Resolver: Loss of tracking"; break;
-            case -100 + FAULT_CODE_RESOLVER_DOS: reason = "Encoder/Resolver: Degradation of signal"; break;
-            case -100 + FAULT_CODE_RESOLVER_LOS: reason = "Encoder/Resolver: Loss of signal"; break;
-            case -100 + FAULT_CODE_FLASH_CORRUPTION_APP_CFG: reason = "Flash corruption, App config corrupt, rewrite app config to restore"; break;
-            case -100 + FAULT_CODE_FLASH_CORRUPTION_MC_CFG: reason = "Flash corruption, Motor config corrupt, rewrite motor config to restore"; break;
-            case -100 + FAULT_CODE_ENCODER_NO_MAGNET: reason = "Encoder no magnet, magnet is too weak or too far from the encoder"; break;
-            case -100 + FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: reason = "Magnet too strong, magnet is too strong or too close to the encoder"; break;
-            case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, invalid phase filter readings"; break;
-            case -100 + FAULT_CODE_ENCODER_FAULT: reason = "Encoder fault, check encoder connections and alignment"; break;
-
-            default: reason = QString::number(resDetect); break;
+            default:
+                reason = resDetect > -100 ? faultToDescription(mc_fault_code(resDetect + 100)) : "";
+                if (reason.isEmpty()) {
+                    reason = QString::number(resDetect);
+                }
+                break;
             }
 
             res = QString("Detection failed. Reason:\n%1").arg(reason);

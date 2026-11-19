@@ -139,6 +139,14 @@ ApplicationWindow {
         toastTimer.restart()
     }
 
+    // Description of a fault from its name, like FAULT_CODE_DRV
+    function faultDescription(name) {
+        for (var code = 1; mCommands.faultToStr(code) !== "Unknown fault"; code++) {
+            if (mCommands.faultToStr(code) === name) return Utility.faultToDescription(code)
+        }
+        return ""
+    }
+
     function fwString(params) {
         return params.major + "." + ("0" + params.minor).slice(-2)
     }
@@ -1828,7 +1836,7 @@ ApplicationWindow {
 
             delegate: RowLayout {
                 width: ListView.view.width
-                height: 40
+                height: Math.max(40, implicitHeight + 12)
                 spacing: 10
 
                 Rectangle {
@@ -1838,11 +1846,26 @@ ApplicationWindow {
                     color: good ? Utility.getAppHexColor("positiveText") : Utility.getAppHexColor("dangerText")
                 }
 
-                Text {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    text: msg
-                    elide: Text.ElideRight
-                    color: Utility.getAppHexColor("lightText")
+                    spacing: 1
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: msg
+                        elide: Text.ElideRight
+                        color: Utility.getAppHexColor("lightText")
+                    }
+
+                    // Faults are logged by name, with what they mean below
+                    Text {
+                        Layout.fillWidth: true
+                        visible: text !== ""
+                        text: faultDescription(msg)
+                        wrapMode: Text.Wrap
+                        font.pointSize: 9
+                        color: Utility.getAppHexColor("normalText")
+                    }
                 }
 
                 Text {
@@ -1889,6 +1912,14 @@ ApplicationWindow {
                 font.family: "DejaVu Sans Mono"
                 font.pointSize: 10
                 color: Utility.getAppHexColor("lightText")
+            }
+
+            Text {
+                Layout.fillWidth: true
+                visible: text !== ""
+                text: connectionSheet.visible ? faultDescription(connectionSheet.fault) : ""
+                wrapMode: Text.Wrap
+                color: Utility.getAppHexColor("dangerText")
             }
 
             Text {

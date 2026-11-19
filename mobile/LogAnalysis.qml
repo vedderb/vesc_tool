@@ -903,6 +903,78 @@ Item {
         }
     }
 
+    // Faults in the log, a tap moves the cursor to one
+    SheetDialog {
+        id: faultsDialog
+        title: "Faults"
+        acceptText: qsTr("Close")
+        rejectText: ""
+
+        ListView {
+            anchors.fill: parent
+            implicitHeight: contentHeight
+            clip: true
+            model: root.faultRuns
+
+            delegate: ItemDelegate {
+                readonly property var time: root.faultTimeText(modelData)
+                width: ListView.view.width
+                onClicked: {
+                    if (modelData.start < root.viewStart || modelData.start > root.viewEnd) {
+                        root.applyZoomWindow(0, root.rawRows.length - 1, false)
+                    }
+                    root.currentIndex = modelData.start
+                    faultsDialog.close()
+                }
+
+                contentItem: GridLayout {
+                    columns: 2
+                    rowSpacing: 2
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.mCommands.faultToStr(modelData.code)
+                        wrapMode: Text.WrapAnywhere
+                        font.weight: Font.Medium
+                        color: Utility.getAppHexColor("danger")
+                    }
+
+                    Text {
+                        text: time.at
+                        font.weight: Font.Medium
+                        font.features: { "tnum": 1 }
+                        color: Utility.getAppHexColor("lightText")
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.columnSpan: 2
+                        visible: text !== ""
+                        text: Utility.faultToDescription(modelData.code)
+                        wrapMode: Text.Wrap
+                        color: Utility.getAppHexColor("lightText")
+                    }
+
+                    Text {
+                        Layout.columnSpan: 2
+                        text: root.columnMeta[modelData.col].label + " · " + time.duration
+                        font.pointSize: 9
+                        font.features: { "tnum": 1 }
+                        color: Utility.getAppHexColor("normalText")
+                    }
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 1
+                    color: Utility.getAppHexColor("lightestBackground")
+                }
+            }
+        }
+    }
+
     // Column of a graph line. Logs with many columns are grouped by device or kind.
     SheetDialog {
         id: columnSheet
@@ -1561,6 +1633,23 @@ Item {
             tripCol.max = distance * tripCol.scale
         }
 
+        // Runs of rows with the same fault, from each column that logs one. Empty cells keep the
+        // last value. LogUI logs the same fault as both fault and Fault, so a label is used once.
+        var faults = [], faultLabels = []
+        meta.cols.forEach(function(col) {
+            var label = col.label.toLowerCase()
+            if (!/fault/.test(col.key + " " + label) || faultLabels.indexOf(label) >= 0) return
+            faultLabels.push(label)
+            var code = 0, run = null
+            for (var r = 0; r < rows.length; r++) {
+                if (rows[r].vals[col.index] !== null) code = Math.round(rows[r].vals[col.index])
+                if (run && code !== run.code) { faults.push(run); run = null }
+                if (!run && code !== 0) run = { col: col.index, code: code, start: r }
+                if (run) run.end = r
+            }
+            if (run) faults.push(run)
+        })
+
         if (rows.length === 0) { statusText = "No valid rows found."; return }
 
         columnMeta = meta.cols
@@ -1568,6 +1657,8 @@ Item {
         rawRows = rows
         trackCoords = coords
         hasGps = coords.length > 0
+        faults.forEach(f => f.coord = hasGps ? trackCoordAt(f.start) : null)
+        faultRuns = faults.sort((a, b) => a.start - b.start)
         viewStart = 0
         viewEnd = rows.length - 1
         currentIndex = 0
@@ -1610,6 +1701,25 @@ Item {
 
     property var zoomedStats: []
     property bool showMapStats: true
+
+    // Column, fault code, first and last row and position of each run of rows with a fault
+    property var faultRuns: []
+    property bool showFaults: true
+    onShowFaultsChanged: chartLines.requestPaint()
+
+    // When a fault began from the start of the log and how long it lasted, in rows without a time column
+    function faultTimeText(run) {
+        var t = findColKeyIdx(["ms_today", "t_day", "esc uptime", "jet uptime", "time"])
+        var next = Math.min(run.end + 1, rawRows.length - 1)
+        if (t === -1 || [0, run.start, next].some(i => rawRows[i].vals[t] === null)) {
+            return { at: "#" + (run.start + 1), duration: (run.end - run.start + 1) + " rows" }
+        }
+        var k = columnMeta[t].key.indexOf("ms_") === 0 ? 1000 : 1
+        var sec = (a, b) => ((rawRows[b].vals[t] - rawRows[a].vals[t]) / k + 86400) % 86400
+        var at = sec(0, run.start)
+        return { at: Math.floor(at / 60) + ":" + ("0" + Math.floor(at % 60)).slice(-2),
+                 duration: sec(run.start, next).toFixed(1) + " s" }
+    }
 
     function computeZoomedStats() {
         if (rawRows.length === 0) {
@@ -1747,6 +1857,12 @@ Item {
             if (maxW > 0) {
                 items.push({ label: "Peak Power", value: Math.round(maxW) + " W" })
             }
+        }
+
+        // 8. Faults in view, the row opens the list
+        var faultCount = faultRuns.filter(f => f.end >= s && f.start <= e).length
+        if (faultCount > 0) {
+            items.push({ label: "Faults", value: faultCount + " →" })
         }
 
         zoomedStats = items
@@ -2115,8 +2231,17 @@ Item {
                     Repeater {
                         model: root.zoomedStats
                         RowLayout {
+                            id: statRow
+                            // The fault count on a red badge, as the row opens the list
+                            readonly property bool isFaults: modelData.label === "Faults"
                             Layout.fillWidth: true
                             spacing: 8
+
+                            TapHandler {
+                                enabled: parent.isFaults
+                                margin: 8
+                                onTapped: faultsDialog.open()
+                            }
 
                             Label {
                                 text: modelData.label + ":"
@@ -2133,9 +2258,18 @@ Item {
                                 font.features: { "tnum": 1 }
                                 font.pixelSize: 11
                                 font.bold: true
-                                color: Utility.getAppHexColor("titleText")
-                                style: Text.Outline
+                                color: parent.isFaults ? "white" : Utility.getAppHexColor("titleText")
+                                style: parent.isFaults ? Text.Normal : Text.Outline
                                 styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
+                                leftPadding: parent.isFaults ? 8 : 0
+                                rightPadding: leftPadding
+                                topPadding: parent.isFaults ? 2 : 0
+                                bottomPadding: topPadding
+                                background: Rectangle {
+                                    visible: statRow.isFaults
+                                    radius: height / 2
+                                    color: Utility.getAppHexColor("danger")
+                                }
                             }
                         }
                     }
@@ -2147,9 +2281,9 @@ Item {
                 anchors.right: parent.right
                 anchors.margins: 4
                 z: 10
-                visible: root.hasGps
 
                 RoundButton {
+                    visible: root.hasGps
                     icon.source: "qrc" + Utility.getThemePath() + "icons/Fit to Screen-96.png"
                     Accessible.name: qsTr("Fit Route")
                     onClicked: {
@@ -2159,6 +2293,7 @@ Item {
                 }
 
                 RoundButton {
+                    visible: root.hasGps
                     icon.source: "qrc" + Utility.getThemePath() + "icons/icons8-target-96.png"
                     Accessible.name: qsTr("Follow")
                     checkable: true
@@ -2168,6 +2303,40 @@ Item {
                         root.followMap = checked
                         if (checked && root.currentMapCoord.isValid) {
                             root.easeMap(() => map.center = root.currentMapCoord)
+                        }
+                    }
+                }
+
+                // Shows the faults on the map and graphs, holding it opens the list
+                RoundButton {
+                    visible: root.faultRuns.length > 0
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Brake Warning-96.png"
+                    Accessible.name: qsTr("Faults")
+                    checkable: true
+                    checked: root.showFaults
+                    highlighted: checked
+                    onToggled: root.showFaults = checked
+                    onPressAndHold: faultsDialog.open()
+                }
+            }
+
+            MapItemView {
+                model: root.showFaults ? root.faultRuns.filter(f => f.coord && f.end >= root.viewStart && f.start <= root.viewEnd) : []
+                // Over the route, under the marker
+                delegate: MapQuickItem {
+                    z: 1
+                    coordinate: modelData.coord
+                    anchorPoint: Qt.point(8, 8)
+                    sourceItem: Rectangle {
+                        width: 16; height: 16; radius: 8
+                        color: Utility.getAppHexColor("danger"); border.color: "white"; border.width: 2
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "!"
+                            color: "white"
+                            font.pixelSize: 10
+                            font.bold: true
                         }
                     }
                 }
@@ -2210,6 +2379,7 @@ Item {
         }
         MapQuickItem {
             id: currentMarker
+            z: 2
             visible: root.hasGps
             coordinate: root.currentMapCoord
             anchorPoint: Qt.point(12, 12)
@@ -2419,6 +2589,24 @@ Item {
                                 ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(width, gy); ctx.stroke()
                             }
                             if (root.rawRows.length < 2) return
+                            // A band over the rows with a fault, dashed where it began and with a tab on top,
+                            // so that it is not taken for a spike in a red line
+                            if (root.showFaults) {
+                                var span = Math.max(1, root.viewEnd - root.viewStart)
+                                var red = Utility.getAppHexColor("danger")
+                                ctx.strokeStyle = red; ctx.lineWidth = 1; ctx.setLineDash([3, 3])
+                                root.faultRuns.forEach(function(f) {
+                                    var x1 = (f.start - root.viewStart) / span * width
+                                    var x2 = (f.end - root.viewStart) / span * width
+                                    if (x2 < 0 || x1 > width) return
+                                    ctx.fillStyle = Qt.alpha(red, 0.15)
+                                    ctx.fillRect(x1, 0, Math.max(2, x2 - x1), height)
+                                    ctx.beginPath(); ctx.moveTo(x1, 0); ctx.lineTo(x1, height); ctx.stroke()
+                                    ctx.fillStyle = red
+                                    ctx.beginPath(); ctx.moveTo(x1 - 5, 0); ctx.lineTo(x1 + 5, 0); ctx.lineTo(x1, 7); ctx.closePath(); ctx.fill()
+                                })
+                                ctx.setLineDash([])
+                            }
                             for (var s = 3; s >= 0; s--) {
                                 if (root.slotEnabled[s]) {
                                     drawColSeries(ctx, root.slotColIdx[s], root.slotColors[s], root.slotRanges[s])

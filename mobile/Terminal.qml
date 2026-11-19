@@ -47,6 +47,14 @@ Item {
             var html = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
             terminalText.append("<div style='white-space:pre'>" + (color ? "<font color='" + color + "'>" + html + "</font>" :
                                                                             formatLine(html)) + "</div>")
+
+            // What a fault means, under its name
+            var fault = color ? null : /FAULT_CODE_\w+/.exec(line)
+            var description = fault ? faultDescription(fault[0]) : ""
+            if (description !== "") {
+                terminalText.append("<div style='white-space:pre'><font color='" + Utility.getAppHexColor("normalText") + "'>" +
+                                    " ".repeat(fault.index) + description + "</font></div>")
+            }
         }
     }
 

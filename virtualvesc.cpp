@@ -1188,9 +1188,9 @@ QString VirtualVesc::sdPath(const QString &path) const
 
 void VirtualVesc::generateLog()
 {
-    // A ride for the log browser, like an Express that logs to SD
+    // A ride for the log browser, like an Express that logs to SD, again when it was deleted
     QString dir = sdPath("log_can");
-    if (dir.isEmpty() || QDir(dir).exists() || !QDir().mkpath(dir)) {
+    if (dir.isEmpty() || !QDir(dir).entryList({"*.csv"}).isEmpty() || !QDir().mkpath(dir)) {
         return;
     }
 
@@ -1205,6 +1205,7 @@ void VirtualVesc::generateLog()
            "setup_curr_motor:Current Motors:A:2:0:0;setup_curr_battery:Current Battery:A:2:0:0;"
            "setup_power:Power:W:0:0:0;erpm:ERPM::0:0:0;duty:Duty:%:1:0:0;"
            "soc:Battery Level:%:1:0:0;t_mosfet:Temp MOSFET:°C:1:0:0;t_motor:Temp Motor:°C:1:0:0;"
+           "fault:Fault Code::0:0:0;"
            "cnt_ah:Ah Used:Ah:3:0:0;cnt_wh:Wh Used:Wh:3:0:0;trip_vesc_abs:Trip VESC ABS:m:3:1:0;"
            "t_day_pos:Time GNSS:s:3:0:1;gnss_lat:Latitude:deg:7:0:0;gnss_lon:Longitude:deg:7:0:0\n";
 
@@ -1214,16 +1215,21 @@ void VirtualVesc::generateLog()
     double t0 = start.time().msecsSinceStartOfDay() / 1000.0;
 
     for (int i = 0;i < 3000;i++) {
+        // A few faults for the log viewer, held as long as the firmware would
+        p.faultForced = (i >= 900 && i < 905) ? FAULT_CODE_ABS_OVER_CURRENT :
+                        (i >= 1800 && i < 1830) ? FAULT_CODE_OVER_TEMP_FET :
+                        i == 2500 ? FAULT_CODE_DRV : FAULT_CODE_NONE;
+
         for (int j = 0;j < 5;j++) {
             p.step(0.02);
         }
 
         double t = fmod(t0 + p.timeS, 86400.0);
-        out << QString::asprintf("%.3f;%.2f;%.2f;%.2f;%.2f;%.0f;%.0f;%.1f;%.1f;%.1f;%.1f;"
+        out << QString::asprintf("%.3f;%.2f;%.2f;%.2f;%.2f;%.0f;%.0f;%.1f;%.1f;%.1f;%.1f;%d;"
                                  "%.3f;%.3f;%.3f;%.3f;%.7f;%.7f\n",
                                  t, p.speed * 3.6, p.vBus, p.iMotor() * n, p.iIn * n,
                                  p.iIn * n * p.vBus, p.erpm, p.duty * 100.0, p.soc * 100.0,
-                                 p.tempFet, p.tempMotor, p.ah * n, p.wh * n, p.distAbs,
+                                 p.tempFet, p.tempMotor, p.fault, p.ah * n, p.wh * n, p.distAbs,
                                  t, p.lat, p.lon);
     }
 }

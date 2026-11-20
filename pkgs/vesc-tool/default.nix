@@ -5,9 +5,8 @@
   kind ? "free",
 
   lib,
-  cmake,
   copyDesktopItems,
-  libsForQt5,
+  qt6,
   makeDesktopItem,
   stdenv,
   tree,
@@ -88,25 +87,30 @@ stdenv.mkDerivation {
           $out/bin \
           $out/share/icons/hicolor/scalable/apps
 
-        cp build/lin/vesc_tool_* $out/bin/${executableName}
+        cp vesc_tool_[0-9]* $out/bin/${executableName}
         cp ${iconPath} $out/share/icons/hicolor/scalable/apps/vesc_tool_${kind}.svg
         echo $desktopItems
 
         runHook postInstall
       '';
 
-  buildInputs = [ libsForQt5.qtbase ];
+  buildInputs = [
+    qt6.qtbase
+    qt6.qtdeclarative
+    qt6.qtsvg
+    qt6.qt5compat
+    qt6.qtserialport
+    qt6.qtconnectivity
+    qt6.qtpositioning
+    qt6.qtlocation
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
+    qt6.qtwayland
+  ];
 
   nativeBuildInputs = [
-    cmake
-    libsForQt5.qtbase
-    libsForQt5.qtquickcontrols2
-    libsForQt5.qtgamepad
-    libsForQt5.qtconnectivity
-    libsForQt5.qtpositioning
-    libsForQt5.qtserialport
-    libsForQt5.qtgraphicaleffects
-    libsForQt5.wrapQtAppsHook
+    qt6.qmake
+    qt6.wrapQtAppsHook
 
     # Make the desktop icon work
     copyDesktopItems

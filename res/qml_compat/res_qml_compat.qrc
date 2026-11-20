@@ -1,0 +1,15 @@
+<!--
+    Aliases for QML modules that were removed or changed in Qt 6, so that packages
+    built for the Qt 5 VESC Tool keep loading. qrc:/qt/qml is in the default QML
+    import path of every engine. The versioned directories (Dialogs.1, settings.1)
+    are only looked up for 1.x imports, so Qt 6 imports still get the real modules.
+-->
+<RCC>
+    <qresource prefix="/qt/qml">
+        <file>QtGraphicalEffects/qmldir</file>
+        <file>QtQuick/Dialogs.1/qmldir</file>
+        <file>QtQuick/Dialogs.1/FileDialog.qml</file>
+        <file>Qt/labs/settings.1/qmldir</file>
+        <file>Qt/labs/settings.1/Settings.qml</file>
+    </qresource>
+</RCC>

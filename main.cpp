@@ -293,6 +293,11 @@ int main(int argc, char *argv[])
     qmlRegisterType<SystemCommandExecutor>("Vedder.vesc.syscmd", 1, 0, "SysCmd");
 #endif
 
+    // QtQuick.Dialogs 1.x is provided by the Qt 5 compatibility shim in res/qml_compat. Without
+    // the module version registered here, every import of it makes the engine retry the type
+    // registration of the Qt 6 QtQuick.Dialogs module, which prints a warning per type.
+    qmlRegisterModule("QtQuick.Dialogs", 1, 3);
+
     qRegisterMetaType<VSerialInfo_t>();
     qRegisterMetaType<MCCONF_TEMP>();
     qRegisterMetaType<MC_VALUES>();

@@ -17,16 +17,36 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
+
 #include "datatypes.h"
 #include "utility.h"
 
-// The icon of the package for QML, as a data URL, or the default package icon when it has none
+#include <QByteArray>
+#include <QString>
+
 QString VescPackage::iconSrc()
 {
-    QByteArray image = (Utility::isDarkMode() || iconLight.isEmpty()) ? icon : iconLight;
-    if (image.isEmpty()) {
-        return "qrc" + Utility::getThemePath() + "icons/Package-96.png";
+    const QByteArray &rawBytes = Utility::isDarkMode() ? icon : iconLight;
+
+    if (!rawBytes.isEmpty()) {
+        QByteArray mime = "image/*"; // Wildcard fallback
+
+        if (rawBytes.startsWith("\xFF\xD8\xFF")) {
+            mime = "image/jpeg";
+        } else if (rawBytes.startsWith("\x89PNG\r\n\x1A\n")) {
+            mime = "image/png";
+        } else if (rawBytes.startsWith("GIF87a") || rawBytes.startsWith("GIF89a")) {
+            mime = "image/gif";
+        } else if (rawBytes.startsWith("RIFF") && rawBytes.mid(8, 4) == "WEBP") {
+            mime = "image/webp";
+        } else if (rawBytes.startsWith("BM")) {
+            mime = "image/bmp";
+        } else if (rawBytes.trimmed().startsWith("<svg") || rawBytes.trimmed().startsWith("<?xml")) {
+            mime = "image/svg+xml";
+        }
+
+        return QString::fromLatin1("data:" + mime + ";base64," + rawBytes.toBase64());
     }
 
-    return "data:image/png;base64," + QString::fromLatin1(image.toBase64());
+    return "qrc" + Utility::getThemePath() + "icons/Package-96.png";
 }

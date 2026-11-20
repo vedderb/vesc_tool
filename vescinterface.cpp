@@ -231,17 +231,18 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mTcpServer->packet()->sendPacket(packet);
     });
 
+    mBroadcastSocket = new QUdpSocket(this);
+
     mTimerBroadcast = new QTimer(this);
     mTimerBroadcast->setInterval(1000);
     mTimerBroadcast->start();
     connect(mTimerBroadcast, &QTimer::timeout, [this]() {
         if (mTcpServer->isServerRunning() && isPortConnected()) {
-            QUdpSocket *udp = new QUdpSocket(this);
             QString dgram = QString("%1::%2::%3").
                     arg(getLastFwRxParams().hw).
                     arg(Utility::getNetworkAddresses().first().toString()).
                     arg(mTcpServer->lastPort());
-            udp->writeDatagram(dgram.toLocal8Bit().data(), dgram.size(), QHostAddress::Broadcast, 65109);
+            mBroadcastSocket->writeDatagram(dgram.toLocal8Bit().data(), dgram.size(), QHostAddress::Broadcast, 65109);
         }
     });
 
@@ -371,6 +372,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     // Sanity-check motor parameters
     connect(mCommands, &Commands::mcConfigWriteSent, [this](bool checkSet) {
+        cacheMcConf();
+
         if (!checkSet) {
             return;
         }
@@ -4341,11 +4344,7 @@ void VescInterface::mcconfUpdated()
 {
     emit statusMessage(tr("Motor config updated"), true);
 
-    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
-    QDir().mkpath(confCacheDir);
-    auto confPath = confCacheDir + "/mcconf.xml";
-    mMcConfig->saveXml(confPath, "MCConfiguration");
+    cacheMcConf();
 
     if (isPortConnected() && fwRx()) {
         QPair<int, int> fw_connected = qMakePair(mLastFwParams.major, mLastFwParams.minor);
@@ -4398,6 +4397,21 @@ bool VescInterface::isBlockFwSwap() const
 void VescInterface::setBlockFwSwap(bool newBlockFwSwap)
 {
     mBlockFwSwap = newBlockFwSwap;
+}
+
+bool VescInterface::cacheMcConf()
+{
+    if (!isPortConnected()) {
+        return false;
+    }
+
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
+    QDir().mkpath(confCacheDir);
+    auto confPath = confCacheDir + "/mcconf.xml";
+    mMcConfig->saveXml(confPath, "MCConfiguration");
+
+    return true;
 }
 
 bool VescInterface::showFwUpdateAvailable() const

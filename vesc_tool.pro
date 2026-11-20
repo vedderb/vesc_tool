@@ -268,6 +268,7 @@ RESOURCES += res.qrc \
     res_lisp.qrc \
     res_qml.qrc
 RESOURCES += res/config/res_config.qrc
+RESOURCES += res/qml_compat/res_qml_compat.qrc
 
 RESOURCES += res_fw_bms.qrc
 

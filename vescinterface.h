@@ -288,6 +288,8 @@ public:
     Q_INVOKABLE bool isBlockFwSwap() const;
     Q_INVOKABLE void setBlockFwSwap(bool newBlockFwSwap);
 
+    Q_INVOKABLE bool cacheMcConf();
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);

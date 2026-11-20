@@ -854,13 +854,6 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
         data.append(dataRaw);
     }
 
-    if (!pkg.qmlFileQt6.isEmpty()) {
-        auto dataRaw = pkg.qmlFileQt6.toUtf8();
-        data.vbAppendString("qmlFileQt6");
-        data.vbAppendInt32(dataRaw.size());
-        data.append(dataRaw);
-    }
-
     if (!pkg.pkgDescQml.isEmpty()) {
         auto dataRaw = pkg.pkgDescQml.toUtf8();
         data.vbAppendString("pkgDescQml");
@@ -940,12 +933,6 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             vb.remove(0, len);
             pkg.qmlFile = QString::fromUtf8(dataRaw);
             pkg.loadOk = true;
-        } else if (name == "qmlFileQt6") {
-            auto len = vb.vbPopFrontInt32();
-            auto dataRaw = vb.left(len);
-            vb.remove(0, len);
-            pkg.qmlFileQt6 = QString::fromUtf8(dataRaw);
-            pkg.loadOk = true;
         } else if (name == "qmlIsFullscreen") {
             vb.vbPopFrontInt32(); // Discard length
             pkg.qmlIsFullscreen = vb.vbPopFrontInt8();
@@ -1017,14 +1004,7 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
     bool res = true;
     QByteArray qml;
 
-    if (!pkg.qmlFileQt6.isEmpty()) {
-        qml = qmlCompress(pkg.qmlFileQt6);
-        res = qmlErase(qml.size() + 100);
-
-        if (res) {
-            res = qmlUpload(qml, pkg.qmlIsFullscreen);
-        }
-    } else if (!pkg.qmlFile.isEmpty()) {
+    if (!pkg.qmlFile.isEmpty()) {
         qml = qmlCompress(pkg.qmlFile);
         res = qmlErase(qml.size() + 100);
 
@@ -1286,23 +1266,6 @@ bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes,
                 pkg.qmlFile = f.readAll();
                 f.close();
                 qDebug() << "Package qml found!";
-            } else {
-                qWarning() << "Could not open qml file.";
-                result = false;
-            }
-        }
-    }
-
-    prop = qmlItem->property("pkgQmlQt6");
-    if (prop.isValid()) {
-        auto qmlQt6Path = prop.toString();
-
-        if (!qmlQt6Path.isEmpty()) {
-            QFile f(qmlQt6Path);
-            if (f.open(QIODevice::ReadOnly)) {
-                pkg.qmlFileQt6 = f.readAll();
-                f.close();
-                qDebug() << "Package qml Qt6 found!";
             } else {
                 qWarning() << "Could not open qml file.";
                 result = false;

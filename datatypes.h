@@ -1222,7 +1222,6 @@ public:
     Q_PROPERTY(QString description_md MEMBER description_md)
     Q_PROPERTY(QByteArray lispData MEMBER lispData)
     Q_PROPERTY(QString qmlFile MEMBER qmlFile)
-    Q_PROPERTY(QString qmlFileQt6 MEMBER qmlFileQt6)
     Q_PROPERTY(QString pkgDescQml MEMBER pkgDescQml)
     Q_PROPERTY(bool qmlIsFullscreen MEMBER qmlIsFullscreen)
     Q_PROPERTY(bool isLibrary MEMBER isLibrary)
@@ -1246,7 +1245,6 @@ public:
     QString description_md;
     QByteArray lispData;
     QString qmlFile;
-    QString qmlFileQt6;
     QString pkgDescQml;
     QByteArray icon;
     QByteArray iconLight;

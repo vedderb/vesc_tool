@@ -310,6 +310,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(mVesc->mcConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
     connect(mVesc->appConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
+    connect(mVesc, &VescInterface::portConnectedChanged, this, &MainWindow::updateConfigChanges);
 
     mMcConfRead = false;
     mAppConfRead = false;
@@ -1434,11 +1435,12 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     }
 }
 
-// Marks the write buttons and the pages that have parameters not written to the VESC
+// Marks the write buttons and the pages that have parameters not written to the VESC, while connected to one
 void MainWindow::updateConfigChanges()
 {
-    int mcChanges = mVesc->mcConfig()->getChangedParams().size();
-    int appChanges = mVesc->appConfig()->getChangedParams().size();
+    bool connected = mVesc->isPortConnected();
+    int mcChanges = connected ? mVesc->mcConfig()->getChangedParams().size() : 0;
+    int appChanges = connected ? mVesc->appConfig()->getChangedParams().size() : 0;
 
     ui->actionWriteMcconf->setIcon(mcChanges > 0 ? Utility::getIconWithDot("icons/motor_down.png") :
                                                    Utility::getIcon("icons/motor_down.png"));
@@ -1461,7 +1463,7 @@ void MainWindow::updateConfigChanges()
         for (ParamTable *t: page->findChildren<ParamTable*>()) {
             changed = changed || t->hasChanges();
         }
-        item->setChanged(changed);
+        item->setChanged(connected && changed);
     }
 }
 

@@ -38,6 +38,8 @@ Item {
     // graphs get the full height.
     readonly property bool wide: mainIsHorizontal
     readonly property bool headerOverMap: phoneLandscape
+    // Tablets and large windows in landscape show the map, the values and the graphs together
+    readonly property bool showAll: wide && !headerOverMap
     anchors.fill: parent
 
     property var mCommands: VescIf.commands()
@@ -903,7 +905,7 @@ Item {
     // Faults in the log over the map or the values, so that the graphs stay in view. A tap moves the cursor to one
     Dialog {
         id: faultsDialog
-        parent: root.showValues ? valuesView : map
+        parent: map.visible ? map : valuesView
         width: parent.width
         height: parent.height
         padding: 8
@@ -2045,7 +2047,7 @@ Item {
                         checkable: true
                         checked: root.showMapStats
                         // The stats are on the map
-                        enabled: root.rawRows.length > 0 && !root.showValues
+                        enabled: root.rawRows.length > 0 && map.visible
                         opacity: enabled ? 1 : 0.4
                         onToggled: root.showMapStats = checked
                     }
@@ -2093,7 +2095,9 @@ Item {
             Layout.fillHeight: true
             // Half the page on phones, so that the header fits above it
             Layout.preferredWidth: root.headerOverMap ? 3 : 2
-            visible: !root.showValues
+            // Beside the values and the graphs when all show
+            Layout.rowSpan: root.showAll ? 2 : 1
+            visible: root.showAll || !root.showValues
             onVisibleChanged: {
                 if (visible && root.routeFitPending) {
                     root.routeFitPending = false
@@ -2336,6 +2340,14 @@ Item {
                 anchors.margins: 4
                 z: 10
 
+                // Top right on both the map and the values, where the values one shows the map icon
+                RoundButton {
+                    visible: !root.showAll
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Value Tiles-96.png"
+                    Accessible.name: qsTr("Values")
+                    onClicked: root.showValues = true
+                }
+
                 RoundButton {
                     visible: root.hasGps
                     icon.source: "qrc" + Utility.getThemePath() + "icons/Fit to Screen-96.png"
@@ -2371,12 +2383,6 @@ Item {
                     highlighted: checked
                     onToggled: root.showFaults = checked
                     onPressAndHold: faultsDialog.open()
-                }
-
-                RoundButton {
-                    icon.source: "qrc" + Utility.getThemePath() + "icons/Grid-96.png"
-                    Accessible.name: qsTr("Values")
-                    onClicked: root.showValues = true
                 }
             }
 
@@ -2426,12 +2432,19 @@ Item {
         ColumnLayout {
             id: valuesView
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: map.Layout.preferredWidth
-            visible: root.showValues
+            // Above the graphs when all show, as tall as its tiles up to a bit under half the page, the
+            // graphs get the rest. Else in the place of the map
+            Layout.fillHeight: !root.showAll
+            Layout.preferredHeight: root.showAll ? Math.min(valuesHeader.implicitHeight + spacing + valuesGrid.rowsHeight,
+                                                            root.height * 0.45) : -1
+            Layout.preferredWidth: root.showAll ? 3 : map.Layout.preferredWidth
+            visible: root.showAll || root.showValues
             spacing: 4
+            onVisibleChanged: swapMenu.close()
 
             RowLayout {
+                id: valuesHeader
+
                 Label {
                     Layout.fillWidth: true
                     Layout.leftMargin: 4
@@ -2449,23 +2462,31 @@ Item {
                     onClicked: faultsDialog.open()
                 }
 
-                Chip {
-                    topInset: 0
-                    text: qsTr("Map")
-                    iconSource: "qrc" + Utility.getThemePath() + "icons/Waypoint Map-96.png"
+                // Where the Values button is on the map
+                RoundButton {
+                    visible: !root.showAll
+                    Layout.topMargin: 4
+                    Layout.rightMargin: 4
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Waypoint Map-96.png"
+                    Accessible.name: qsTr("Map")
                     onClicked: root.showValues = false
                 }
             }
 
             GridView {
                 id: valuesGrid
+                // Height of all the rows of tiles
+                readonly property real rowsHeight: Math.ceil(count / Math.max(1, Math.floor(width / 120))) * cellHeight
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                // As many tiles as fit at 140 wide or more
-                cellWidth: width / Math.max(1, Math.floor(width / 140))
-                cellHeight: 60
-                // Columns with data, in the groups of the value picker
+                // As many tiles as fit at 120 wide or more
+                cellWidth: width / Math.max(1, Math.floor(width / 120))
+                cellHeight: 46
+                // The menu of a tile is placed at it, so it closes when the tiles move
+                onWidthChanged: swapMenu.close()
+                // Columns with data, in the groups of the value picker. They keep their places when the
+                // plotted values change, the plotted ones are marked in the colours of their lines.
                 model: root.columnMeta.filter(c => c.max >= c.min)
                        .sort((a, b) => root.columnGroups.indexOf(a.group) - root.columnGroups.indexOf(b.group) || a.index - b.index)
 
@@ -2474,13 +2495,131 @@ Item {
                     height: valuesGrid.cellHeight
 
                     ValueTile {
+                        id: tile
                         readonly property var val: root.cursorValue(modelData.index)
+                        // Lines that plot it
+                        readonly property var slots: [0, 1, 2, 3].filter(s => root.slotColIdx[s] === modelData.index)
+                        // Marked like a checked chip while its menu is open
+                        readonly property bool picked: swapMenu.visible && swapMenu.colIdx === modelData.index
                         anchors.fill: parent
                         anchors.margins: 3
+                        color: picked ? Qt.alpha(Material.accent, 0.12) : Utility.getAppHexColor("cardBackground")
+                        border.width: picked ? 1.5 : 1
+                        border.color: picked ? Material.accent : Utility.getAppHexColor("raisedBackground")
                         title: modelData.label
                         value: val === null ? "–" : val.toFixed(root.colDecimals(modelData))
                         unit: modelData.unit
+                        // Smaller than elsewhere, the title like the min and max under the graphs
+                        titleFont.pixelSize: 10
+                        valueFont.pointSize: 12
+
+                        // A bar in the colour of each line that plots it, in the margin at the left edge
+                        Column {
+                            x: 3
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 2
+
+                            Repeater {
+                                model: tile.slots
+
+                                Rectangle {
+                                    width: 3
+                                    height: (tile.height - 16 - (tile.slots.length - 1) * 2) / tile.slots.length
+                                    radius: 1.5
+                                    color: root.slotColors[modelData]
+                                }
+                            }
+                        }
+
+                        // A tap plots the value in place of one of the lines, if it is not plotted yet
+                        TapHandler {
+                            enabled: tile.slots.length === 0
+                            onTapped: swapMenu.show(modelData.index, tile)
+                        }
                     }
+                }
+            }
+
+            // The lines to plot a tapped value in place of, at its tile. One for all the tiles, as the grid
+            // makes them again while it scrolls.
+            PopupMenu {
+                id: swapMenu
+                property int colIdx: -1
+                width: Math.min(280, root.width - 32)
+                // A press outside only closes it, without scrubbing the graphs under it. The page dims a little
+                // and the menu is raised above the tiles, so that it stands out from them.
+                modal: true
+
+                Overlay.modal: Rectangle {
+                    color: Qt.alpha("black", Utility.isDarkMode() ? 0.4 : 0.2)
+                }
+
+                background: Rectangle {
+                    color: Utility.getAppHexColor(Utility.isDarkMode() ? "raisedBackground" : "darkBackground")
+                    border.color: Utility.getAppHexColor("lightestBackground")
+                    radius: 16
+                }
+
+                function show(col, tile) {
+                    colIdx = col
+                    // Under the tile, or over it where the page has no room
+                    var p = tile.mapToItem(valuesView, 0, 0)
+                    x = p.x
+                    y = tile.mapToItem(root, 0, tile.height).y + implicitHeight <= root.height ? p.y + tile.height :
+                                                                                               p.y - implicitHeight
+                    open()
+                }
+
+                function swap(slot) {
+                    root.setSlotColumn(slot, colIdx)
+                    if (!root.slotEnabled[slot]) root.toggleSlot(slot, true)
+                }
+
+                function label(slot) {
+                    return root.columnMeta[root.slotColIdx[slot]]?.label ?? ""
+                }
+
+                // A dot and the name in the colour of the line, like its picker under the graphs. The name is
+                // from the log, so it is escaped for the rich text.
+                function entryText(slot) {
+                    return "<font color='" + root.slotColors[slot] + "'>● " +
+                            label(slot).replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>"
+                }
+
+                Label {
+                    leftPadding: 10
+                    topPadding: 6
+                    bottomPadding: 4
+                    text: qsTr("Plot %1 in place of").arg(root.columnMeta[swapMenu.colIdx]?.label ?? "")
+                    elide: Text.ElideRight
+                    font.pointSize: 10
+                    color: Utility.getAppHexColor("normalText")
+                }
+
+                // Faded while the line is hidden, the swap shows it again
+                MenuEntry {
+                    text: swapMenu.entryText(0)
+                    Accessible.name: swapMenu.label(0)
+                    opacity: root.slotEnabled[0] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(0)
+                }
+                MenuEntry {
+                    text: swapMenu.entryText(1)
+                    Accessible.name: swapMenu.label(1)
+                    opacity: root.slotEnabled[1] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(1)
+                }
+                MenuEntry {
+                    text: swapMenu.entryText(2)
+                    Accessible.name: swapMenu.label(2)
+                    opacity: root.slotEnabled[2] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(2)
+                }
+                MenuEntry {
+                    text: swapMenu.entryText(3)
+                    Accessible.name: swapMenu.label(3)
+                    opacity: root.slotEnabled[3] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(3)
                 }
             }
         }

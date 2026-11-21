@@ -29,7 +29,8 @@ MenuItem {
     // File in the theme's icons folder
     property string iconFile: ""
 
-    implicitHeight: 52
+    // Lower without the icon tile
+    implicitHeight: iconFile !== "" ? 52 : 44
     leftPadding: 10
     rightPadding: 10
 
@@ -48,7 +49,7 @@ MenuItem {
                 anchors.centerIn: parent
                 width: 22
                 height: 22
-                source: "qrc" + Utility.getThemePath() + "icons/" + entry.iconFile
+                source: entry.iconFile !== "" ? "qrc" + Utility.getThemePath() + "icons/" + entry.iconFile : ""
                 smooth: true
             }
         }

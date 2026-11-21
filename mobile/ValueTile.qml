@@ -24,6 +24,8 @@ Rectangle {
     property alias title: titleText.text
     property alias value: valueText.text
     property alias unit: unitText.text
+    property alias titleFont: titleText.font
+    property alias valueFont: valueText.font
     property alias valueColor: valueText.color
     property real level: -1
     property color levelColor: Utility.getAppHexColor("lightAccent")

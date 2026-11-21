@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2018 - 2026 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -17,68 +17,62 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-// Based on https://stackoverflow.com/questions/43406830/how-to-use-float-in-a-qml-spinbox
+import QtQuick
+import QtQuick.Controls
+import Vedder.vesc.utility 1.0
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+DoubleSpinBox {
+    id: root
 
-Item {
-    height: spinbox.implicitHeight
-
-    property int decimals: 2
-    property real realValue: 0.0
-    property real realFrom: 0.0
-    property real realTo: 100.0
-    property real realStepSize: 1.0
+    property alias realValue: root.value
+    property alias realFrom: root.from
+    property alias realTo: root.to
+    property alias realStepSize: root.stepSize
     property string suffix: ""
     property string prefix: ""
 
-    onPrefixChanged: forceUpdate()
-    onSuffixChanged: forceUpdate()
+    editable: true
+    decimals: 2
+    from: 0.0
+    to: 100.0
+    stepSize: 1.0
 
-    function forceUpdate() {
-        var old = realValue
-        realValue += realStepSize
-        realValue = old
+    inputMethodHints: Qt.platform.os === "ios"
+                      ? (Qt.ImhPreferNumbers | Qt.ImhNoPredictiveText)
+                      : Qt.ImhFormattedNumbersOnly
+
+    Binding {
+        target: root.contentItem
+        property: "leftPadding"
+        value: prefixText.width
+    }
+    Binding {
+        target: root.contentItem
+        property: "rightPadding"
+        value: suffixText.width
     }
 
-    SpinBox {
-        id: spinbox
-        anchors.fill: parent
-        editable: true
-//        wheelEnabled: true
+    Row {
+        parent: root.contentItem
+        anchors.centerIn: parent
 
-        property real factor: Math.pow(10, decimals)
-        stepSize: realStepSize * factor
-        value: Math.round(realValue * factor)
-        to : realTo * factor
-        from : realFrom * factor
-
-        validator: DoubleValidator {
-            bottom: Math.min(spinbox.from, spinbox.to) * spinbox.factor
-            top:  Math.max(spinbox.from, spinbox.to) * spinbox.factor
+        Text {
+            id: prefixText
+            text: root.prefix
+            font: root.font
+            color: Utility.getAppHexColor("disabledText")
         }
 
-        textFromValue: function(value, locale) {
-            return prefix + parseFloat(value * 1.0 / factor).toFixed(decimals) + suffix;
+        Item {
+            width: root.contentItem.contentWidth
+            height: 1
         }
 
-        valueFromText: function(text, locale) {
-            // For some reason android does not hide the keyboard
-            // when finishing the edit. Hiding it from here seems
-            // to behave as expected. TODO: Test on ios and different
-            // phones in general.
-            Qt.inputMethod.hide()
-
-            return Math.round(parseFloat(text.replace(",", ".").
-                                         replace(suffix, "").
-                                         replace(prefix, "")) * factor)
-        }
-
-        onValueChanged: {
-            if (Math.round(realValue * factor) !== value) {
-                realValue = value * 1.0 / factor
-            }
+        Text {
+            id: suffixText
+            text: root.suffix
+            font: root.font
+            color: Utility.getAppHexColor("disabledText")
         }
     }
 }

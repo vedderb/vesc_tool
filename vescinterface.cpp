@@ -959,6 +959,8 @@ void VescInterface::updateMcconfFromProfile(MCCONF_TEMP profile)
     mMcConfig->updateParamDouble("l_max_erpm", profile.erpm_or_speed_max * speedFact);
     mMcConfig->updateParamDouble("l_min_duty", profile.duty_min);
     mMcConfig->updateParamDouble("l_max_duty", profile.duty_max);
+
+    cacheMcConf();
 }
 
 QStringList VescInterface::getPairedUuids()

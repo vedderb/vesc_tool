@@ -311,6 +311,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mVesc->mcConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
     connect(mVesc->appConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
     connect(mVesc, &VescInterface::portConnectedChanged, this, &MainWindow::updateConfigChanges);
+    connect(mVesc, &VescInterface::fwRxChanged, this, &MainWindow::updateConfigChanges);
 
     mMcConfRead = false;
     mAppConfRead = false;
@@ -1435,12 +1436,14 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
     }
 }
 
-// Marks the write buttons and the pages that have parameters not written to the VESC, while connected to one
+// Marks the write buttons and the pages that have parameters not written to the device, while connected
+// to one. The motor and app configurations only on a motor controller, the other devices do not have them.
 void MainWindow::updateConfigChanges()
 {
     bool connected = mVesc->isPortConnected();
-    int mcChanges = connected ? mVesc->mcConfig()->getChangedParams().size() : 0;
-    int appChanges = connected ? mVesc->appConfig()->getChangedParams().size() : 0;
+    bool motorConfs = connected && mVesc->getFwSupportsConfiguration();
+    int mcChanges = motorConfs ? mVesc->mcConfig()->getChangedParams().size() : 0;
+    int appChanges = motorConfs ? mVesc->appConfig()->getChangedParams().size() : 0;
 
     ui->actionWriteMcconf->setIcon(mcChanges > 0 ? Utility::getIconWithDot("icons/motor_down.png") :
                                                    Utility::getIcon("icons/motor_down.png"));
@@ -1458,12 +1461,17 @@ void MainWindow::updateConfigChanges()
             continue;
         }
 
+        bool custom = false;
+        for (int c = 0;c < 3;c++) {
+            custom = custom || i == mPageNameIdList.value(QString("app_custom_config_%1").arg(c), -1);
+        }
+
         bool changed = (i == mPageNameIdList.value("motor", -1) && mcChanges > 0) ||
                        (i == mPageNameIdList.value("app", -1) && appChanges > 0);
         for (ParamTable *t: page->findChildren<ParamTable*>()) {
             changed = changed || t->hasChanges();
         }
-        item->setChanged(connected && changed);
+        item->setChanged((custom ? connected : motorConfs) && changed);
     }
 }
 

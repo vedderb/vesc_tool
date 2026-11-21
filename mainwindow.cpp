@@ -19,7 +19,10 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "mcp/mcpserver.h"
+#include "mcp/vescmcptools.h"
 #include <QMessageBox>
+#include <QCheckBox>
 #include <QDebug>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -576,8 +579,83 @@ MainWindow::MainWindow(QWidget *parent) :
     setAcceptDrops(true);
 }
 
+bool MainWindow::startMcpServer(quint16 port, const QByteArray &token, bool allowEdits,
+                              bool allowControllerWrites)
+{
+    if (!findChildren<McpServer*>(QString(), Qt::FindDirectChildrenOnly).isEmpty()) return false;
+    auto server = new McpServer(this);
+    auto tools = new VescMcpTools(mVesc, server);
+    tools->setAllowEdits(allowEdits);
+    tools->setAllowControllerWrites(allowControllerWrites);
+    server->setTools(tools->tools(), [tools](const QString &name, const QJsonObject &arguments) {
+        return tools->call(name, arguments);
+    });
+    if (!server->start(port, token)) {
+        qWarning() << "Could not start MCP server:" << server->errorString();
+        delete server;
+        return false;
+    }
+    auto label = new QLabel((allowControllerWrites ? tr("MCP controller writes: 127.0.0.1:%1") :
+                            allowEdits ? tr("MCP local edits: 127.0.0.1:%1") :
+                                        tr("MCP read-only: 127.0.0.1:%1")).arg(server->port()), this);
+    label->setToolTip(tr("Authenticated local MCP access. Persistent writes require approval in this window."));
+    ui->statusBar->addPermanentWidget(label);
+    connect(server, &McpServer::toolCalled, this, [this](const QString &name) {
+        ui->statusBar->showMessage(tr("MCP: %1").arg(name), 3000);
+    });
+    auto operations = tools->operations();
+    auto progress = new QProgressDialog(tr("MCP controller operation in progress..."), tr("Stop motor / cancel"), 0, 0, this);
+    progress->setWindowModality(Qt::ApplicationModal);
+    progress->setMinimumDuration(0);
+    // Stop QProgressDialog's initial force-show timer; only busyChanged may show it.
+    progress->reset();
+    progress->hide();
+    connect(progress, &QProgressDialog::canceled, this, [this, operations]() {
+        operations->cancel(operations->currentId());
+        on_stopButton_clicked();
+    });
+    connect(operations, &McpDeviceOperations::busyChanged, progress, [progress](bool busy) {
+        if (busy) progress->show(); else { progress->reset(); progress->hide(); }
+    });
+    connect(operations, &McpDeviceOperations::approvalRequested, this,
+            [this, operations, progress](const QString &id, const QString &title, const QString &details) {
+        progress->hide();
+        auto dialog = new QMessageBox(QMessageBox::Warning, title,
+                    tr("MCP requests a persistent controller change. The motor may react to changed settings or code. "
+                       "Review the device and changes in Details before approving."),
+                    QMessageBox::Yes | QMessageBox::No, this);
+        dialog->setTextFormat(Qt::PlainText);
+        dialog->setDetailedText(details);
+        dialog->setDefaultButton(QMessageBox::No);
+        if (operations->job(id).value("unmonitoredUart").toBool()) {
+            dialog->setInformativeText(tr("ADC and UART mode is active. ADC is monitored, but UART "
+                                          "motor commands cannot be observed or locked by this app. "
+                                          "Disconnect any external UART controller before approving."));
+            auto confirmation = new QCheckBox(tr("I confirm that no external UART device can send motor commands."), dialog);
+            dialog->setCheckBox(confirmation);
+            auto yesButton = dialog->button(QMessageBox::Yes);
+            yesButton->setEnabled(false);
+            connect(confirmation, &QCheckBox::toggled, yesButton, &QAbstractButton::setEnabled);
+        }
+        dialog->setWindowModality(Qt::ApplicationModal);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        QPointer<McpDeviceOperations> owner(operations);
+        connect(dialog, &QDialog::finished, this, [owner, id, progress](int answer) {
+            if (!owner) return;
+            owner->approve(id, answer == QMessageBox::Yes);
+            if (owner->busy()) progress->show();
+        });
+        connect(operations, &McpDeviceOperations::busyChanged, dialog, [dialog](bool busy) {
+            if (!busy) dialog->reject();
+        });
+        dialog->open();
+    });
+    return true;
+}
+
 MainWindow::~MainWindow()
 {
+    qDeleteAll(findChildren<McpServer*>(QString(), Qt::FindDirectChildrenOnly));
     // Save settings
     mSettings.setValue("version", mVersion);
     mSettings.setValue("introVersion", VT_INTRO_VERSION);

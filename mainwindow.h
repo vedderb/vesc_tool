@@ -83,6 +83,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    bool startMcpServer(quint16 port, const QByteArray &token, bool allowEdits = false,
+                        bool allowControllerWrites = false);
     bool eventFilter(QObject *object, QEvent *e);
     void closeEvent(QCloseEvent *event);
 

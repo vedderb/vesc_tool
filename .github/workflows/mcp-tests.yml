@@ -1,0 +1,52 @@
+name: MCP tests
+
+on:
+  push:
+    paths:
+      - 'mcp/**'
+      - 'tests/mcp/**'
+      - 'mcp_tests.pro'
+      - 'commands.cpp'
+      - 'commands.h'
+      - 'vescinterface.cpp'
+      - 'vesc_tool.pro'
+      - '.github/workflows/mcp-tests.yml'
+  pull_request:
+    paths:
+      - 'mcp/**'
+      - 'tests/mcp/**'
+      - 'mcp_tests.pro'
+      - 'commands.cpp'
+      - 'commands.h'
+      - 'vescinterface.cpp'
+      - 'vesc_tool.pro'
+      - '.github/workflows/mcp-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  qt-tests:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: mcp
+            binary: tst_mcpserver
+          - project: transactions
+            binary: tst_mcpwritetransaction
+          - project: deviceoperations
+            binary: tst_mcpdeviceoperations
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Install Qt 5 test dependencies
+        run: sudo apt-get update && sudo apt-get install -y qtbase5-dev
+      - name: Build and run hardware-free tests
+        run: |
+          mkdir -p ../mcp-test-build
+          cd ../mcp-test-build
+          qmake "$GITHUB_WORKSPACE/tests/mcp/${{ matrix.project }}.pro" CONFIG+=release CONFIG-=debug
+          make -j2
+          ./"${{ matrix.binary }}"

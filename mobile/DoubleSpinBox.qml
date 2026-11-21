@@ -23,6 +23,11 @@ import Vedder.vesc.utility 1.0
 
 DoubleSpinBox {
     id: root
+    locale: Qt.locale("C")
+
+    // Intercept typing before the validator runs, or normalize in valueFromText:
+    validator: RegularExpressionValidator { regularExpression: /[-+]?[0-9]*[.,]?[0-9]*/ }
+    valueFromText: function(text, locale) { return parseFloat(text.replace(",", ".")) || 0 }
 
     property alias realValue: root.value
     property alias realFrom: root.from

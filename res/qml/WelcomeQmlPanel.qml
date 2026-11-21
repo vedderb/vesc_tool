@@ -52,6 +52,10 @@ Item {
         return ""
     }
 
+    function displayPath(path) {
+        return path
+    }
+
     function showToast(text, detail) {
         VescIf.emitStatusMessage(text + ": " + detail, true)
     }
@@ -193,7 +197,7 @@ Item {
 
             Repeater {
                 id: rep
-                model: ["RT Data", "Profiles"]
+                model: ["RT Data", "Profiles", "LogView"]
 
                 TabButton {
                     text: modelData
@@ -260,7 +264,9 @@ Item {
 
             DragHandler {
                 id: horizDrag
-                enabled: !connScreen.opened
+                // The map and the graphs of the log take the drags, unless a fullscreen
+                // HwUi / AppUi hides the tabs
+                enabled: !connScreen.opened && (swipeView.currentItem !== logViewPage || !tabBar.visible)
                 target: null
                 xAxis.enabled: true
                 yAxis.enabled: false
@@ -370,6 +376,17 @@ Item {
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
                     dialogParent: container
+                }
+            }
+
+            Page {
+                id: logViewPage
+                // Loaded on the first visit, as the map takes a while. By url, so that the
+                // rest of the panel does not wait for the map modules or depend on them.
+                Loader {
+                    anchors.fill: parent
+                    active: logViewPage.SwipeView.isCurrentItem || status != Loader.Null
+                    source: "qrc:/mobile/LogAnalysis.qml"
                 }
             }
         }

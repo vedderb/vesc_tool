@@ -552,7 +552,7 @@ Item {
             spacing: 6
 
             Repeater {
-                model: [qsTr("This VESC · ID %1").arg(VescIf.appConfig().getParamInt("controller_id"))].concat(
+                model: [localCanId >= 0 ? qsTr("This VESC · ID %1").arg(localCanId) : qsTr("This VESC")].concat(
                            backupConfigDialog.canDevs.map(function(id) { return qsTr("CAN bus · ID %1").arg(id) }))
 
                 Text {

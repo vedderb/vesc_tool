@@ -89,7 +89,6 @@ Item {
                     color: Utility.getAppHexColor("titleText")
                     font.pointSize: 22
                     font.weight: Font.Medium
-                    font.features: { "tnum": 1 }
                 }
             }
 
@@ -99,7 +98,6 @@ Item {
                 text: channel.now.toFixed(channel.decimals + 1) + " " + channel.unit
                 color: Utility.getAppHexColor("normalText")
                 font.pointSize: 11
-                font.features: { "tnum": 1 }
             }
         }
 
@@ -171,7 +169,6 @@ Item {
                     text: modelData.toFixed(channel.decimals) + " " + channel.unit
                     color: Utility.getAppHexColor("normalText")
                     font.pointSize: 10
-                    font.features: { "tnum": 1 }
                 }
             }
         }
@@ -310,6 +307,11 @@ Item {
         function onDecodedPpmReceived(value, last_len) {
             valueNow = value
             msNow = last_len
+
+            // The firmware reports 0 until it has received a pulse
+            if (msNow < 1e-3) {
+                return
+            }
 
             if (resetDone) {
                 resetDone = false

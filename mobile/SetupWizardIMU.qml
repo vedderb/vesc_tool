@@ -1149,7 +1149,6 @@ Item {
                             text: axisRow.done ? (axisSteps.results[index] || "") : axisRow.active ? axisSteps.values[index] : ""
                             color: Utility.getAppHexColor(axisRow.skipped ? "normalText" : axisRow.done || axisRow.locked ? "positiveText" : "titleText")
                             font.pointSize: axisRow.active ? 15 : 12
-                            font.features: { "tnum": 1 }
                         }
                     }
                     Text {

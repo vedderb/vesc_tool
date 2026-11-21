@@ -243,7 +243,6 @@ Item {
                             text: logRow.details
                             elide: Text.ElideRight
                             font.pointSize: 9
-                            font.features: { "tnum": 1 }
                             color: Utility.getAppHexColor("normalText")
                         }
                     }
@@ -252,7 +251,6 @@ Item {
                         visible: text !== ""
                         text: logRow.value
                         font.weight: Font.Medium
-                        font.features: { "tnum": 1 }
                         color: Utility.getAppHexColor("lightText")
                     }
                 }
@@ -519,7 +517,6 @@ Item {
                     value: root.downloadProgress
                 }
                 Label {
-                    font.features: { "tnum": 1 }
                     text: root.downloadProgress.toFixed(0) + "% (" + root.downloadSpeedKBps.toFixed(1) + " KB/s)"
                 }
                 Button {
@@ -903,28 +900,55 @@ Item {
         }
     }
 
-    // Faults in the log, a tap moves the cursor to one
-    SheetDialog {
+    // Faults in the log over the map or the values, so that the graphs stay in view. A tap moves the cursor to one
+    Dialog {
         id: faultsDialog
-        title: "Faults"
-        acceptText: qsTr("Close")
-        rejectText: ""
+        parent: root.showValues ? valuesView : map
+        width: parent.width
+        height: parent.height
+        padding: 8
+        topPadding: 0
+        modal: false
+        closePolicy: Popup.CloseOnEscape
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("cardBackground")
+            radius: 12
+            border.color: Utility.getAppHexColor("raisedBackground")
+        }
+
+        header: RowLayout {
+            Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                text: qsTr("Faults")
+                font.pointSize: 13
+                font.weight: Font.Medium
+                color: Utility.getAppHexColor("titleText")
+            }
+
+            ToolButton {
+                text: "×"
+                font.pixelSize: 18
+                Accessible.name: qsTr("Close")
+                onClicked: faultsDialog.close()
+            }
+        }
 
         ListView {
             anchors.fill: parent
-            implicitHeight: contentHeight
             clip: true
             model: root.faultRuns
 
             delegate: ItemDelegate {
                 readonly property var time: root.faultTimeText(modelData)
                 width: ListView.view.width
+                highlighted: root.currentIndex >= modelData.start && root.currentIndex <= modelData.end
                 onClicked: {
                     if (modelData.start < root.viewStart || modelData.start > root.viewEnd) {
                         root.applyZoomWindow(0, root.rawRows.length - 1, false)
                     }
                     root.currentIndex = modelData.start
-                    faultsDialog.close()
                 }
 
                 contentItem: GridLayout {
@@ -942,7 +966,6 @@ Item {
                     Text {
                         text: time.at
                         font.weight: Font.Medium
-                        font.features: { "tnum": 1 }
                         color: Utility.getAppHexColor("lightText")
                     }
 
@@ -959,7 +982,6 @@ Item {
                         Layout.columnSpan: 2
                         text: root.columnMeta[modelData.col].label + " · " + time.duration
                         font.pointSize: 9
-                        font.features: { "tnum": 1 }
                         color: Utility.getAppHexColor("normalText")
                     }
                 }
@@ -1055,8 +1077,7 @@ Item {
                     name: columnSheet.grouped && modelData.group === modelData.word &&
                           root.columnKinds.every(kd => kd[0] !== modelData.group) ?
                               modelData.label.slice(modelData.word.length + 1) || modelData.label : modelData.label
-                    // Enough decimals to tell min from max, like 57.4886 – 57.4926 °
-                    readonly property int decimals: Math.min(7, Math.max(1, 1 - Math.floor(Math.log10(modelData.max - modelData.min))))
+                    readonly property int decimals: root.colDecimals(modelData)
                     details: modelData.min.toFixed(decimals) + " – " + modelData.max.toFixed(decimals) + " " + modelData.unit
                     // A dot in the colour of each line that shows this column
                     value: root.slotColIdx.map((c, s) => c === modelData.index ? "<font color='" + root.slotColors[s] + "'>●</font>" : "").join("")
@@ -1207,6 +1228,10 @@ Item {
 
     function fitRouteBounds() {
         if (!hasGps || rawRows.length === 0) return
+        if (!map.visible) {
+            routeFitPending = true
+            return
+        }
         var visibleCoords = []
         var s = Math.max(0, Math.min(viewStart, rawRows.length - 1))
         var e = Math.max(s, Math.min(viewEnd, rawRows.length - 1))
@@ -1682,15 +1707,28 @@ Item {
         computeZoomedStats()
     }
 
+    // Value of a column at the cursor, from the last row up to it that has one
+    function cursorValue(colIdx) {
+        // The tiles update while a log loads, before rawRows and currentIndex do
+        for (var i = Math.min(currentIndex, rawRows.length - 1); i >= 0; i--) {
+            var v = rawRows[i].vals[colIdx]
+            if (v !== null && !isNaN(v)) return v
+        }
+        return null
+    }
+
+    // Enough decimals to tell min from max, like 57.4886 – 57.4926 °
+    function colDecimals(col) {
+        return col.max > col.min ? Math.min(7, Math.max(1, 1 - Math.floor(Math.log10(col.max - col.min)))) :
+                                   Number.isInteger(col.max) ? 0 : 1
+    }
+
     function latestSlotVal(slot) {
         var colIdx = slotColIdx[slot]
         if (colIdx < 0 || rawRows.length === 0 || colIdx >= columnMeta.length) return ""
         var unit = columnMeta[colIdx].unit
-        for (var i = currentIndex; i >= 0; i--) {
-            var v = rawRows[i].vals[colIdx]
-            if (v !== null && !isNaN(v)) return v.toFixed(1) + (unit ? " " + unit : "")
-        }
-        return "N/A"
+        var v = cursorValue(colIdx)
+        return v === null ? "N/A" : v.toFixed(1) + (unit ? " " + unit : "")
     }
 
     function slotMinMaxText(slot) {
@@ -1701,6 +1739,10 @@ Item {
 
     property var zoomedStats: []
     property bool showMapStats: true
+    // The values at the cursor in place of the map
+    property bool showValues: false
+    // The hidden map keeps the size it had, so the route is fitted when it is shown again
+    property bool routeFitPending: false
 
     // Column, fault code, first and last row and position of each run of rows with a fault
     property var faultRuns: []
@@ -1778,6 +1820,11 @@ Item {
                                label: "Duration",
                                value: mins > 0 ? (mins + "m " + secs + "s") : (dtSec.toFixed(1) + "s")
                            })
+                // Rows between the ones the time was taken from
+                var r0 = s, r1 = e
+                while (rawRows[r0].vals[tIdx] === null) r0++
+                while (rawRows[r1].vals[tIdx] === null) r1--
+                items.push({ label: "Sample Rate", value: ((r1 - r0) / dtSec).toFixed(1) + " Hz" })
             }
         }
 
@@ -1997,7 +2044,8 @@ Item {
                         text: "Stats"
                         checkable: true
                         checked: root.showMapStats
-                        enabled: root.rawRows.length > 0
+                        // The stats are on the map
+                        enabled: root.rawRows.length > 0 && !root.showValues
                         opacity: enabled ? 1 : 0.4
                         onToggled: root.showMapStats = checked
                     }
@@ -2045,6 +2093,13 @@ Item {
             Layout.fillHeight: true
             // Half the page on phones, so that the header fits above it
             Layout.preferredWidth: root.headerOverMap ? 3 : 2
+            visible: !root.showValues
+            onVisibleChanged: {
+                if (visible && root.routeFitPending) {
+                    root.routeFitPending = false
+                    Qt.callLater(root.fitRouteBounds)
+                }
+            }
             plugin: mapPlugin
             center: QtPositioning.coordinate(57.49, 13.11)
             zoomLevel: 13
@@ -2255,7 +2310,6 @@ Item {
 
                             Label {
                                 text: modelData.value
-                                font.features: { "tnum": 1 }
                                 font.pixelSize: 11
                                 font.bold: true
                                 color: parent.isFaults ? "white" : Utility.getAppHexColor("titleText")
@@ -2318,6 +2372,12 @@ Item {
                     onToggled: root.showFaults = checked
                     onPressAndHold: faultsDialog.open()
                 }
+
+                RoundButton {
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Grid-96.png"
+                    Accessible.name: qsTr("Values")
+                    onClicked: root.showValues = true
+                }
             }
 
             MapItemView {
@@ -2359,6 +2419,69 @@ Item {
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
                 elide: Text.ElideRight
+            }
+        }
+
+        // Every value at the cursor, in the place of the map
+        ColumnLayout {
+            id: valuesView
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.preferredWidth: map.Layout.preferredWidth
+            visible: root.showValues
+            spacing: 4
+
+            RowLayout {
+                Label {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 4
+                    text: root.rawRows.length > 0 ? "#" + (root.currentIndex + 1) + " / " + root.rawRows.length : ""
+                    color: Utility.getAppHexColor("normalText")
+                }
+
+                Chip {
+                    topInset: 0
+                    visible: root.faultRuns.length > 0
+                    text: qsTr("Faults")
+                    tinted: true
+                    tint: Utility.getAppHexColor("danger")
+                    tintText: Utility.getAppHexColor("dangerText")
+                    onClicked: faultsDialog.open()
+                }
+
+                Chip {
+                    topInset: 0
+                    text: qsTr("Map")
+                    iconSource: "qrc" + Utility.getThemePath() + "icons/Waypoint Map-96.png"
+                    onClicked: root.showValues = false
+                }
+            }
+
+            GridView {
+                id: valuesGrid
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                // As many tiles as fit at 140 wide or more
+                cellWidth: width / Math.max(1, Math.floor(width / 140))
+                cellHeight: 60
+                // Columns with data, in the groups of the value picker
+                model: root.columnMeta.filter(c => c.max >= c.min)
+                       .sort((a, b) => root.columnGroups.indexOf(a.group) - root.columnGroups.indexOf(b.group) || a.index - b.index)
+
+                delegate: Item {
+                    width: valuesGrid.cellWidth
+                    height: valuesGrid.cellHeight
+
+                    ValueTile {
+                        readonly property var val: root.cursorValue(modelData.index)
+                        anchors.fill: parent
+                        anchors.margins: 3
+                        title: modelData.label
+                        value: val === null ? "–" : val.toFixed(root.colDecimals(modelData))
+                        unit: modelData.unit
+                    }
+                }
             }
         }
 
@@ -2525,7 +2648,6 @@ Item {
                                 }
                                 Label {
                                     color: root.slotColors[index]
-                                    font.features: { "tnum": 1 }
                                     font.bold: true
                                     font.pixelSize: 11
                                     text: root.rawRows.length > 0 ? root.latestSlotVal(index) : ""
@@ -2536,7 +2658,6 @@ Item {
                                 Layout.fillWidth: true
                                 leftPadding: 31
                                 color: Utility.getAppHexColor("normalText")
-                                font.features: { "tnum": 1 }
                                 font.pixelSize: 10
                                 elide: Text.ElideRight
                                 text: root.rawRows.length > 0 ? root.slotMinMaxText(index) : ""
@@ -2747,7 +2868,6 @@ Item {
 
                     Label {
                         color: Utility.getAppHexColor("normalText")
-                        font.features: { "tnum": 1 }
                         font.pixelSize: 11
                         text: root.rawRows.length > 0 ? (root.viewStart + 1) + "-" + (root.viewEnd + 1) : ""
                     }

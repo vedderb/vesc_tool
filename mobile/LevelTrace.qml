@@ -174,7 +174,6 @@ Item {
                             text: modelData.toFixed(modelData ? 1 : 0) + "°"
                             color: Utility.getAppHexColor(modelData ? "normalText" : "lightText")
                             font.pointSize: 8
-                            font.features: { "tnum": 1 }
                         }
                     }
                 }

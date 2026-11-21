@@ -226,7 +226,6 @@ Item {
                     elide: Text.ElideRight
                     Layout.maximumWidth: frame.width * 0.45
                     font.weight: Font.Medium
-                    font.features: { "tnum": 1 }
                     color: frame.changed ? Utility.getAppHexColor("accentText") : Utility.getAppHexColor("titleText")
                 }
 

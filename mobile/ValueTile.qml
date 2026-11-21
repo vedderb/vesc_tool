@@ -65,7 +65,6 @@ Rectangle {
                 color: Utility.getAppHexColor("titleText")
                 font.pointSize: 15
                 font.weight: Font.Medium
-                font.features: { "tnum": 1 }
             }
 
             Text {

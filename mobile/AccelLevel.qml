@@ -177,7 +177,6 @@ Item {
             color: Utility.getAppHexColor(lvl.steady ? "positiveText" : "titleText")
             font.pointSize: 22
             font.weight: Font.Medium
-            font.features: { "tnum": 1 }
         }
         Text {
             width: parent.width

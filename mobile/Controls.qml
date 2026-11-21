@@ -152,7 +152,6 @@ Item {
                                 onActiveFocusChanged: if (activeFocus) selectAll()
                                 font.pointSize: 26
                                 font.weight: Font.Medium
-                                font.features: { "tnum": 1 }
                                 color: Utility.getAppHexColor("titleText")
                                 // The iOS number pads have no return key
                                 inputMethodHints: Qt.platform.os === "ios" ? Qt.ImhPreferNumbers | Qt.ImhNoPredictiveText : Qt.ImhFormattedNumbersOnly

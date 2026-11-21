@@ -77,7 +77,6 @@ Item {
         color: Utility.getAppHexColor(plot.captured ? "positiveText" : "warningText")
         font.pointSize: 9
         font.weight: Font.Medium
-        font.features: { "tnum": 1 }
     }
 
     Canvas {

@@ -2902,7 +2902,7 @@ void Commands::emitEmptyValues()
     values.fault_code = FAULT_CODE_NONE;
     values.fault_str = faultToStr(values.fault_code);
     values.position = 0.0;
-    values.vesc_id = 0;
+    values.vesc_id = 255; // No device sent these
 
     emit valuesReceived(values, 0xFFFFFFFF);
 }
@@ -2928,7 +2928,7 @@ void Commands::emitEmptySetupValues()
     values.position = 0.0;
     values.fault_code = FAULT_CODE_NONE;
     values.fault_str = faultToStr(values.fault_code);
-    values.vesc_id = 0;
+    values.vesc_id = 255; // No device sent these
     values.num_vescs = 1;
     values.battery_wh = 0.0;
 

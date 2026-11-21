@@ -209,7 +209,7 @@ Item {
 
                             Text {
                                 Layout.fillWidth: true
-                                text: "ID " + (ID === "LOCAL" ? VescIf.appConfig().getParamInt("controller_id") : ID) + " · FW " + fw
+                                text: (ID !== "LOCAL" ? "ID " + ID + " · " : localCanId >= 0 ? "ID " + localCanId + " · " : "") + "FW " + fw
                                 elide: Text.ElideRight
                                 font.pointSize: 9
                                 color: Utility.getAppHexColor("normalText")

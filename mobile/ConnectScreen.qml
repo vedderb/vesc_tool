@@ -777,7 +777,7 @@ Item {
                 pingTcpHub = false
                 disableDialog()
                 var hubDevs = VescIf.getTcpHubDevs()
-                for (tcpHubDevice of hubDevs) {
+                for (var tcpHubDevice of hubDevs) {
                     if (tcpHubDevice.ping()) {
                         devices.push(formatTcpHubDevice(tcpHubDevice))
                     }

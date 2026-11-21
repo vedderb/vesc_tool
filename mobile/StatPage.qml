@@ -96,7 +96,6 @@ Item {
                     Text {
                         text: tripTime
                         color: Utility.getAppHexColor("lightText")
-                        font.features: { "tnum": 1 }
                     }
                 }
 

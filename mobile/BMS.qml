@@ -236,7 +236,6 @@ Item {
                                         Layout.rightMargin: 14
                                         text: modelData[1]
                                         color: Utility.getAppHexColor("lightText")
-                                        font.features: { "tnum": 1 }
                                     }
                                 }
                             }

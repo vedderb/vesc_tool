@@ -64,6 +64,9 @@ ApplicationWindow {
     property string hwName: ""
     property string hwType: ""
     property int fwCanId: -1
+    // CAN ID of the connected device itself, as it reports it in values replies, or in its custom config
+    // for the Express and BMS. The loaded configs can be from the device CAN forwarding selects.
+    property int localCanId: -1
     // First motor controller on CAN when the connected device is not one, from the CAN scan
     property int canMotorId: -1
     property string fwVersion: ""
@@ -1244,6 +1247,10 @@ ApplicationWindow {
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
 
+                    if (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex === 3) {
+                        mCommands.getStats(0xFFFFFFFF)
+                    }
+
                     if (mainSwipeView.currentItem == bmsPage) {
                         mCommands.bmsGetValues()
                     }
@@ -1275,18 +1282,34 @@ ApplicationWindow {
                         mCommands.bmsGetValues()
                     }
 
-                    // Slow update of the values shown in the footer and on the start page
-                    if (mainSwipeView.currentItem != rtDataPage && mainSwipeView.currentItem != bmsPage &&
-                            (hwType === "VESC" || canMotorId >= 0) && VescIf.getFwUploadProgress() < 0) {
+                    if (mainSwipeView.currentItem != rtDataPage && mainSwipeView.currentItem != bmsPage) {
                         interval = 1000
-                        if (hwType === "VESC") {
-                            mCommands.getValuesSetupSelective(0x10183)
-                        } else {
-                            VescIf.canTmpOverride(true, canMotorId)
-                            mCommands.getValuesSetupSelective(0x10183)
-                            VescIf.canTmpOverrideEnd()
-                        }
                     }
+                }
+            }
+        }
+    }
+
+    // Slow update of the values shown in the footer and on the start page, where the
+    // RT data polling does not include them
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+
+        onTriggered: {
+            var polled = VescIf.isRtLogOpen() ||
+                    (mainSwipeView.currentItem == rtDataPage && rtSwipeView.currentIndex < 2)
+
+            if (VescIf.isPortConnected() && !polled &&
+                    (hwType === "VESC" || canMotorId >= 0) && VescIf.getFwUploadProgress() < 0) {
+                if (hwType === "VESC") {
+                    // With vesc_id for localCanId
+                    mCommands.getValuesSetupSelective(0x30183)
+                } else {
+                    VescIf.canTmpOverride(true, canMotorId)
+                    mCommands.getValuesSetupSelective(0x10183)
+                    VescIf.canTmpOverrideEnd()
                 }
             }
         }
@@ -1512,6 +1535,7 @@ ApplicationWindow {
                 hwName = ""
                 hwType = ""
                 canMotorId = -1
+                localCanId = -1
                 rtVin = 0
                 rtBattery = -1
                 faultText = ""
@@ -1641,6 +1665,13 @@ ApplicationWindow {
     Connections {
         target: customConf
         function onWriteConfirmed() { disconnectTimer.confirm(customConf) }
+
+        // VESC Express and BMS keep their CAN ID in the custom config
+        function onReferenceStored() {
+            if (!mCommands.getSendCan() && !VescIf.getFwSupportsConfiguration() && customConf.hasParam("controller_id")) {
+                localCanId = customConf.getReference().getParamInt("controller_id")
+            }
+        }
     }
 
     Connections {
@@ -1651,6 +1682,7 @@ ApplicationWindow {
             if (mask & (1 << 1)) rtTempMotor = values.temp_motor
             if (mask & (1 << 8)) rtVin = values.v_in
             if (mask & (1 << 15)) faultText = values.fault_code !== 0 ? values.fault_str : ""
+            if ((mask & (1 << 17)) && values.vesc_id !== 255 && hwType === "VESC" && !mCommands.getSendCan()) localCanId = values.vesc_id
         }
 
         function onValuesSetupReceived(values, mask) {
@@ -1659,6 +1691,7 @@ ApplicationWindow {
             if (mask & (1 << 7)) rtVin = values.v_in
             if (mask & (1 << 8)) rtBattery = values.battery_level
             if (mask & (1 << 16)) faultText = values.fault_code !== 0 ? values.fault_str : ""
+            if ((mask & (1 << 17)) && values.vesc_id !== 255 && hwType === "VESC" && !mCommands.getSendCan()) localCanId = values.vesc_id
         }
 
         function onBmsValuesRx(val) {
@@ -1879,17 +1912,12 @@ ApplicationWindow {
 
     SheetDialog {
         id: connectionSheet
-        property string fault: ""
 
         title: connName
         iconSource: "qrc" + Utility.getThemePath() + "icons/v_icon-96.png"
         acceptText: qsTr("Disconnect")
         rejectText: qsTr("Close")
         onAccepted: requestDisconnect()
-        onAboutToShow: {
-            fault = faultText
-            faultText = ""
-        }
 
         function diagnostics() {
             return [qsTr("Connection: %1").arg(VescIf.getConnectedPortName()),
@@ -1897,7 +1925,7 @@ ApplicationWindow {
                     qsTr("Firmware: %1").arg(fwVersion),
                     qsTr("UUID: %1").arg(VescIf.getConnectedUuid()),
                     qsTr("Battery: %1 V").arg(rtVin.toFixed(1)),
-                    qsTr("Fault: %1").arg(fault !== "" ? fault : "FAULT_CODE_NONE")].join("\n")
+                    qsTr("Fault: %1").arg(faultText !== "" ? faultText : "FAULT_CODE_NONE")].join("\n")
         }
 
         ColumnLayout {
@@ -1917,7 +1945,7 @@ ApplicationWindow {
             Text {
                 Layout.fillWidth: true
                 visible: text !== ""
-                text: connectionSheet.visible ? faultDescription(connectionSheet.fault) : ""
+                text: connectionSheet.visible ? faultDescription(faultText) : ""
                 wrapMode: Text.Wrap
                 color: Utility.getAppHexColor("dangerText")
             }

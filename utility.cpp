@@ -2455,8 +2455,8 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
                 if (rxb[0] != '\n') {
                     rxLine.append(rxb[0]);
                 } else {
-                    rxLine.append('\0');
                     loop.quit();
+                    break;
                 }
             } else {
                 break;

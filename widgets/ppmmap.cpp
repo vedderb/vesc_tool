@@ -100,12 +100,17 @@ void PpmMap::decodedPpmReceived(double value, double last_len)
                              arg(p2, 0, 'f', 1));
     }
 
+    // The firmware reports 0 until it has received a pulse
+    if (last_len < 1e-3) {
+        return;
+    }
+
     if (mResetDone) {
         mResetDone = false;
         ui->minBox->setValue(last_len);
         ui->maxBox->setValue(last_len);
     } else {
-        if (last_len < ui->minBox->value() && last_len > 1e-3) {
+        if (last_len < ui->minBox->value()) {
             ui->minBox->setValue(last_len);
         }
 

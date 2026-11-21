@@ -79,7 +79,6 @@ Item {
             color: view.liftColor
             font.pointSize: 15
             font.weight: Font.Medium
-            font.features: { "tnum": 1 }
         }
 
         Canvas {

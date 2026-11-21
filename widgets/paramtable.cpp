@@ -127,6 +127,28 @@ bool ParamTable::hasChanges()
     return false;
 }
 
+// The names get room for bold text, so that they still fit when their rows show changes
+int ParamTable::sizeHintForColumn(int column) const
+{
+    int hint = QTableWidget::sizeHintForColumn(column);
+    if (column != 0) {
+        return hint;
+    }
+
+    QFont bold = font();
+    bold.setBold(true);
+    QFontMetrics fmBold(bold);
+    int extra = 0;
+    for (int row = 0;row < rowCount();row++) {
+        const QTableWidgetItem *it = item(row, 0);
+        if (it && !it->font().bold()) {
+            extra = qMax(extra, fmBold.horizontalAdvance(it->text()) - fontMetrics().horizontalAdvance(it->text()));
+        }
+    }
+
+    return hint + extra;
+}
+
 bool ParamTable::rowChanged(int row)
 {
     const auto &r = mRows.at(row);

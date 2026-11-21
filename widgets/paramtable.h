@@ -36,6 +36,9 @@ public:
     void clearParams();
     bool hasChanges();
 
+protected:
+    int sizeHintForColumn(int column) const override;
+
 private:
     // Parameter shown in each row, empty for separators
     QVector<QPair<QPointer<ConfigParams>, QString>> mRows;

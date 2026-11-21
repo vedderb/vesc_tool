@@ -1490,6 +1490,8 @@ void Commands::setAppConf()
         mAppConfig->serialize(vb);
         emitData(vb);
         emitData(vb);
+
+        emit appConfigWriteSent();
     }
 }
 

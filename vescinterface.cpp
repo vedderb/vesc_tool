@@ -412,6 +412,10 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
+    connect(mCommands, &Commands::appConfigWriteSent, [this]() {
+        cacheAppConf();
+    });
+
     connect(mCommands, &Commands::valuesSetupReceived, [this](SETUP_VALUES v) {
         mLastSetupValues = v;
         mLastSetupTime = QDateTime::currentDateTimeUtc();
@@ -957,6 +961,8 @@ void VescInterface::updateMcconfFromProfile(MCCONF_TEMP profile)
     mMcConfig->updateParamDouble("l_max_erpm", profile.erpm_or_speed_max * speedFact);
     mMcConfig->updateParamDouble("l_min_duty", profile.duty_min);
     mMcConfig->updateParamDouble("l_max_duty", profile.duty_max);
+
+    cacheMcConf();
 }
 
 QStringList VescInterface::getPairedUuids()
@@ -4332,12 +4338,7 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 void VescInterface::appconfUpdated()
 {
     emit statusMessage(tr("App config updated"), true);
-
-    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
-    QDir().mkpath(confCacheDir);
-    auto confPath = confCacheDir + "/appconf.xml";
-    mAppConfig->saveXml(confPath, "APPConfiguration");
+    cacheAppConf();
 }
 
 void VescInterface::mcconfUpdated()
@@ -4410,6 +4411,21 @@ bool VescInterface::cacheMcConf()
     QDir().mkpath(confCacheDir);
     auto confPath = confCacheDir + "/mcconf.xml";
     mMcConfig->saveXml(confPath, "MCConfiguration");
+
+    return true;
+}
+
+bool VescInterface::cacheAppConf()
+{
+    if (!isPortConnected()) {
+        return false;
+    }
+
+    QString appDataLoc = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    auto confCacheDir = appDataLoc + "/conf_cache/" + Utility::uuid2Str(mLastFwParams.uuid, false);
+    QDir().mkpath(confCacheDir);
+    auto confPath = confCacheDir + "/appconf.xml";
+    mAppConfig->saveXml(confPath, "APPConfiguration");
 
     return true;
 }

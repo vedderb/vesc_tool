@@ -119,6 +119,7 @@ signals:
     void nrfPairingRes(int res);
     void mcConfigCheckResult(QStringList paramsNotSet);
     void mcConfigWriteSent(bool checkSet);
+    void appConfigWriteSent();
     void gpdBufferNotifyReceived();
     void gpdBufferSizeLeftReceived(int sizeLeft);
     void valuesSetupReceived(SETUP_VALUES values, unsigned int mask);

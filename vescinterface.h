@@ -289,6 +289,7 @@ public:
     Q_INVOKABLE void setBlockFwSwap(bool newBlockFwSwap);
 
     Q_INVOKABLE bool cacheMcConf();
+    Q_INVOKABLE bool cacheAppConf();
 
 signals:
     void statusMessage(const QString &msg, bool isGood);

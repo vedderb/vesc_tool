@@ -315,12 +315,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mMcConfRead = false;
     mAppConfRead = false;
+    mConfReadCanId = -1;
+    mConfReadRequested = false;
+    mConfReadFailed = false;
 
+    // Only once requested from the device, so that a late reply from the device selected before does not count
     connect(mVesc->mcConfig(), &ConfigParams::updated, [this]() {
-        mMcConfRead = true;
+        mMcConfRead = mMcConfRead || mConfReadRequested;
     });
     connect(mVesc->appConfig(), &ConfigParams::updated, [this]() {
-        mAppConfRead = true;
+        mAppConfRead = mAppConfRead || mConfReadRequested;
+    });
+
+    // The configurations of the device do not match this VESC Tool. They are not tried again until
+    // the device is connected or selected again, the other devices on the CAN-bus are still read.
+    connect(mVesc->commands(), &Commands::deserializeConfigFailed, [this]() {
+        mConfReadFailed = mConfReadFailed || (mConfReadRequested && !mVesc->isIgnoringCanChanges());
     });
 
     auto updateMotortype = [this]() {
@@ -356,6 +366,16 @@ MainWindow::MainWindow(QWidget *parent) :
         if (!rx) {
             return;
         }
+
+        // Read the configurations of the device on every connect and CAN switch. The cached ones are
+        // loaded before this, they are shown until the timer has read the ones on the device.
+        mMcConfRead = false;
+        mAppConfRead = false;
+        mConfReadRequested = false;
+        mConfReadFailed = false;
+        // Not known while another CAN device is selected for a moment, it is taken when that ends
+        mConfReadCanId = mVesc->isIgnoringCanChanges() ? -2 :
+                         mVesc->commands()->getSendCan() ? mVesc->commands()->getCanSendId() : -1;
 
         FW_RX_PARAMS params = mVesc->getLastFwRxParams();
 
@@ -414,6 +434,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         mMcConfRead = false;
         mAppConfRead = false;
+        mConfReadFailed = false;
 
         mPageMotorSettings->reloadParams();
         mPageMotor->reloadParams();
@@ -891,7 +912,8 @@ void MainWindow::timerSlot()
     static int disconected_cnt = 0;
     disconected_cnt++;
 
-    // Read configurations if they haven't been read since starting VESC Tool
+    // Read the configurations if they haven't been read since connecting to or selecting the device. Not while
+    // another CAN device is selected for a moment, e.g. for a scan or before its firmware version is received.
     if (mVesc->isPortConnected()) {
         static int conf_cnt = 0;
         disconected_cnt = 0;
@@ -899,14 +921,21 @@ void MainWindow::timerSlot()
         if (conf_cnt >= 20) {
             conf_cnt = 0;
 
-            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx() &&
-                    mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
+            int canId = mVesc->commands()->getSendCan() ? mVesc->commands()->getCanSendId() : -1;
+            if (mConfReadCanId == -2 && !mVesc->isIgnoringCanChanges()) {
+                mConfReadCanId = canId;
+            }
+
+            if (!mConfReadFailed && !mVesc->isIgnoringCanChanges() && canId == mConfReadCanId &&
+                    mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
                 if (!mMcConfRead) {
                     mVesc->commands()->getMcconf();
+                    mConfReadRequested = true;
                 }
 
                 if (!mAppConfRead) {
                     mVesc->commands()->getAppConf();
+                    mConfReadRequested = true;
                 }
             }
         }
@@ -2265,12 +2294,6 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
         if (currentRow == 0) {
             if (mVesc->commands()->getSendCan()) {
                 mVesc->commands()->setSendCan(false);
-                QTimer::singleShot(1500, [this]() {
-                    if (mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
-                        mVesc->commands()->getMcconf();
-                        mVesc->commands()->getAppConf();
-                    }
-                });
             }
         } else {
             QWidget *current = ui->canList->itemWidget(ui->canList->currentItem());
@@ -2279,12 +2302,6 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
             if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
                     mVesc->commands()->setSendCan(true, quint32(id));
-                    QTimer::singleShot(1500, [this]() {
-                        if (mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
-                            mVesc->commands()->getMcconf();
-                            mVesc->commands()->getAppConf();
-                        }
-                    });
                 }
             }
         }

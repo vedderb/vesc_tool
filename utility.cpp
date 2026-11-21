@@ -1212,6 +1212,8 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
 
     if (res && can) {
         QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
+        // The scan ends its CAN override with ignoreCanChange(false)
+        vesc->ignoreCanChange(true);
 
         for (int d: canDevs) {
             vesc->commands()->setSendCan(true, d);

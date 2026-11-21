@@ -181,6 +181,11 @@ private:
     bool mKeyRight;
     bool mMcConfRead;
     bool mAppConfRead;
+    // Device the configurations are read from (-1 is the local one, -2 not known yet), if they have been
+    // requested from it and if they could not be read
+    int mConfReadCanId;
+    bool mConfReadRequested;
+    bool mConfReadFailed;
     QMap<QString, int> mPageNameIdList;
     QString mLastParamParserCPath;
     QString mLastMCConfigXMLPath;

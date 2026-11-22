@@ -11,6 +11,7 @@
 * Added option to show firmware for all hardware version.
 * Support for UI scale less than 1.
 * Added Log Viewer to mobile UI.
+* Package install progress display and cancel support.
 
 ---
 

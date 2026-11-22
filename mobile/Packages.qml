@@ -293,6 +293,7 @@ Item {
         id: dlDialog
         title: "Processing..."
         closePolicy: Popup.NoAutoClose
+        standardButtons: Dialog.Cancel
         modal: true
         focus: true
         Overlay.modal: Rectangle {
@@ -304,9 +305,13 @@ Item {
         y: parent.height / 2 - height / 2
         parent: dialogParent
 
+        onRejected: {
+            mLoader.abortDownloadUpload()
+        }
+
         ProgressBar {
+            id: dlProgress
             anchors.fill: parent
-            indeterminate: visible
         }
     }
 
@@ -402,13 +407,25 @@ Item {
                                                  "Installation Done!",
                                                  true, false)
                     } else {
+                        if (dlDialog.result !== Dialog.rejected()) {
+                            VescIf.emitMessageDialog("Install Package",
+                                                     "Installation failed",
+                                                     false, false)
+                        }
                         enableDialog()
-                        VescIf.emitMessageDialog("Install Package",
-                                                 "Installation failed",
-                                                 false, false)
                     }
                 }
             }
+        }
+    }
+
+    Connections {
+        target: mLoader
+
+        function onPkgInstallProgress (bytes, bytesTotal) {
+            dlProgress.from = 0
+            dlProgress.to = bytesTotal
+            dlProgress.value = bytes
         }
     }
 

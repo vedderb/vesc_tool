@@ -797,7 +797,9 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
 
     quint32 offset = 0;
     bool ok = true;
-    while (data.size() > 0) {
+    auto sizeTotal = data.size();
+    mAbortDownloadUpload = false;
+    while (data.size() > 0 && !mAbortDownloadUpload) {
         const int chunkSize = 384;
         int sz = data.size() > chunkSize ? chunkSize : data.size();
 
@@ -807,8 +809,16 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
             break;
         }
 
+        emit qmlUploadProgress(sizeTotal - data.size(), sizeTotal);
+
         offset += sz;
         data.remove(0, sz);
+    }
+
+    emit qmlUploadProgress(sizeTotal, sizeTotal);
+
+    if (mAbortDownloadUpload) {
+        ok = false;
     }
 
     return ok;
@@ -1002,14 +1012,28 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
     }
 
     bool res = true;
-    QByteArray qml;
+    QByteArray qmlData;
 
     if (!pkg.qmlFile.isEmpty()) {
-        qml = qmlCompress(pkg.qmlFile);
-        res = qmlErase(qml.size() + 100);
+        qmlData = qmlCompress(pkg.qmlFile);
+    }
+
+    qint64 lispSize = pkg.lispData.size();
+    qint64 qmlSize  = qmlData.size();
+    qint64 totalBytes = lispSize + qmlSize;
+
+    emit pkgInstallProgress(0, totalBytes);
+
+    auto connQml = connect(this, &CodeLoader::qmlUploadProgress,
+                           [this, totalBytes](qint64 bytes, qint64) {
+                               emit pkgInstallProgress(bytes, totalBytes);
+                           });
+
+    if (!qmlData.isEmpty()) {
+        res = qmlErase(qmlData.size() + 100);
 
         if (res) {
-            res = qmlUpload(qml, pkg.qmlIsFullscreen);
+            res = qmlUpload(qmlData, pkg.qmlIsFullscreen);
         }
     } else {
         if (mVesc && mVesc->isPortConnected() && mVesc->getLastFwRxParams().hasQmlApp) {
@@ -1017,21 +1041,34 @@ bool CodeLoader::installVescPackage(VescPackage pkg)
         }
     }
 
-    if (res) {
-        if (!pkg.lispData.isEmpty()) {
-            res = lispErase(pkg.lispData.size() + 100);
+    disconnect(connQml);
+
+    if (!res) {
+        emit pkgInstallProgress(totalBytes, totalBytes);
+        return res;
+    }
+
+    auto connLisp = connect(this, &CodeLoader::lispUploadProgress,
+                            [this, qmlSize, totalBytes](qint64 bytes, qint64) {
+                                emit pkgInstallProgress(qmlSize + bytes, totalBytes);
+                            });
+
+    if (!pkg.lispData.isEmpty()) {
+        res = lispErase(pkg.lispData.size() + 100);
+
+        if (res) {
+            res = lispUpload(VByteArray(pkg.lispData));
 
             if (res) {
-                res = lispUpload(VByteArray(pkg.lispData));
-
-                if (res) {
-                    mVesc->commands()->lispSetRunning(1);
-                }
+                mVesc->commands()->lispSetRunning(1);
             }
-        } else {
-            res = lispErase(16);
         }
+    } else {
+        res = lispErase(16);
     }
+
+    disconnect(connLisp);
+    emit pkgInstallProgress(totalBytes, totalBytes);
 
     Utility::sleepWithEventLoop(500);
     mVesc->reloadFirmware();

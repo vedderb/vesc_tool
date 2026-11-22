@@ -249,42 +249,15 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            interactive: false
 
             Component.onCompleted: {
-                contentItem.interactive = false
                 contentItem.highlightMoveDuration = 200
+                swipeThroughScrollViews(swipeView)
             }
 
             onCurrentIndexChanged: {
                 if (tabBar.currentIndex !== currentIndex) {
                     tabBar.setCurrentIndex(currentIndex)
-                }
-            }
-
-            DragHandler {
-                id: horizDrag
-                // The map and the graphs of the log take the drags, unless a fullscreen
-                // HwUi / AppUi hides the tabs
-                enabled: !connScreen.opened && (swipeView.currentItem !== logViewPage || !tabBar.visible)
-                target: null
-                xAxis.enabled: true
-                yAxis.enabled: false
-                dragThreshold: 12
-                grabPermissions: PointerHandler.CanTakeOverFromItems
-
-                property real startX: 0
-                onActiveChanged: {
-                    if (active) {
-                        startX = centroid.position.x
-                    } else {
-                        var dx = centroid.position.x - startX
-                        if (dx < -40 && swipeView.currentIndex < swipeView.count - 1) {
-                            swipeView.incrementCurrentIndex()
-                        } else if (dx > 40 && swipeView.currentIndex > 0) {
-                            swipeView.decrementCurrentIndex()
-                        }
-                    }
                 }
             }
 
@@ -312,36 +285,8 @@ Item {
                     currentIndex: 0
                     anchors.fill: parent
                     orientation: Qt.Vertical
-                    interactive: false
 
-                    Component.onCompleted: {
-                        contentItem.interactive = false
-                        contentItem.highlightMoveDuration = 200
-                    }
-
-                    DragHandler {
-                        id: vertDrag
-                        enabled: !connScreen.opened
-                        target: null
-                        xAxis.enabled: false
-                        yAxis.enabled: true
-                        dragThreshold: 12
-                        grabPermissions: PointerHandler.CanTakeOverFromItems
-
-                        property real startY: 0
-                        onActiveChanged: {
-                            if (active) {
-                                startY = centroid.position.y
-                            } else {
-                                var dy = centroid.position.y - startY
-                                if (dy < -40 && rtSwipeView.currentIndex < rtSwipeView.count - 1) {
-                                    rtSwipeView.incrementCurrentIndex()
-                                } else if (dy > 40 && rtSwipeView.currentIndex > 0) {
-                                    rtSwipeView.decrementCurrentIndex()
-                                }
-                            }
-                        }
-                    }
+                    Component.onCompleted: contentItem.highlightMoveDuration = 200
 
                     WheelHandler {
                         acceptedDevices: PointerDevice.Mouse
@@ -422,6 +367,12 @@ Item {
         anchors.fill: parent
         color: "black"
 
+        // The pages under it do not swipe while it is open
+        MouseArea {
+            anchors.fill: parent
+            enabled: connScreen.opened
+        }
+
         ConnectScreen {
             id: connScreen
             x: 0
@@ -446,6 +397,18 @@ Item {
         function onPortConnectedChanged() {
             connScreen.opened = VescIf.isPortConnected() ? false : true
             connectButton.visible = !VescIf.isPortConnected()
+        }
+    }
+
+    // A ScrollView takes a mouse drag that starts on one of its controls and then does not move, as it only
+    // scrolls with the wheel and scroll bars on the desktop, so the pages would not swipe. Touch is not affected.
+    function swipeThroughScrollViews(item) {
+        if (item instanceof ScrollView) {
+            item.contentItem.acceptedButtons = Qt.NoButton
+        }
+
+        for (var i = 0; i < item.children.length; i++) {
+            swipeThroughScrollViews(item.children[i])
         }
     }
 
@@ -475,6 +438,7 @@ Item {
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+            swipeThroughScrollViews(hwUiObj)
 
             uiHwButton.text = "HwUi"
             if (hwUiObj.tabTitle) {
@@ -501,6 +465,7 @@ Item {
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+            swipeThroughScrollViews(appUiObj)
 
             uiAppButton.text = "AppUi"
             if (appUiObj.tabTitle) {

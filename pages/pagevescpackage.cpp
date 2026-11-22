@@ -414,25 +414,44 @@ void PageVescPackage::on_installButton_clicked()
     }
 
     if (mCurrentPkg.loadOk) {
-        QProgressDialog dialog(tr("Writing..."), QString(), 0, 0, this);
+        QProgressDialog dialog(tr("Writing..."), tr("Cancel"), 0, 0, this);
         dialog.setWindowModality(Qt::WindowModal);
         dialog.show();
 
         QTimer closeStopTimer;
         closeStopTimer.start(100);
-        auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog]() {
-            if (!dialog.isVisible()) {
+        auto conn1 = connect(&closeStopTimer, &QTimer::timeout, [&dialog, this]() {
+            if (dialog.wasCanceled()) {
+                mLoader.abortDownloadUpload();
+            } else if (!dialog.isVisible()) {
                 dialog.show();
             }
         });
 
-        mLoader.installVescPackage(mCurrentPkg);
+        auto conn2 = connect(&mLoader, &CodeLoader::pkgInstallProgress,
+                             [&dialog](qint64 bytes, qint64 bytesTotal) {
+                                 if (!dialog.wasCanceled()) {
+                                     dialog.setMaximum(bytesTotal);
+                                     dialog.setValue(bytes);
+                                 }
+                             });
+
+        bool res = mLoader.installVescPackage(mCurrentPkg);
 
         disconnect(conn1);
+        disconnect(conn2);
 
-        mVesc->emitMessageDialog(tr("Install Package"),
-                                 tr("Installation Done!"),
-                                 true);
+        if (res) {
+            mVesc->emitMessageDialog(tr("Install Package"),
+                                     tr("Installation Done!"),
+                                     true);
+        } else {
+            if (!dialog.wasCanceled()) {
+                mVesc->emitMessageDialog(tr("Install Package"),
+                                     tr("Installation Failed"),
+                                     false);
+            }
+        }
     } else {
         mVesc->emitMessageDialog(tr("Install Package"),
                                  tr("No package selected."),

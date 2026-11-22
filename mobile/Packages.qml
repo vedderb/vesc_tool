@@ -39,6 +39,7 @@ Item {
     readonly property bool split: mainIsTablet && width >= 700
     property int selectedInd: -1
     property bool installing: false
+    property bool installCancelled: false
 
     onSplitChanged: installFromPathDialog.close()
 
@@ -59,8 +60,6 @@ Item {
 
     CodeLoader {
         id: mLoader
-        onPackageInstallStarted: function(bytesTotal) { installProgress.to = bytesTotal }
-        onCodeChunkWritten: function(bytes) { installProgress.value += bytes }
         Component.onCompleted: {
             mLoader.setVesc(VescIf)
         }
@@ -391,6 +390,12 @@ Item {
         id: dlDialog
         title: "Processing..."
         spinner: !installing
+        cancelText: "Cancel"
+
+        onRejected: {
+            installCancelled = true
+            mLoader.abortDownloadUpload()
+        }
 
         ProgressBar {
             id: installProgress
@@ -453,6 +458,7 @@ Item {
 
                     onClicked: {
                         installing = true
+                        installCancelled = false
                         installProgress.to = 0
                         installProgress.value = 0
                         disableDialog()
@@ -489,12 +495,23 @@ Item {
                                                  "Installation Done!",
                                                  true, false)
                     } else {
-                        VescIf.emitMessageDialog("Install Package",
-                                                 "Installation failed",
-                                                 false, false)
+                        if (!installCancelled) {
+                            VescIf.emitMessageDialog("Install Package",
+                                                     "Installation failed",
+                                                     false, false)
+                        }
                     }
                 }
             }
+        }
+    }
+
+    Connections {
+        target: mLoader
+
+        function onPkgInstallProgress(bytes, bytesTotal) {
+            installProgress.to = bytesTotal
+            installProgress.value = bytes
         }
     }
 

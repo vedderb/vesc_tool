@@ -253,6 +253,7 @@ Item {
             Component.onCompleted: {
                 contentItem.highlightMoveDuration = 200
                 swipeThroughScrollViews(swipeView)
+                wheelPager.attach(swipeView)
             }
 
             onCurrentIndexChanged: {
@@ -287,17 +288,6 @@ Item {
                     orientation: Qt.Vertical
 
                     Component.onCompleted: contentItem.highlightMoveDuration = 200
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-                        onWheel: (event) => {
-                                     if (event.angleDelta.y < 0 && rtSwipeView.currentIndex < rtSwipeView.count - 1) {
-                                         rtSwipeView.incrementCurrentIndex()
-                                     } else if (event.angleDelta.y > 0 && rtSwipeView.currentIndex > 0) {
-                                         rtSwipeView.decrementCurrentIndex()
-                                     }
-                                 }
-                    }
 
                     Page {
                         RtDataSetup {
@@ -400,6 +390,10 @@ Item {
         }
     }
 
+    WheelPager {
+        id: wheelPager
+    }
+
     // A ScrollView takes a mouse drag that starts on one of its controls and then does not move, as it only
     // scrolls with the wheel and scroll bars on the desktop, so the pages would not swipe. Touch is not affected.
     function swipeThroughScrollViews(item) {
@@ -439,6 +433,7 @@ Item {
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
             swipeThroughScrollViews(hwUiObj)
+            wheelPager.attach(hwUiObj)
 
             uiHwButton.text = "HwUi"
             if (hwUiObj.tabTitle) {
@@ -466,6 +461,7 @@ Item {
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
             swipeThroughScrollViews(appUiObj)
+            wheelPager.attach(appUiObj)
 
             uiAppButton.text = "AppUi"
             if (appUiObj.tabTitle) {

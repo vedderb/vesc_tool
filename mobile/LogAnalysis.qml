@@ -2916,7 +2916,9 @@ Item {
                         onPressed: (m) => scrub(m.x)
                         onPositionChanged: (m) => { if (pressed) scrub(m.x) }
                         onWheel: (w) => {
-                                     if (w.angleDelta.y > 0) root.zoomAroundCursor(0.75)
+                                     // Sideways scrolling is left to the pages
+                                     if (Math.abs(w.angleDelta.x) > Math.abs(w.angleDelta.y)) w.accepted = false
+                                     else if (w.angleDelta.y > 0) root.zoomAroundCursor(0.75)
                                      else if (w.angleDelta.y < 0) root.zoomAroundCursor(1.33)
                                  }
                     }

@@ -508,6 +508,11 @@ ApplicationWindow {
         }
     }
 
+    // Wheel and touchpad scrolling across the pages, as with a mouse on the desktop
+    WheelPager {
+        id: wheelPager
+    }
+
     SwipeView {
         id: mainSwipeView
         currentIndex: tabBar.currentIndex
@@ -537,6 +542,8 @@ ApplicationWindow {
 
             onContentWidthChanged: positionViewAtIndex(currentIndex, ListView.Beginning)
         }
+
+        Component.onCompleted: wheelPager.attach(mainSwipeView)
 
         Page {
             Loader {
@@ -1484,6 +1491,7 @@ ApplicationWindow {
         if (show) {
             mainSwipeView.insertItem(index, page)
             tabBar.insertItem(index, button)
+            wheelPager.attach(page)
         } else {
             page.parent = null
             button.parent = null

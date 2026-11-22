@@ -68,11 +68,17 @@ Item {
         }
     }
 
-    ScrollView {
+    // A Flickable rather than a ScrollView, which rounds the scroll position to whole pixels, so that scrolling
+    // glides smoothly, and which does not scroll with a mouse drag on the desktop
+    Flickable {
         anchors.fill: parent
-        contentWidth: parent.width
+        contentWidth: width
         contentHeight: grid.height + 20
         clip: true
+        ScrollBar.vertical: ScrollBar {
+            // Only an indicator on phones, as from a ScrollView after a touch
+            interactive: Qt.platform.os !== "ios" && Qt.platform.os !== "android"
+        }
 
         GridLayout {
             id: grid

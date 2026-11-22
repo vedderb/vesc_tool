@@ -26,8 +26,12 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: page
     property Commands mCommands: VescIf.commands()
-    property bool isHorizontal: width > height
+    // The two sections side by side where they fit, the tiles are too narrow to read otherwise
+    property bool isHorizontal: width > height && width >= 600
+    // Smaller tiles in three columns where the page is short, like in the narrow panel of the desktop welcome page
+    readonly property bool compact: !isHorizontal && height < 600
     property var startValues: []
     property var tripValues: []
     property string tripTime: ""
@@ -41,10 +45,11 @@ Item {
         id: tileGrid
         property var titles: []
         property var values: []
+        property bool compact: false
 
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignTop
-        columns: 2
+        columns: compact ? 3 : 2
         rowSpacing: 6
         columnSpacing: 6
 
@@ -53,7 +58,9 @@ Item {
 
             ValueTile {
                 Layout.fillWidth: true
-                implicitHeight: 48
+                implicitHeight: tileGrid.compact ? 40 : 48
+                titleFont.pointSize: tileGrid.compact ? 7.5 : 9
+                valueFont.pointSize: tileGrid.compact ? 12 : 15
                 title: modelData
                 value: tileGrid.values[index] ? tileGrid.values[index][0] : ""
                 unit: tileGrid.values[index] ? tileGrid.values[index][1] : ""
@@ -84,6 +91,7 @@ Item {
                 TileGrid {
                     titles: ["Ah Drawn", "Ah Charged", "Wh Drawn", "Wh Charged", "Dist", "Dist Abs"]
                     values: startValues
+                    compact: page.compact
                 }
             }
 
@@ -103,8 +111,9 @@ Item {
                     titles: ["Distance", "Efficiency", "Energy", "Ah", "Speed Avg / Max",
                         "Power Avg / Max", "T Mot Avg / Max", "T FET Avg / Max", "I Avg / Max"]
                     values: tripValues
+                    compact: page.compact
                     // Three rows like Since Start on landscape phones, which are short
-                    columns: phoneLandscape ? 3 : 2
+                    columns: phoneLandscape || compact ? 3 : 2
                 }
 
                 Button {

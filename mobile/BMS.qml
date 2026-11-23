@@ -486,56 +486,6 @@ Item {
                     }
                 }
 
-                // Where the sensors of the 12s7p BMS are on its board
-                Card {
-                    id: boardCard
-                    readonly property real s: boardImage.paintedWidth / 3766
-                    Layout.fillWidth: true
-                    implicitHeight: boardImage.height + 20
-                    visible: mValSet && temps.length >= 6 && VescIf.getLastFwRxParams().hw === "12s7p"
-
-                    Image {
-                        id: boardImage
-                        y: 10
-                        width: Math.min(parent.width - 20, 900)
-                        height: width * 2011 / 3766
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        source: boardCard.visible ? "qrc:/res/images/12s7p_pcb.png" : ""
-                        fillMode: Image.PreserveAspectFit
-                        smooth: true
-
-                        // Positions on the image, at the baseline of the text
-                        Repeater {
-                            model: boardCard.visible ? [
-                                [2985, 1840, tempText(mVal.temp_ic), mVal.temp_ic],
-                                [2985, 1467, tempText(temps[0]), temps[0]],
-                                [30, 890, tempText(temps[1]), temps[1]],
-                                [2985, 260, tempText(temps[2]), temps[2]],
-                                [2985, 600, tempText(temps[3]), temps[3]],
-                                [2985, 945, tempText(mVal.temp_hum_sensor), mVal.temp_hum_sensor],
-                                [2985, 1050, fmt(mVal.humidity, 1) + " %RH", -300],
-                                [30, 1506, tempText(temps[5]), temps[5]],
-                                [30, 1794, tempText(temps[4]), temps[4]]] : []
-
-                            Text {
-                                x: modelData[0] * boardCard.s
-                                y: modelData[1] * boardCard.s - ascentMetrics.ascent
-                                text: modelData[2]
-                                color: tempValid(modelData[3]) && modelData[3] >= 45 ? tempTextColor(modelData[3]) :
-                                                                                      Utility.getAppHexColor("positiveText")
-                                font: ascentMetrics.font
-                            }
-                        }
-
-                        FontMetrics {
-                            id: ascentMetrics
-                            font.family: "DejaVu Sans Mono"
-                            font.pixelSize: Math.max(8, 96 * boardCard.s)
-                            font.weight: Font.Medium
-                        }
-                    }
-                }
-
                 // The other values, in groups
                 GridLayout {
                     Layout.fillWidth: true

@@ -13,6 +13,7 @@
         <file>res/qml/Examples/Profiles.qml</file>
         <file>res/qml/SetupMotorWindow.qml</file>
         <file>res/qml/WelcomeQmlPanel.qml</file>
+        <file>res/qml/BmsQmlPanel.qml</file>
         <file>res/qml/Examples/TcpServer.qml</file>
         <file>res/qml/Examples/ParentTabBar.qml</file>
         <file>res/qml/Examples/IoBoard.qml</file>

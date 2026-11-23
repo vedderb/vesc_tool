@@ -929,7 +929,6 @@ ApplicationWindow {
             visible: status == Loader.Ready
             sourceComponent: BMS {
                 anchors.fill: parent
-                isHorizontal: mainIsHorizontal
             }
         }
     }

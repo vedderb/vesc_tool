@@ -1,6 +1,5 @@
 FORMS += \
     $$PWD/pageapppas.ui \
-    $$PWD/pagebms.ui \
     $$PWD/pagecananalyzer.ui \
     $$PWD/pageconnection.ui \
     $$PWD/pagecustomconfig.ui \

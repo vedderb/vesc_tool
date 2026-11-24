@@ -103,6 +103,7 @@ PageSampledData::PageSampledData(QWidget *parent) :
     connect(ui->truncateBox, SIGNAL(toggled(bool)), this, SLOT(replotAll()));
 
     replotAll();
+    updateZoom();
 }
 
 PageSampledData::~PageSampledData()

@@ -108,7 +108,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
     mCanTmpFwdIdLast = -1;
 
     mIgnoreCustomConfigs = false;
-    mIgnoreTestVersion = false;
 
     mFwSwapDone = false;
     mBlockFwSwap = false;
@@ -597,20 +596,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         emit ackReceived(tr("%1 write OK").arg(name));
     });
-
-#ifndef DEBUG_BUILD
-#if VT_IS_TEST_VERSION
-    QTimer::singleShot(1000, [this]() {
-        if (!mIgnoreTestVersion) {
-            emitMessageDialog("VESC Tool Test Version",
-                              "Warning: This is a test version of VESC Tool. The included firmwares are NOT compatible with "
-                              "released firmwares and should only be used with this test version. When using a release version "
-                              "of VESC Tool, the firmware must be upgraded even if the version number is the same.",
-                              false);
-        }
-    });
-#endif
-#endif
 }
 
 VescInterface::~VescInterface()
@@ -4422,16 +4407,6 @@ bool VescInterface::ignoreCustomConfigs() const
 void VescInterface::setIgnoreCustomConfigs(bool newIgnoreCustomConfigs)
 {
     mIgnoreCustomConfigs = newIgnoreCustomConfigs;
-}
-
-bool VescInterface::ignoreTestVersion() const
-{
-    return mIgnoreTestVersion;
-}
-
-void VescInterface::setIgnoreTestVersion(bool ignore)
-{
-    mIgnoreTestVersion = ignore;
 }
 
 bool VescInterface::reconnectLastCan()

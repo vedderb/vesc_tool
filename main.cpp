@@ -1099,7 +1099,6 @@ int main(int argc, char *argv[])
         vesc->setBlockFwSwap(true);
         vesc->setIgnoreCustomConfigs(!isCustomConf);
         vesc->setShowFwUpdateAvailable(false);
-        vesc->setIgnoreTestVersion(true);
 
         vesc->fwConfig()->loadParamsXml(Utility::configPath("fw.xml"));
         Utility::configLoadLatest(vesc);

@@ -512,6 +512,7 @@ QString Utility::faultToDescription(mc_fault_code fault)
     case FAULT_CODE_OVERSPEED: return "Motor speed went above Max ERPM. Only checked when Overspeed is enabled in Additional Faults.";
     case FAULT_CODE_UNDERSPEED: return "Reverse motor speed went past Max ERPM Reverse. Only checked when Underspeed is enabled in Additional Faults.";
     case FAULT_CODE_ABS_OVERSPEED: return "Motor speed went above ERPM ABS Overspeed. Only checked when Absolute Overspeed is enabled in Additional Faults.";
+    case FAULT_CODE_THROTTLE_RANGE: return "The ADC throttle voltage went outside ADC1 Abs Min Voltage to ADC1 Abs Max Voltage, or the two channels of a redundant throttle differed by more than Redundant Throttle Max Diff. Usually a broken throttle wire, connector or sensor.";
     default: return "";
     }
 }

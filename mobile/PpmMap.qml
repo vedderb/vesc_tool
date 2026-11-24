@@ -19,6 +19,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
@@ -199,13 +200,23 @@ Item {
         }
     }
 
+    // Apply shows that it writes, and then that the VESC has stored it or that it did not answer
     component MapButtons: RowLayout {
         id: buttons
         property string helpName: ""
         property bool showApply: true
         property bool canApply: false
+        // "", "writing", "written" or "failed"
+        property string writeState: ""
         signal reset()
         signal apply()
+
+        // How long a write may take, and how long its result shows
+        function setWriteState(state) {
+            writeState = state
+            writeTimer.interval = state === "writing" ? 4000 : 2500
+            writeTimer.restart()
+        }
 
         Layout.fillWidth: true
         spacing: 8
@@ -217,8 +228,10 @@ Item {
                                                 VescIf.infoConfig().getDescription(buttons.helpName), true, true)
         }
 
+        // Reset a third of the row and apply two thirds, also while apply changes its text
         Button {
             Layout.fillWidth: buttons.showApply
+            Layout.preferredWidth: buttons.showApply ? 1 : -1
             text: qsTr("Reset")
             flat: true
             onClicked: buttons.reset()
@@ -226,11 +239,42 @@ Item {
 
         Button {
             Layout.fillWidth: true
+            Layout.preferredWidth: 2
             visible: buttons.showApply
-            enabled: buttons.canApply
+            enabled: buttons.canApply && buttons.writeState !== "writing"
             highlighted: true
-            text: qsTr("Apply && write")
-            onClicked: buttons.apply()
+            Material.accent: buttons.writeState === "written" ? Utility.getAppHexColor("positive") :
+                             buttons.writeState === "failed" ? Utility.getAppHexColor("danger") : undefined
+            text: buttons.writeState === "writing" ? qsTr("Writing...") :
+                  buttons.writeState === "written" ? qsTr("Written \u2713") :
+                  buttons.writeState === "failed" ? qsTr("Not written, try again") : qsTr("Apply && write")
+            onClicked: {
+                buttons.setWriteState("writing")
+                buttons.apply()
+            }
+        }
+
+        // Also an answer that comes after the write was shown as failed, a slow link can take that long
+        Connections {
+            target: VescIf.commands()
+            enabled: buttons.writeState === "writing" || buttons.writeState === "failed"
+
+            function onAckReceived(ackType) {
+                if (ackType === "App config write OK") {
+                    buttons.setWriteState("written")
+                }
+            }
+        }
+
+        Timer {
+            id: writeTimer
+            onTriggered: {
+                if (buttons.writeState === "writing") {
+                    buttons.setWriteState("failed")
+                } else {
+                    buttons.writeState = ""
+                }
+            }
         }
     }
 

@@ -173,6 +173,8 @@ PageRtData::PageRtData(QWidget *parent) :
 
     connect(mTimer, SIGNAL(timeout()),
             this, SLOT(timerSlot()));
+
+    updateZoom();
 }
 
 PageRtData::~PageRtData()

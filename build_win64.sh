@@ -2,14 +2,16 @@
 set -euo pipefail
 
 # ==============================================================================
-# VESC Tool Windows x86_64 Cross-Build & Packaging Script (Linux + Clang + Qt 6.12)
+# VESC Tool Windows x86_64 Cross-Build & Single-File Portable EXE Script
 # ==============================================================================
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE}")" && pwd)"
 BUILD_DIR="$REPO_DIR/build-win6"
-DIST_NAME="vesc_tool_7.01_win64"
+APP_VERSION="8.00"
+DIST_NAME="vesc_tool_${APP_VERSION}_win64"
 DIST_DIR="$REPO_DIR/$DIST_NAME"
 ZIP_FILE="$REPO_DIR/${DIST_NAME}.zip"
+SINGLE_EXE="$REPO_DIR/${DIST_NAME}.exe"
 
 QT_VER="6.12.0"
 QT_HOST="/opt/qt-host/$QT_VER/gcc_64"
@@ -26,9 +28,13 @@ for dir in "$QT_HOST" "$QT_WIN" "$XWIN_DIR" "$LLVM_BIN" "$CLANG_INC"; do
     exit 1
   fi
 done
+if ! command -v makensis >/dev/null 2>&1; then
+  echo "ERROR: makensis not found. Install it with: sudo apt-get install -y nsis"
+  exit 1
+fi
 
 echo "=== 2. Cleaning Previous Build & Packaging Artifacts ==="
-rm -rf "$BUILD_DIR" "$DIST_DIR" "$ZIP_FILE"
+rm -rf "$BUILD_DIR" "$DIST_DIR" "$ZIP_FILE" "$SINGLE_EXE"
 
 echo "=== 3. Writing Custom Qt Mkspec ($MKSPEC_DIR) ==="
 mkdir -p "$MKSPEC_DIR"
@@ -220,7 +226,42 @@ echo "=== 7. Creating Zip Archive ==="
 cd "$REPO_DIR"
 zip -qr "$ZIP_FILE" "$DIST_NAME/"
 
+echo "=== 8. Building Single-File Portable Executable ($SINGLE_EXE) ==="
+PORTABLE_NSI="$BUILD_DIR/portable.nsi"
+ICON_OPT=""
+if [ -f "$REPO_DIR/res/icons/vesc_tool.ico" ]; then
+  ICON_OPT="Icon \"$REPO_DIR/res/icons/vesc_tool.ico\""
+elif [ -f "$REPO_DIR/res/vesc_tool.ico" ]; then
+  ICON_OPT="Icon \"$REPO_DIR/res/vesc_tool.ico\""
+fi
+
+cat << EOF > "$PORTABLE_NSI"
+Unicode True
+Name "VESC Tool $APP_VERSION"
+OutFile "$SINGLE_EXE"
+RequestExecutionLevel user
+SilentInstall silent
+SetCompressor /SOLID lzma
+$ICON_OPT
+
+Section "Run"
+  StrCpy \$INSTDIR "\$LOCALAPPDATA\\VESC_Tool_${APP_VERSION}"
+  CreateDirectory "\$INSTDIR"
+  SetOutPath "\$INSTDIR"
+  SetOverwrite ifnewer
+  File /r "$DIST_DIR\\*.*"
+
+  ExecWait '"\$INSTDIR\\$EXE_BASENAME"'
+SectionEnd
+EOF
+
+makensis -V2 "$PORTABLE_NSI"
+
+echo "=== 9. Cleaning Build Artifacts ==="
+rm -rf "$BUILD_DIR" "$DIST_DIR"
+
 echo "=== Done! ==="
-echo "Folder : $DIST_DIR"
-echo "Archive: $ZIP_FILE"
+echo "Single-File EXE : $SINGLE_EXE"
+echo "Portable Zip    : $ZIP_FILE"
+echo "Folder          : $DIST_DIR"
 

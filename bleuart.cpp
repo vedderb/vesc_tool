@@ -232,13 +232,9 @@ void BleUart::addDevice(const QBluetoothDeviceInfo &dev)
             set.endArray();
         }
 
-#if defined(Q_OS_WIN)
-        mDevs.insert(addr, dev.name());
-#else
         if(preferred || dev.serviceUuids().contains(QBluetoothUuid(QUuid("6e400001-b5a3-f393-e0a9-e50e24dcca9e")))) {
             mDevs.insert(addr, dev.name());
         }
-#endif
 
         mRssi.insert(addr, dev.rssi());
         mConnectTimeoutTimer.stop();
@@ -438,6 +434,17 @@ void BleUart::init()
 
     connect(mDeviceDiscoveryAgent, SIGNAL(deviceDiscovered(const QBluetoothDeviceInfo&)),
             this, SLOT(addDevice(const QBluetoothDeviceInfo&)));
+#if defined(Q_OS_WIN)
+    // Windows reports a device before its scan response, where VESC devices have the UART service, and only
+    // the updates after that have the service
+    connect(mDeviceDiscoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceUpdated,
+            this, [this](const QBluetoothDeviceInfo &dev) {
+        if (!mDevs.contains(dev.address().toString()) &&
+                dev.serviceUuids().contains(QBluetoothUuid(QUuid(mServiceUuid)))) {
+            addDevice(dev);
+        }
+    });
+#endif
     connect(mDeviceDiscoveryAgent, SIGNAL(errorOccurred(QBluetoothDeviceDiscoveryAgent::Error)),
             this, SLOT(deviceScanError(QBluetoothDeviceDiscoveryAgent::Error)));
     connect(mDeviceDiscoveryAgent, SIGNAL(finished()), this, SLOT(scanFinished()));

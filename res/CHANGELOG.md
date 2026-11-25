@@ -15,21 +15,31 @@
 * Status pill in the mobile UI showing connection state, device and live values. Tapping it shows connection details, copy diagnostics and the fault log.
 * Message log in the mobile menu.
 * Restyled motor detection and setup wizards in the mobile UI, with step headers and hints.
+* IMU calibration in the mobile UI with live diagrams, and motor detection results with a hall sensor plot.
 * Tablet layouts and landscape fixes in the mobile UI. On landscape tablets the CAN device list docks beside the page.
+* Touchpad and mouse wheel switch pages in the mobile UI and on the welcome page.
 * Mobile log viewer shows the map on iOS, with a direction arrow at the current position.
+* Mobile log viewer shows faults on the graphs and map, with a side by side layout on tablets.
 * Value picker with groups and search, units and Trip GNSS in the mobile log viewer.
+* Log viewer tab on the VESC Tool welcome page.
+* Fault codes show a short description in the mobile connection sheet, messages and terminal.
 * Log lists in the mobile UI can be searched, show the distance of each log and sort by date, distance or size in either direction.
 * Clearer RT logging card in the mobile UI.
 * Fixed the RT log folder on iOS and ask for location permission before logging with position.
-* Mobile terminal keeps a command history and colors fault codes.
+* Mobile terminal and LispBM REPL keep a command history, and the terminal colors fault codes.
+* Redesigned BMS page with temperature bars, humidity, energy totals and SOH, also used in VESC Tool.
 * BMS summary on the mobile start page when there is no motor controller.
 * BMS tab in the mobile UI only shows while a BMS reports cell voltages.
 * Restyled package store in the mobile UI.
 * Mobile UI keeps the selected page when switching device.
 * Redesigned PPM and ADC mapping in the mobile UI with a live input bar, the captured range and the mapped output.
 * IMU view in VESC Tool and the mobile UI uses the VESC Maxim 3D model.
+* Virtual ESC simulates a full vehicle with CAN devices, BMS and LispBM, adjustable on a Sim page.
+* More reliable config reads and writes when switching CAN devices.
+* Markdown text supports tables and LispBM highlighting in code blocks.
 * Only scan CAN once per connection in the mobile UI.
 * Fixed the Roboto Bold font not loading.
+* Fixed the BLE scan on Windows listing every device instead of only VESC devices.
 * Added filter box to package store.
 * Poll manager for more stable comminucation while polling.
 * Improved motor and app config write reliability.

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 7.01
+VT_VERSION = 8.00
 VT_INTRO_VERSION = 1
 VT_CONFIG_VERSION = 4
 
@@ -71,10 +71,10 @@ ios: {
 #DEFINES += HAS_CANBUS
 
 # Positioning
-!win32: {
+#!win32: {
     DEFINES += HAS_POS
     DEFINES += HAS_BLUETOOTH
-}
+#}
 
 !ios: {
     QT      += printsupport

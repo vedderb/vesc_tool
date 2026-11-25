@@ -1,4 +1,4 @@
-### 7.01
+### 8.00
 #### TBD
 * Added filter box to package store.
 * Poll manager for more stable comminucation while polling.

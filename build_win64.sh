@@ -227,6 +227,9 @@ cd "$REPO_DIR"
 zip -qr "$ZIP_FILE" "$DIST_NAME/"
 
 echo "=== 8. Building Single-File Portable Executable ($SINGLE_EXE) ==="
+BUILD_ID="$(git -C "$REPO_DIR" rev-parse --short HEAD 2>/dev/null || echo "nogit")-$(date +%s)"
+echo "$BUILD_ID" > "$BUILD_DIR/build_id.txt"
+
 PORTABLE_NSI="$BUILD_DIR/portable.nsi"
 ICON_OPT=""
 if [ -f "$REPO_DIR/res/icons/vesc_tool.ico" ]; then
@@ -237,6 +240,8 @@ fi
 
 cat << EOF > "$PORTABLE_NSI"
 Unicode True
+!include "FileFunc.nsh"
+
 Name "VESC Tool $APP_VERSION"
 OutFile "$SINGLE_EXE"
 RequestExecutionLevel user
@@ -244,14 +249,37 @@ SilentInstall silent
 SetCompressor /SOLID lzma
 $ICON_OPT
 
-Section "Run"
-  StrCpy \$INSTDIR "\$LOCALAPPDATA\\VESC_Tool_${APP_VERSION}"
-  CreateDirectory "\$INSTDIR"
-  SetOutPath "\$INSTDIR"
-  SetOverwrite ifnewer
-  File /r "$DIST_DIR\\*.*"
+Function .onInit
+  InitPluginsDir
+FunctionEnd
 
-  ExecWait '"\$INSTDIR\\$EXE_BASENAME"'
+Section "Run"
+  StrCpy \$INSTDIR "\$LOCALAPPDATA\\VESC_Tool_Portable"
+
+  File "/oname=\$PLUGINSDIR\\build_id.txt" "$BUILD_DIR/build_id.txt"
+  ClearErrors
+  FileOpen \$0 "\$INSTDIR\\build_id.txt" r
+  IfErrors wipe_cache
+  FileRead \$0 \$1
+  FileClose \$0
+
+  FileOpen \$0 "\$PLUGINSDIR\\build_id.txt" r
+  FileRead \$0 \$2
+  FileClose \$0
+
+  StrCmp \$1 \$2 launch_app
+
+  wipe_cache:
+    RMDir /r "\$INSTDIR"
+    CreateDirectory "\$INSTDIR"
+    SetOutPath "\$INSTDIR"
+    File /r "$DIST_DIR\\*.*"
+    File "$BUILD_DIR/build_id.txt"
+
+  launch_app:
+    SetOutPath "\$INSTDIR"
+    \${GetParameters} \$R0
+    ExecWait '"\$INSTDIR\\$EXE_BASENAME" \$R0'
 SectionEnd
 EOF
 

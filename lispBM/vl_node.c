@@ -1,5 +1,5 @@
 /*
-    Copyright 2026 Jeffrey M. Friesen
+    Copyright 2026 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 

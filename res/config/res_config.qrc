@@ -73,8 +73,8 @@
         <file>7.00/info.xml</file>
         <file>7.00/parameters_appconf.xml</file>
         <file>7.00/parameters_mcconf.xml</file>
-        <file>7.01/info.xml</file>
-        <file>7.01/parameters_appconf.xml</file>
-        <file>7.01/parameters_mcconf.xml</file>
+        <file>8.00/info.xml</file>
+        <file>8.00/parameters_appconf.xml</file>
+        <file>8.00/parameters_mcconf.xml</file>
     </qresource>
 </RCC>

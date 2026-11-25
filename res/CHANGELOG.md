@@ -30,11 +30,6 @@
 * IMU view in VESC Tool and the mobile UI uses the VESC Maxim 3D model.
 * Only scan CAN once per connection in the mobile UI.
 * Fixed the Roboto Bold font not loading.
-
----
-
-### 7.01
-#### TBD
 * Added filter box to package store.
 * Poll manager for more stable comminucation while polling.
 * Improved motor and app config write reliability.

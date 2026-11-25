@@ -194,9 +194,10 @@ for qml_mod in QtQuick QtQml Qt5Compat QtCore Qt Qt3D QtLocation QtPositioning; 
   fi
 done
 
-# Remove debug symbols (.pdb) and debug DLLs (*d.dll)
+# Remove debug symbols (.pdb) and debug DLLs (*d.dll), preserving *backend.dll (TLS plugins)
 find "$DIST_DIR/plugins" "$DIST_DIR/qml" -name "*.pdb" -delete
-find "$DIST_DIR/plugins" "$DIST_DIR/qml" -name "*d.dll" ! -name "Qt6Quick3D*.dll" ! -name "qtquick3d*.dll" -delete
+find "$DIST_DIR/plugins" "$DIST_DIR/qml" -name "*d.dll" ! -name "*backend.dll" ! -name "Qt6Quick3D*.dll" ! -name "qtquick3d*.dll" \
+  -delete
 
 # Resolve all direct and transitive Qt6 DLL dependencies across .exe, plugins/, and qml/
 for pass in 1 2 3 4; do
@@ -218,6 +219,13 @@ cat << 'EOF' > "$DIST_DIR/qt.conf"
 Plugins = plugins
 QmlImports = qml
 EOF
+
+# Copy OpenSSL 3 runtime DLLs if installed
+OPENSSL_BIN="/opt/qt-win/Tools/OpenSSLv3/Win_x64/bin"
+if [ -d "$OPENSSL_BIN" ]; then
+  cp -fv "$OPENSSL_BIN/libcrypto-3-x64.dll" "$DIST_DIR/"
+  cp -fv "$OPENSSL_BIN/libssl-3-x64.dll" "$DIST_DIR/"
+fi
 
 # Copy MSVC runtime DLLs from xwin
 find "$XWIN_DIR" -type f \( -iname "vcruntime140*.dll" -o -iname "msvcp140*.dll" -o -iname "concrt140.dll" \) -exec cp -fv {} "$DIST_DIR/" \;

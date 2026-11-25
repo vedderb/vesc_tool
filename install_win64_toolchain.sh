@@ -102,6 +102,9 @@ mkdir -p "$QT_WIN_DIR"
   -O "$QT_WIN_DIR" \
   -m "${QT_MODULES[@]}"
 
+# Install OpenSSL 3 runtime DLLs for Qt TLS backend
+"$TOOLS_VENV/bin/aqt" install-tool windows desktop tools_opensslv3_x64 -O "$QT_WIN_DIR"
+
 echo "=== 7. Fixing Permissions for Non-Root Builds ==="
 chmod -R a+rX "$XWIN_DIR" "$QT_HOST_DIR" "$QT_WIN_DIR" "$TOOLS_VENV"
 

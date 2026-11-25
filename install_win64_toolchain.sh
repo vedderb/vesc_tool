@@ -49,7 +49,8 @@ apt-get install -y --no-install-recommends \
   libgl1-mesa-dev \
   libxkbcommon-x11-0 \
   libdbus-1-3 \
-  libfontconfig1
+  libfontconfig1 \
+  nsis
 
 echo "=== 2. Installing LLVM / Clang $LLVM_VER & LLD ==="
 if ! command -v "clang++-$LLVM_VER" >/dev/null 2>&1; then

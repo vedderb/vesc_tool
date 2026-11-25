@@ -46,6 +46,9 @@ public slots:
     void startSetupWizardMotor();
     void startSetupWizardApp();
 
+protected:
+    bool eventFilter(QObject *object, QEvent *event) override;
+
 private slots:
     void on_autoConnectButton_clicked();
     void on_nrfPairButton_clicked();

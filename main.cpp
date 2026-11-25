@@ -49,6 +49,10 @@
 #include "ios/src/setIosParameters.h"
 #endif
 
+#ifdef Q_OS_WIN
+#include "wintouchpad.h"
+#endif
+
 #ifdef Q_OS_LINUX
 #include <signal.h>
 #include <systemcommandexecutor.h>
@@ -1619,6 +1623,10 @@ int main(int argc, char *argv[])
     } else {
         QApplication *a = new QApplication(argc, argv);
         app = a;
+
+#ifdef Q_OS_WIN
+        WinTouchpad::install();
+#endif
 
         addFonts();
 

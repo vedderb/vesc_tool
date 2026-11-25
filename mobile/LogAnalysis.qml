@@ -2191,12 +2191,28 @@ Item {
                 }
             }
 
-            WheelHandler {
+            // Touchpads pan and pinch, wheels zoom and leave sideways scrolling to the pages. Ctrl+wheel, also a
+            // Windows touchpad pinch, zooms.
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                cursorShape: undefined
                 onWheel: (event) => {
+                             var pixels = event.phase !== Qt.NoScrollPhase &&
+                                     (event.pixelDelta.x !== 0 || event.pixelDelta.y !== 0)
+                             var ctrl = (event.modifiers & Qt.ControlModifier) && event.angleDelta.y !== 0
+                             if (!ctrl && !pixels && Math.abs(event.angleDelta.y) <= Math.abs(event.angleDelta.x)) {
+                                 event.accepted = false
+                                 return
+                             }
                              mapAnim.stop()
+                             if (pixels && !ctrl) {
+                                 map.pan(-event.pixelDelta.x, -event.pixelDelta.y)
+                                 return
+                             }
                              var pt = Qt.point(event.x, event.y)
                              var geo = map.toCoordinate(pt, false)
-                             map.zoomLevel += (event.angleDelta.y > 0 ? 0.5 : -0.5)
+                             map.zoomLevel += event.angleDelta.y / 240
                              if (geo.isValid) map.alignCoordinateToPoint(geo, pt)
                          }
             }
@@ -2907,6 +2923,8 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         enabled: root.rawRows.length > 1 && !columnSheet.visible && !chartPinch.active
+                        // Zoom not yet applied
+                        property real zoom: 1
 
                         function scrub(mx) {
                             var span = Math.max(1, root.viewEnd - root.viewStart)
@@ -2916,10 +2934,17 @@ Item {
                         onPressed: (m) => scrub(m.x)
                         onPositionChanged: (m) => { if (pressed) scrub(m.x) }
                         onWheel: (w) => {
-                                     // Sideways scrolling is left to the pages
-                                     if (Math.abs(w.angleDelta.x) > Math.abs(w.angleDelta.y)) w.accepted = false
-                                     else if (w.angleDelta.y > 0) root.zoomAroundCursor(0.75)
-                                     else if (w.angleDelta.y < 0) root.zoomAroundCursor(1.33)
+                                     // Sideways scrolling is left to the pages. Small touchpad steps add up.
+                                     if (Math.abs(w.angleDelta.x) > Math.abs(w.angleDelta.y)) {
+                                         w.accepted = false
+                                     } else if (w.angleDelta.y !== 0) {
+                                         zoom *= Math.pow(0.75, w.angleDelta.y / 120)
+                                         var span = Math.max(10, root.viewEnd - root.viewStart)
+                                         if (Math.round(span * zoom) !== span) {
+                                             root.zoomAroundCursor(zoom)
+                                             zoom = 1
+                                         }
+                                     }
                                  }
                     }
                     // Extra touch-drag claim so parent SwipeView never steals horizontal drags

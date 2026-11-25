@@ -58,6 +58,17 @@ ApplicationWindow {
     readonly property bool phoneLandscape: mainIsHorizontal && !mainIsTablet
     readonly property real canDockWidth: canDrawerLoader.item && canDrawerLoader.item.docked && canDrawerLoader.item.visible ? canDrawerLoader.item.width : 0
 
+    // Rotation resizes the pages in several steps, and the swipe views would show or select another page from
+    // the old offset, so they do not pick the page from the scroll position while this runs. The window changes
+    // its size before the pages, so this starts before they resize. Not switched while swiping, as that stops
+    // the drag.
+    onWidthChanged: resizing.restart()
+    onHeightChanged: resizing.restart()
+    Timer {
+        id: resizing
+        interval: 500
+    }
+
     // Connection status shown in the footer, the drawer and on the start page
     property string connName: ""
     property string connLink: ""
@@ -530,9 +541,8 @@ ApplicationWindow {
             snapMode: ListView.SnapOneItem
             boundsBehavior: Flickable.StopAtBounds
 
-            // Only a swipe picks the page from the scroll position. Rotation resizes the pages
-            // in several steps, and the old offset would otherwise show or select another page.
-            highlightRangeMode: moving ? ListView.StrictlyEnforceRange : ListView.ApplyRange
+            // See resizing
+            highlightRangeMode: resizing.running ? ListView.ApplyRange : ListView.StrictlyEnforceRange
             preferredHighlightBegin: 0
             preferredHighlightEnd: 0
             highlightMoveDuration: 250
@@ -607,8 +617,8 @@ ApplicationWindow {
                     snapMode: ListView.SnapOneItem
                     boundsBehavior: Flickable.StopAtBounds
 
-                    // Same as for mainSwipeView, this one is vertical
-                    highlightRangeMode: moving ? ListView.StrictlyEnforceRange : ListView.ApplyRange
+                    // See resizing
+                    highlightRangeMode: resizing.running ? ListView.ApplyRange : ListView.StrictlyEnforceRange
                     preferredHighlightBegin: 0
                     preferredHighlightEnd: 0
                     highlightMoveDuration: 250

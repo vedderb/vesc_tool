@@ -86,6 +86,9 @@ ios: {
 
 win32: {
     DEFINES += _USE_MATH_DEFINES
+    SOURCES += wintouchpad.cpp
+    HEADERS += wintouchpad.h
+    LIBS += -lole32 -luser32
 }
 
 # https://stackoverflow.com/questions/61444320/what-are-the-configure-options-for-qt-that-enable-dead-keys-usage

@@ -51,23 +51,24 @@ fi
 # make MXE_TARGETS="x86_64-w64-mingw32.static" qt6
 
 if [[ "$1" == "windows" || -z "$1" ]]; then
-  export PATH=/opt/mxe2/usr/bin/:$PATH
+#  export PATH=/opt/mxe2/usr/bin/:$PATH
 
-  rm -rf build/win/*
-  mkdir -p build/win
+#  rm -rf build/win/*
+#  mkdir -p build/win
 
-  cd build/win
+#  cd build/win
 
-  /opt/mxe2/usr/bin/x86_64-w64-mingw32.static-qt6-qmake "$PROJECT_DIR/vesc_tool.pro" \
-    "CONFIG+=release" \
-    "CONFIG-=qml_debug" \
-    "CONFIG+=qtquickcompiler" \
-    "CONFIG-=separate_debug_info"
-  make -j8
+#  /opt/mxe2/usr/bin/x86_64-w64-mingw32.static-qt6-qmake "$PROJECT_DIR/vesc_tool.pro" \
+#    "CONFIG+=release" \
+#    "CONFIG-=qml_debug" \
+#    "CONFIG+=qtquickcompiler" \
+#    "CONFIG-=separate_debug_info"
+#  make -j8
 
-  cd "$PROJECT_DIR/"
-  mv build/win/release/vesc_tool*.exe build/test_all/vesc_tool_test_windows.exe
-  rm -rf build/win/*
+#  cd "$PROJECT_DIR/"
+#  mv build/win/release/vesc_tool*.exe build/test_all/vesc_tool_test_windows.exe
+#  rm -rf build/win/*
+  mv vesc_tool_8.00_win64.exe build/test_all/vesc_tool_test_windows.exe
 fi
 
 # Android

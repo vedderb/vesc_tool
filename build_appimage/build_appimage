@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BUILD_DIR="../build/lin/vesc_tool_7.01"
-APP_NAME=vesc_tool_7.01
+BUILD_DIR="../build/lin/vesc_tool_8.00"
+APP_NAME=vesc_tool_8.00
 
 set -e
 

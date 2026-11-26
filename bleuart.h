@@ -26,6 +26,7 @@
 #include <QLowEnergyController>
 #include <QLowEnergyService>
 #include <QVariantMap>
+#include <QHash>
 #include <QTimer>
 
 class BleUart : public QObject
@@ -41,6 +42,7 @@ public:
     Q_INVOKABLE bool isConnected();
     Q_INVOKABLE bool isConnecting();
     Q_INVOKABLE void emitScanDone();
+    Q_INVOKABLE int getRssi(QString addr);
 
 signals:
     void dataRx(QByteArray data);
@@ -77,6 +79,7 @@ private:
     QLowEnergyService *mService;
     QLowEnergyDescriptor mNotificationDescTx;
     QVariantMap mDevs;
+    QHash<QString, int> mRssi;
     bool mUartServiceFound;
     bool mConnectDone;
     QString mServiceUuid;

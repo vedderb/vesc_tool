@@ -42,24 +42,14 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         property ConfigParams mAppConf: VescIf.appConfig()
         property Commands mCommands: VescIf.commands()
 
         id: dialog
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        height: parent.height - 60
-        closePolicy: Popup.CloseOnEscape
-        x: (parent.width - width)/2
-        y: 50
-        parent: dialogParent
-        padding: 10
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        title: qsTr("Paired VESCs")
+        rejectText: ""
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
@@ -67,10 +57,8 @@ Item {
             Text {
                 id: text
                 Layout.fillWidth: true
-                color: Utility.getAppHexColor("lightText")
+                color: Utility.getAppHexColor("normalText")
                 text: qsTr("These are the VESCs paired to this instance of VESC Tool.")
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
             }
 
@@ -84,7 +72,15 @@ Item {
                 Layout.fillHeight: true
                 focus: true
                 clip: true
+
                 spacing: 5
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: pairModel.count === 0
+                    text: qsTr("No paired VESCs")
+                    color: Utility.getAppHexColor("disabledText")
+                }
 
                 Component {
                     id: pairDelegate
@@ -128,22 +124,11 @@ Item {
                                     deleteDialog.open()
                                 }
 
-                                Dialog {
+                                SheetDialog {
                                     id: deleteDialog
+                                    acceptText: qsTr("Delete")
                                     property int indexNow: 0
-                                    standardButtons: Dialog.Ok | Dialog.Cancel
-                                    modal: true
-                                    focus: true
-                                    width: parent.width - 20
-                                    closePolicy: Popup.CloseOnEscape
                                     title: "Delete paired VESC"
-                                    x: 10
-                                    y: 10 + parent.height / 2 - height / 2
-                                    parent: dialogParent
-
-                                    Overlay.modal: Rectangle {
-                                        color: "#AA000000"
-                                    }
 
                                     Text {
                                         color: Utility.getAppHexColor("lightText")
@@ -177,12 +162,13 @@ Item {
                     text: "..."
                     onClicked: menu.open()
 
-                    Menu {
+                    PopupMenu {
                         id: menu
                         width: 500
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Add current without pairing"
+                            iconFile: "Plus Math-96.png"
                             onTriggered: {
                                 if (VescIf.isPortConnected()) {
                                     VescIf.addPairedUuid(VescIf.getConnectedUuid());
@@ -195,15 +181,17 @@ Item {
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Add from UUID"
+                            iconFile: "icons8-edit-96.png"
                             onTriggered: {
                                 uuidEnter.open()
                             }
                         }
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Unpair connected"
+                            iconFile: "Delete-96.png"
                             onTriggered: {
                                 if (VescIf.isPortConnected()) {
                                     if (mCommands.isLimitedMode()) {
@@ -226,6 +214,7 @@ Item {
                 Button {
                     id: pairConnectedButton
                     text: "Pair VESC"
+                    highlighted: true
                     Layout.fillWidth: true
                     onClicked: {
                         if (VescIf.isPortConnected()) {
@@ -255,22 +244,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: pairConnectedDialog
+        acceptText: qsTr("Pair")
         property int indexNow: 0
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
         title: "Pair connected VESC"
-        x: (parent.width - width)/2
-        y: 10 + Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -296,22 +274,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: unpairConnectedDialog
+        acceptText: qsTr("Unpair")
         property int indexNow: 0
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
         title: "Unpair connected VESC"
-        x: (parent.width - width)/2
-        y: 10 + parent.height / 2 - height / 2
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             color: Utility.getAppHexColor("lightText")
@@ -329,23 +296,12 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: uuidEnter
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
+        acceptText: qsTr("Add")
         title: "Add UUID"
 
-        width: parent.width - 20  - notchLeft - notchRight
-        height: 200
-        closePolicy: Popup.CloseOnEscape
-        x: (parent.width - width)/2
-        y: (parent.height - height)/2
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        fullHeight: true
 
         Rectangle {
             anchors.fill: parent

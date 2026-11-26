@@ -21,128 +21,40 @@ import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
-
-Item {
+ParamEditFrame {
     id: editor
-    property string paramName: ""
-    property ConfigParams params: null
-    height: 140
-    Layout.fillWidth: true
     property real maxVal: 1.0
     property bool createReady: false
+    property int currentIndex: -1
+    useSheet: true
 
     Component.onCompleted: {
         if (params != null) {
-            nameText.text = params.getLongName(paramName)
-            enumBox.model = params.getParamEnumNames(paramName)
-            enumBox.currentIndex = params.getParamEnum(paramName)
-
-            if (params.getParamTransmittable(paramName)) {
-                nowButton.visible = true
-                defaultButton.visible = true
-            } else {
-                nowButton.visible = false
-                defaultButton.visible = false
-            }
-
+            enumRepeater.model = params.getParamEnumNames(paramName)
+            currentIndex = params.getParamEnum(paramName)
             createReady = true
         }
     }
 
-    Rectangle {
-        id: rect
-        anchors.fill: parent
-        color: Color.transparent(Utility.getAppHexColor("lightBackground"), 0.4)
-        radius: 10
-        border.color:  {border.color = Utility.getAppHexColor("disabledText")}
-        border.width: 3
-
-        ColumnLayout {
-            id: column
-            anchors.fill: parent
-            anchors.bottomMargin: 2
-            anchors.margins: 10
-
-            Text {
-                id: nameText
-                color: {color = Utility.getAppHexColor("lightText")}
-                text: paramName
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-                font.pointSize: 12
+    onCurrentIndexChanged: {
+        if (params != null && createReady) {
+            if (params.getUpdateOnly() !== paramName) {
+                params.setUpdateOnly("")
             }
+            params.updateParamEnum(paramName, currentIndex, editor);
+        }
+    }
 
-            ComboBox {
-                id: enumBox
-                focusPolicy: Qt.NoFocus
-                Layout.fillWidth: true
+    Repeater {
+        id: enumRepeater
 
-                background: Rectangle {
-                    implicitHeight: 35
-                    color: enumBox.hovered ? Utility.getAppHexColor("lightBackground") : Utility.getAppHexColor("normalBackground")
-                    border.color: enumBox.hovered ? Utility.getAppHexColor("lightText") : Utility.getAppHexColor("midAccent")
-                    border.width: enumBox.visualFocus ? 2 : 1
-                    radius: 5
-                }
-
-                onCurrentIndexChanged: {
-                    if (params != null && createReady) {
-                        if (params.getUpdateOnly() !== paramName) {
-                            params.setUpdateOnly("")
-                        }
-                        params.updateParamEnum(paramName, currentIndex, editor);
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Button {
-                    id: nowButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Current"
-                    onClicked: {
-                        params.setUpdateOnly(paramName)
-                        params.requestUpdate()
-                    }
-                }
-
-                Button {
-                    id: defaultButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Default"
-                    onClicked: {
-                        params.setUpdateOnly(paramName)
-                        params.requestUpdateDefault()
-                    }
-                }
-
-                Button {
-                    id: helpButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Help"
-                    onClicked: {
-                        VescIf.emitMessageDialog(
-                                    params.getLongName(paramName),
-                                    params.getDescription(paramName),
-                                    true, true)
-                    }
-                }
+        RadioDelegate {
+            Layout.fillWidth: true
+            text: params.enumLabel(modelData)
+            checked: index === editor.currentIndex
+            onClicked: {
+                editor.currentIndex = index
+                editor.closeSheet()
             }
         }
     }
@@ -152,7 +64,7 @@ Item {
 
         function onParamChangedEnum(src, name, newParam) {
             if (src !== editor && name === paramName) {
-                enumBox.currentIndex = newParam
+                currentIndex = newParam
             }
         }
     }

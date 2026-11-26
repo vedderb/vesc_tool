@@ -19,19 +19,15 @@
 
 #include "vesc3ditem.h"
 #include <QtDebug>
-#include "utility.h"
 #include <QApplication>
 
 
 
 Vesc3dItem::Vesc3dItem(QQuickItem *parent) : QQuickPaintedItem(parent)
 {
-    mVesc3d.setBgColor(Utility::getAppQColor("normalBackground").redF(),
-                       Utility::getAppQColor("normalBackground").greenF(),
-                       Utility::getAppQColor("normalBackground").blueF(), 1.0);
+    mVesc3d.setBgColor(0, 0, 0, 0);
     setRenderTarget(QQuickPaintedItem::FramebufferObject);
     setAntialiasing(true);
-    setOpaquePainting(true);
 }
 
 void Vesc3dItem::setRotation(double roll, double pitch, double yaw)
@@ -62,10 +58,11 @@ void Vesc3dItem::paint(QPainter *painter)
 void Vesc3dItem::updateImage()
 {
     if (qApp->applicationState() == Qt::ApplicationState::ApplicationActive) {
-        double scale = 1.0;
+        // The item is sized in pixels, the widget applies the device pixel ratio itself
+        QSize s = (size() / qApp->devicePixelRatio()).toSize();
 
-        if (mVesc3d.size() != size().toSize()) {
-            mVesc3d.resize(size().toSize() * scale);
+        if (mVesc3d.size() != s) {
+            mVesc3d.resize(s);
             mVesc3d.render(&mLastCornerImg, QPoint(), QRegion(), QWidget::RenderFlags());
         }
 

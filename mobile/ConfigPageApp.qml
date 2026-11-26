@@ -33,74 +33,59 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
     property var dialogParent: Overlay.overlay
+    property bool active: false
+    // Group shown while this is the current page, to keep the live input idle otherwise
+    readonly property string mapGroup: mainIsTablet && groupList.visible && active ? pageBox.currentText : ""
 
     ParamEditors {
         id: editors
     }
 
-    Dialog {
+    SheetDialog {
         id: ppmMap
-        title: "PPM Mapping"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
+        title: qsTr("PPM Mapping")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Pulse Width-96.png"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: (parent.height - height) / 2
-        parent: dialogParent
-
-        PpmMap {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+
+            PpmMap {
+                width: parent.width
+            }
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: adcMap
-        title: "ADC Mapping"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
+        title: qsTr("ADC Mapping")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Potentiometer-96.png"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        AdcMap {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+
+            AdcMap {
+                width: parent.width
+            }
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: nrfPair
-        title: "NRF Pairing"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
+        title: qsTr("NRF Pairing")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/icons8-fantasy-96.png"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        NrfPair {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+
+            NrfPair {
+                width: parent.width
+            }
         }
     }
 
@@ -110,7 +95,7 @@ Item {
 
     function addSeparator(text) {
         var e = editors.createSeparator(scrollCol, text)
-        e.Layout.columnSpan = isHorizontal ? 2 : 1
+        e.Layout.columnSpan = Qt.binding(function() { return scrollCol.columns })
     }
 
     function destroyEditors() {
@@ -123,6 +108,16 @@ Item {
         var e = editors.createEditorApp(scrollCol, param)
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+    }
+
+    function review() {
+        writeButton.review()
+    }
+
+    function jumpTo(group, subgroup, name) {
+        pageBox.currentIndex = pageBox.find(group)
+        tabBox.currentIndex = tabBox.model.indexOf(subgroup)
+        editors.showParam(scroll, scrollCol, name)
     }
 
     function updateEditors() {
@@ -139,38 +134,85 @@ Item {
         }
     }
 
+    ParamGroupList {
+        id: groupList
+        box: pageBox
+        params: VescIf.appConfig()
+    }
+
     ColumnLayout {
+        id: liveInput
+        anchors.right: parent.right
+        y: scroll.y
+        width: 340
+        visible: mapGroup === "PPM" || mapGroup === "ADC"
+
+        SectionHeader {
+            text: qsTr("Live input")
+        }
+
+        PpmMap {
+            Layout.fillWidth: true
+            visible: mapGroup === "PPM"
+        }
+
+        AdcMap {
+            Layout.fillWidth: true
+            visible: mapGroup === "ADC"
+        }
+    }
+
+    GridLayout {
         id: column
         anchors.fill: parent
-        spacing: 5
+        anchors.leftMargin: groupList.visible ? groupList.width + 10 : 0
+        // Phone landscape: buttons stacked right of the parameters
+        columns: phoneLandscape ? 2 : 1
 
         GridLayout {
+            Layout.columnSpan: column.columns
             Layout.fillWidth: true
             Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
 
-            ComboBox {
-                id: pageBox
+            RowLayout {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                visible: !groupList.visible
 
-                model: VescIf.appConfig().getParamGroups()
+                ComboBox {
+                    id: pageBox
+                    background: InputBackground {}
+                    Layout.fillWidth: true
 
-                onCurrentTextChanged: {
-                    var tabTextOld = tabBox.currentText
-                    var subgroups = VescIf.appConfig().getParamSubgroups(currentText)
+                    model: VescIf.appConfig().getParamGroups()
 
-                    tabBox.model = subgroups
-                    tabBox.visible = subgroups.length > 1
+                    onCurrentTextChanged: {
+                        var tabTextOld = tabBox.currentText
+                        var subgroups = VescIf.appConfig().getParamSubgroups(currentText)
 
-                    if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
-                        updateEditors()
+                        tabBox.model = subgroups
+
+                        if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
+                            updateEditors()
+                        }
                     }
+                }
+
+                ToolButton {
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Search-96.png"
+                    Accessible.name: qsTr("Search parameters")
+                    onClicked: paramSearch.open()
                 }
             }
 
-            ComboBox {
+            SubgroupBar {
                 id: tabBox
+                visible: count > 1 || groupList.visible
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                params: VescIf.appConfig()
+                group: pageBox.currentText
 
                 onCurrentTextChanged: {
                     updateEditors()
@@ -182,25 +224,30 @@ Item {
             id: scroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: column.width
+            Layout.rightMargin: liveInput.visible ? liveInput.width + 10 : 0
+            contentWidth: availableWidth
             contentHeight: scrollCol.preferredHeight
             clip: true
 
             GridLayout {
                 id: scrollCol
-                width: column.width
-                columns: isHorizontal ? 2 : 1
+                width: scroll.availableWidth
+                columns: Math.max(1, Math.floor(width / 380))
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Button {
+        GridLayout {
+            columns: phoneLandscape ? 1 : 3
+            Layout.fillWidth: !phoneLandscape
+            Layout.alignment: Qt.AlignTop
+            WriteButton {
+                id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Write"
+                params: VescIf.appConfig()
+                ackText: "App config write OK"
 
-                onClicked: {
+                onWriteRequested: {
                     mCommands.setAppConf()
                 }
             }
@@ -216,46 +263,43 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
+                Layout.fillWidth: phoneLandscape
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
-                    parent: appPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Read Default Settings"
+                        iconFile: "Restart-96.png"
                         onTriggered: {
                             mCommands.getAppConfDefault()
                         }
                     }
-                    MenuItem {
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "PPM Mapping..."
-                        onTriggered: {
-                            ppmMap.open()
-                        }
+                        iconFile: "Pulse Width-96.png"
+                        onTriggered: mainIsTablet && groupList.visible ? jumpTo("PPM", "Mapping", "") : ppmMap.open()
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "ADC Mapping..."
-                        onTriggered: {
-                            adcMap.open()
-                        }
+                        iconFile: "Potentiometer-96.png"
+                        onTriggered: mainIsTablet && groupList.visible ? jumpTo("ADC", "Mapping", "") : adcMap.open()
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Pair NRF..."
+                        iconFile: "icons8-fantasy-96.png"
                         onTriggered: {
                             nrfPair.open()
                         }
                     }
-                    MenuItem {
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "Save XML"
+                        iconFile: "Save as-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogSave.close()
@@ -295,8 +339,9 @@ Item {
                             }
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Load XML"
+                        iconFile: "Open Folder-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogLoad.close()
@@ -346,7 +391,6 @@ Item {
             var subgroups = VescIf.appConfig().getParamSubgroups(pageBox.currentText)
 
             tabBox.model = subgroups
-            tabBox.visible = subgroups.length > 1
 
             updateEditors()
         }

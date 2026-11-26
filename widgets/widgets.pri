@@ -22,7 +22,6 @@ FORMS += \
     $$PWD/scripteditor.ui
 
 HEADERS += \
-    $$PWD/batttempplot.h \
     $$PWD/canlistitem.h \
     $$PWD/experimentplot.h \
     $$PWD/parameditbitfield.h \
@@ -60,7 +59,6 @@ HEADERS += \
     $$PWD/superslider.h
 
 SOURCES += \
-    $$PWD/batttempplot.cpp \
     $$PWD/canlistitem.cpp \
     $$PWD/experimentplot.cpp \
     $$PWD/parameditbitfield.cpp \

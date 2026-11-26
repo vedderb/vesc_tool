@@ -86,6 +86,9 @@ ios: {
 
 win32: {
     DEFINES += _USE_MATH_DEFINES
+    SOURCES += wintouchpad.cpp
+    HEADERS += wintouchpad.h
+    LIBS += -lole32 -luser32
 }
 
 # https://stackoverflow.com/questions/61444320/what-are-the-configure-options-for-qt-that-enable-dead-keys-usage
@@ -130,6 +133,9 @@ contains(DEFINES, HAS_POS) {
     QT       += positioning
 }
 
+# Links the map plugin for the log viewer, static builds do not get it from the QML import
+ios: QT += location
+
 android: QT += core-private
 
 ios | macx: {
@@ -156,6 +162,8 @@ android: {
     manifest.input = $$PWD/android/AndroidManifest.xml.in
     manifest.output = $$PWD/android/AndroidManifest.xml
     QMAKE_SUBSTITUTES += manifest
+
+    SOURCES += android/ridebridge.cpp
 }
 
 TEMPLATE = app
@@ -207,7 +215,10 @@ SOURCES += main.cpp\
     utility.cpp \
     tcpserversimple.cpp \
     hexfile.cpp \
-    virtualvesc.cpp
+    virtualvesc.cpp \
+    virtualvesclisp.cpp \
+    virtualplant.cpp \
+    phoneimu.cpp
 
 HEADERS  += mainwindow.h \
     bleuartdummy.h \
@@ -232,7 +243,9 @@ HEADERS  += mainwindow.h \
     utility.h \
     tcpserversimple.h \
     hexfile.h \
-    virtualvesc.h
+    virtualvesc.h \
+    virtualplant.h \
+    phoneimu.h
 
 unix: {
 !ios: {
@@ -256,6 +269,13 @@ include(mobile/mobile.pri)
 include(map/map.pri)
 include(lzokay/lzokay.pri)
 include(heatshrink/heatshrink.pri)
+# LispBM runs the Lisp code on the devices of the Virtual ESC. CONFIG += no_lispbm
+# leaves it out, which is the default on iOS; CONFIG += lispbm keeps it there.
+ios: !lispbm: CONFIG += no_lispbm
+!no_lispbm {
+    DEFINES += HAS_LISPBM
+    include(lispBM/lispbm.pri)
+}
 include(QCodeEditor/qcodeeditor.pri)
 include(esp32/esp32.pri)
 include(display_tool/display_tool.pri)
@@ -298,7 +318,9 @@ build_original {
 DISTFILES += \
     android/AndroidManifest.xml \
     android/src/com/vedder/vesc/VForegroundService.java \
-    android/src/com/vedder/vesc/Utils.java
+    android/src/com/vedder/vesc/RideService.java \
+    android/src/com/vedder/vesc/Utils.java \
+    android/src/com/vedder/vesc/PhoneImu.java
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
@@ -318,9 +340,12 @@ macx {
 }
 
 ios {
+    include(ios/live_activity.pri)
     QMAKE_INFO_PLIST = ios/Info.plist
     HEADERS += ios/src/setIosParameters.h
-    SOURCES += ios/src/setIosParameters.mm
+    SOURCES += ios/src/setIosParameters.mm \
+               ios/src/phoneImu.mm
+    LIBS += -framework CoreMotion
     DISTFILES += ios/Info.plist \
                  ios/*.storyboard
     QMAKE_ASSET_CATALOGS = $$PWD/ios/Images.xcassets

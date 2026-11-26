@@ -21,7 +21,9 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts
+import QtQuick.Shapes
 import QtQuick.Dialogs
 import QtLocation
 import QtPositioning
@@ -32,11 +34,18 @@ import Vedder.vesc.vescinterface
 
 Item {
     id: root
+    // Map and graphs side by side in landscape. On phones the header only spans the map, so the
+    // graphs get the full height.
+    readonly property bool wide: mainIsHorizontal
+    readonly property bool headerOverMap: phoneLandscape
+    // Tablets and large windows in landscape show the map, the values and the graphs together
+    readonly property bool showAll: wide && !headerOverMap
     anchors.fill: parent
 
     property var mCommands: VescIf.commands()
     property string deviceCurrentDir: "/"
     property var deviceFileEntries: []
+    property bool deviceLoading: false
     property bool downloadingFromDevice: false
     property real downloadProgress: 0.0
     property real downloadSpeedKBps: 0.0
@@ -76,11 +85,18 @@ Item {
 
     function refreshDeviceDir(dirPath) {
         deviceCurrentDir = dirPath
+        deviceFileEntries = []
+        deviceLoading = true
+        // Later, so that the sheet shows that it is loading while the listing blocks
+        Qt.callLater(listDeviceDir, dirPath)
+    }
+
+    function listDeviceDir(dirPath) {
         var rawList = mCommands.fileBlockList(dirPath)
         var items = []
 
         if (dirPath !== "/" && dirPath.length > 0) {
-            items.push({ name: "..", isDir: true, size: 0 })
+            items.push({ name: "..", isDir: true, size: 0, timestamp: 0 })
         }
 
         for (var i = 0; i < rawList.length; i++) {
@@ -101,19 +117,18 @@ Item {
 
             // Show directories and .csv files
             if (isDir || name.toLowerCase().endsWith(".csv")) {
-                items.push({ name: name, isDir: isDir, size: size })
+                items.push({ name: name, isDir: isDir, size: size, timestamp: nameTime(name) })
             }
         }
 
-        // Sort folders first, then newest/alphabetical filenames
-        items.sort(function(a, b) {
-            if (a.name === "..") return -1
-            if (b.name === "..") return 1
-            if (a.isDir !== b.isDir) return a.isDir ? -1 : 1
-            return b.name.localeCompare(a.name)
-        })
-
         deviceFileEntries = items
+        deviceLoading = false
+    }
+
+    // Time in the name of a log, like 2026-11-16_16-05-55.csv, or 0
+    function nameTime(name) {
+        var m = name.match(/(\d{4})-(\d\d)-(\d\d)_(\d\d)-(\d\d)-(\d\d)/)
+        return m ? new Date(m[1], m[2] - 1, m[3], m[4], m[5], m[6]).getTime() : 0
     }
 
     function loadDeviceCsv(fileName) {
@@ -143,13 +158,245 @@ Item {
         parseCsvText(text)
     }
 
-    Dialog {
+    function sizeText(bytes) {
+        return bytes < 1048576 ? (bytes / 1024).toFixed(1) + " KB" : (bytes / 1048576).toFixed(1) + " MB"
+    }
+
+    // Like Nov 17, 2026 · 4:05 PM, with the time in the format of the locale
+    function dateText(ms) {
+        return Qt.formatDateTime(new Date(ms), "MMM d, yyyy · " + Qt.locale().timeFormat(Locale.ShortFormat))
+    }
+
+    // Like 2 of 6 logs · 2.0 MB · /log
+    function logCountText(shown, logs, path) {
+        return qsTr("%1 logs · %2 · %3").arg((shown < logs.length ? shown + " of " : "") + logs.length).
+                arg(sizeText(logs.reduce((sum, e) => sum + e.size, 0))).arg(path)
+    }
+
+    // Distance of a log file in meters, kept as reading the file takes a while
+    property var logDistances: ({})
+    function logMeters(path, size) {
+        var key = path + size
+        if (logDistances[key] === undefined) {
+            logDistances[key] = Utility.logDistance(path)
+        }
+        return logDistances[key]
+    }
+
+    function logDistanceText(path, size) {
+        var m = logMeters(path, size)
+        return m < 0 ? "" : distanceText(m)
+    }
+
+    function distanceText(m) {
+        return VescIf.useImperialUnits() ? (m / 1609.344).toFixed(2) + " mi" :
+                                           m < 1000 ? Math.round(m) + " m" : (m / 1000).toFixed(2) + " km"
+    }
+
+    // Row of the log lists: icon, name, details, a value and actions above a divider
+    component LogRow: Item {
+        id: logRow
+        property string iconSource: ""
+        property string name: ""
+        property string details: ""
+        property string value: ""
+        property bool canSave: false
+        property bool canDelete: false
+        signal clicked()
+        signal saveClicked()
+        signal deleteClicked()
+
+        implicitHeight: rowLayout.implicitHeight
+
+        RowLayout {
+            id: rowLayout
+            anchors.fill: parent
+            spacing: 0
+
+            ItemDelegate {
+                Layout.fillWidth: true
+                onClicked: logRow.clicked()
+
+                contentItem: RowLayout {
+                    spacing: 10
+
+                    Image {
+                        visible: logRow.iconSource !== ""
+                        Layout.preferredWidth: 24
+                        Layout.preferredHeight: 24
+                        source: logRow.iconSource
+                        mipmap: true
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: logRow.name
+                            elide: Text.ElideMiddle
+                            color: Utility.getAppHexColor("lightText")
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            visible: text !== ""
+                            text: logRow.details
+                            elide: Text.ElideRight
+                            font.pointSize: 9
+                            color: Utility.getAppHexColor("normalText")
+                        }
+                    }
+
+                    Text {
+                        visible: text !== ""
+                        text: logRow.value
+                        font.weight: Font.Medium
+                        color: Utility.getAppHexColor("lightText")
+                    }
+                }
+            }
+
+            ToolButton {
+                visible: logRow.canSave
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Save-96.png"
+                Accessible.name: qsTr("Save")
+                onClicked: logRow.saveClicked()
+            }
+
+            ToolButton {
+                visible: logRow.canDelete
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Delete-96.png"
+                icon.width: 20
+                icon.height: 20
+                icon.color: Utility.getAppHexColor("danger")
+                Accessible.name: qsTr("Delete")
+                onClicked: logRow.deleteClicked()
+            }
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 1
+            color: Utility.getAppHexColor("lightestBackground")
+        }
+    }
+
+    // Shown in place of an empty log list
+    component EmptyLogs: ColumnLayout {
+        property alias text: emptyLabel.text
+        spacing: 12
+
+        Item { Layout.fillHeight: true }
+
+        Image {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 48
+            Layout.preferredHeight: 48
+            source: "qrc" + Utility.getThemePath() + "icons/Line Chart-96.png"
+            opacity: 0.35
+        }
+
+        Label {
+            id: emptyLabel
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+            color: Utility.getAppHexColor("normalText")
+        }
+
+        Item { Layout.fillHeight: true }
+    }
+
+    // Search field and sort chips above the count of logs. The chips go next to the field when it
+    // gets 240 pt, as in landscape and on tablets.
+    component LogSearch: ColumnLayout {
+        id: logSearch
+        property alias text: searchField.displayText
+        property alias sorts: sortRepeater.model
+        property string sortBy: "Date"
+        property bool ascending: false
+        property alias count: countLabel.text
+        spacing: 8
+
+        // If s has all searched words, ignoring case
+        function matches(s) {
+            var t = s.toLowerCase()
+            return searchField.displayText.toLowerCase().split(" ").every(w => t.indexOf(w) >= 0)
+        }
+
+        // Ascending comparison d in the picked direction
+        function order(d) {
+            return ascending ? d : -d
+        }
+
+        function clear() {
+            searchField.text = ""
+            // Or the field takes the focus and the keyboard on the next open
+            searchField.focus = false
+        }
+
+        GridLayout {
+            Layout.fillWidth: true
+            columns: width > sortChips.implicitWidth + 240 ? 2 : 1
+            rowSpacing: 0
+            columnSpacing: 8
+
+            InputField {
+                id: searchField
+                Layout.fillWidth: true
+                placeholderText: qsTr("Search logs")
+                inputMethodHints: Qt.ImhNoPredictiveText
+            }
+
+            Row {
+                id: sortChips
+                spacing: 6
+
+                Repeater {
+                    id: sortRepeater
+
+                    // The picked sort shows its direction, tapping it again flips it. Name starts
+                    // A-Z, the others newest, longest or largest first.
+                    Chip {
+                        id: sortChip
+                        text: modelData + (checked ? (logSearch.ascending ? " ↑" : " ↓") : "")
+                        // Room for the arrow on every chip, so picking one does not move the others
+                        implicitWidth: Math.ceil(arrowMetrics.advanceWidth) + 24
+                        checked: logSearch.sortBy === modelData
+                        onClicked: {
+                            Qt.inputMethod.hide()
+                            logSearch.ascending = checked ? !logSearch.ascending : modelData === "Name"
+                            logSearch.sortBy = modelData
+                        }
+
+                        TextMetrics {
+                            id: arrowMetrics
+                            font.family: sortChip.font.family
+                            font.weight: Font.Medium
+                            text: modelData + " ↓"
+                        }
+                    }
+                }
+            }
+        }
+
+        Label {
+            id: countLabel
+            Layout.fillWidth: true
+            elide: Text.ElideMiddle
+            font.pointSize: 10
+            color: Utility.getAppHexColor("normalText")
+        }
+    }
+
+    SheetDialog {
         id: confirmDeleteDialog
+        acceptText: qsTr("Delete")
         title: "Delete Device Log?"
-        modal: true
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.85, 360)
-        standardButtons: Dialog.Yes | Dialog.No
         closePolicy: Popup.NoAutoClose
 
         Label {
@@ -161,14 +408,21 @@ Item {
         onAccepted: root.executeDeleteFile()
     }
 
-    Dialog {
+    SheetDialog {
         id: deviceFileDialog
-        title: "Device Logs (" + root.deviceCurrentDir + ")"
-        modal: true
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.92, 460)
-        height: Math.min(parent.height * 0.80, 520)
+        // Up, the folders and then the logs with all searched words in their name, in the picked order
+        readonly property var shownFiles: root.deviceFileEntries.filter(e => e.name === ".." || deviceSearch.matches(e.name))
+            .sort((a, b) => (b.name === "..") - (a.name === "..") || b.isDir - a.isDir ||
+                            deviceSearch.order((deviceSearch.sortBy === "Date" ? a.timestamp - b.timestamp :
+                                                deviceSearch.sortBy === "Size" ? a.size - b.size : 0) || a.name.localeCompare(b.name)))
+        readonly property var logs: root.deviceFileEntries.filter(e => !e.isDir)
+
+        // Landscape phones have the height for a few rows only, the path is in the count line there
+        title: phoneLandscape ? "" : "Device Logs"
+        fullHeight: true
         closePolicy: Popup.NoAutoClose
+        // Cleared on open, as clearing on Close mid-download rebuilds the row that is downloading
+        onAboutToShow: deviceSearch.clear()
 
         ColumnLayout {
             anchors.fill: parent
@@ -176,7 +430,9 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
-                TextField {
+                visible: !phoneLandscape
+                enabled: !root.deviceLoading && !root.downloadingFromDevice
+                InputField {
                     id: dirInput
                     Layout.fillWidth: true
                     text: root.deviceCurrentDir
@@ -189,64 +445,66 @@ Item {
                 }
             }
 
+            LogSearch {
+                id: deviceSearch
+                Layout.fillWidth: true
+                enabled: !root.downloadingFromDevice
+                sorts: ["Date", "Name", "Size"]
+                count: root.logCountText(deviceFileDialog.shownFiles.filter(e => !e.isDir).length,
+                                         deviceFileDialog.logs, root.deviceCurrentDir)
+            }
+
             ListView {
                 id: deviceListView
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                // Only as tall as the Up row above the empty text
+                Layout.fillHeight: !deviceEmpty.visible
+                Layout.preferredHeight: deviceEmpty.visible ? contentHeight : 0
                 clip: true
                 enabled: !root.downloadingFromDevice
-                model: root.deviceFileEntries
+                model: deviceFileDialog.shownFiles
 
-                delegate: Item {
+                delegate: LogRow {
                     width: deviceListView.width
-                    height: rowDelegate.implicitHeight
-
-                    RowLayout {
-                        id: rowDelegate
-                        anchors.fill: parent
-                        spacing: 4
-
-                        ItemDelegate {
-                            Layout.fillWidth: true
-                            text: (modelData.isDir ? "[DIR] " : "") + modelData.name +
-                                  (!modelData.isDir && modelData.size > 0 ? " (" + (modelData.size / 1024).toFixed(1) + " KB)" : "")
-                            onClicked: {
-                                if (modelData.isDir) {
-                                    if (modelData.name === "..") {
-                                        var parts = root.deviceCurrentDir.replace(/\/+$/, "").split("/")
-                                        parts.pop()
-                                        var up = parts.join("/")
-                                        root.refreshDeviceDir(up.length === 0 ? "/" : up)
-                                    } else {
-                                        var next = (root.deviceCurrentDir === "/" ? "/" : root.deviceCurrentDir + "/") + modelData.name
-                                        root.refreshDeviceDir(next)
-                                    }
-                                } else {
-                                    root.loadDeviceCsv(modelData.name)
-                                    if (!root.mCommands.fileBlockDidCancel()) {
-                                        deviceFileDialog.close()
-                                    }
-                                }
+                    iconSource: modelData.isDir ? "qrc" + Utility.getThemePath() + "icons/" +
+                                                  (modelData.name === ".." ? "Up-96.png" : "Open Folder-96.png") : ""
+                    name: modelData.name === ".." ? qsTr("Up") : modelData.name
+                    details: modelData.name === ".." ? "" : modelData.isDir ? qsTr("Folder") :
+                             root.sizeText(modelData.size) + (modelData.timestamp ? " · " + root.dateText(modelData.timestamp) : "")
+                    canSave: !modelData.isDir
+                    canDelete: !modelData.isDir
+                    onClicked: {
+                        if (modelData.isDir) {
+                            if (modelData.name === "..") {
+                                var parts = root.deviceCurrentDir.replace(/\/+$/, "").split("/")
+                                parts.pop()
+                                var up = parts.join("/")
+                                root.refreshDeviceDir(up.length === 0 ? "/" : up)
+                            } else {
+                                var next = (root.deviceCurrentDir === "/" ? "/" : root.deviceCurrentDir + "/") + modelData.name
+                                root.refreshDeviceDir(next)
+                            }
+                        } else {
+                            root.loadDeviceCsv(modelData.name)
+                            if (!root.mCommands.fileBlockDidCancel()) {
+                                deviceFileDialog.close()
                             }
                         }
-
-                        ToolButton {
-                            visible: !modelData.isDir
-                            text: "Save"
-                            font.pixelSize: 11
-                            onClicked: root.backupDeviceCsv(modelData.name)
-                        }
-
-                        ToolButton {
-                            visible: !modelData.isDir
-                            text: "Delete"
-                            font.pixelSize: 11
-                            palette.buttonText: "#ff5555"
-                            onClicked: root.promptDeleteDeviceFile(modelData.name)
-                        }
                     }
+                    onSaveClicked: root.backupDeviceCsv(modelData.name)
+                    onDeleteClicked: root.promptDeleteDeviceFile(modelData.name)
                 }
 
+            }
+
+            EmptyLogs {
+                id: deviceEmpty
+                visible: deviceFileDialog.shownFiles.every(e => e.name === "..")
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                text: root.deviceLoading ? qsTr("Loading…") :
+                      deviceFileDialog.shownFiles.length < root.deviceFileEntries.length ?
+                          "No logs match \"" + deviceSearch.text + "\"" : "No .csv logs found in:\n" + root.deviceCurrentDir
             }
 
             // Download progress bar & cancel button
@@ -261,7 +519,6 @@ Item {
                     value: root.downloadProgress
                 }
                 Label {
-                    font.family: "Monospace"
                     text: root.downloadProgress.toFixed(0) + "% (" + root.downloadSpeedKBps.toFixed(1) + " KB/s)"
                 }
                 Button {
@@ -270,8 +527,6 @@ Item {
                 }
             }
         }
-
-        standardButtons: Dialog.Close
     }
 
     function rtLogFolderUrl(dir) {
@@ -335,67 +590,79 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: rtLogListDialog
-        title: "RT Logs (" + root.currentRtLogDir + ")"
-        modal: true
-        closePolicy: Popup.NoAutoClose
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.92, 460)
-        height: Math.min(parent.height * 0.80, 520)
-        standardButtons: Dialog.Close
+        // Logs with all searched words in their name or date, in the picked order
+        readonly property var shownLogs: root.rtLogEntries.filter(e => rtLogSearch.matches(e.name + " " + e.modified + " " + root.dateText(e.timestamp)))
+            .sort((a, b) => rtLogSearch.order(rtLogSearch.sortBy === "Distance" ? root.logMeters(a.path, a.size) - root.logMeters(b.path, b.size) :
+                                              rtLogSearch.sortBy === "Size" ? a.size - b.size : a.timestamp - b.timestamp))
+
+        title: "RT Logs"
+        acceptText: qsTr("Close")
+        rejectText: ""
+        fullHeight: true
+        onOpened: distanceTimer.next = 0
+        onClosed: rtLogSearch.clear()
+
+        // Reads the distances one log at a time while the sheet is open, so that sorting by them is quick
+        Timer {
+            id: distanceTimer
+            property int next: 0
+            interval: 50
+            repeat: true
+            running: rtLogListDialog.opened && next < root.rtLogEntries.length
+            onTriggered: {
+                var e = root.rtLogEntries[next++]
+                root.logMeters(e.path, e.size)
+            }
+        }
 
         ColumnLayout {
             anchors.fill: parent
-            spacing: 6
+            spacing: 8
 
-            Label {
-                visible: root.rtLogEntries.length === 0
+            LogSearch {
+                id: rtLogSearch
                 Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                text: "No .csv logs found in:\n" + Utility.getSetting("path_rt_log", "").toString()
-                color: "#9ca3af"
+                visible: root.rtLogEntries.length > 0
+                sorts: ["Date", "Distance", "Size"]
+                count: root.logCountText(rtLogListDialog.shownLogs.length, root.rtLogEntries, displayPath(root.currentRtLogDir))
+            }
+
+            EmptyLogs {
+                visible: rtLogListDialog.shownLogs.length === 0
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                text: root.rtLogEntries.length === 0 ? "No .csv logs found in:\n" + displayPath(root.currentRtLogDir) :
+                                                       "No logs match \"" + rtLogSearch.text + "\""
             }
 
             ListView {
                 id: rtLogListView
+                visible: rtLogListDialog.shownLogs.length > 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
-                model: root.rtLogEntries
+                model: rtLogListDialog.shownLogs
 
-                delegate: Item {
+                delegate: LogRow {
                     width: rtLogListView.width
-                    height: rtRow.implicitHeight
-
-                    RowLayout {
-                        id: rtRow
-                        anchors.fill: parent
-                        spacing: 4
-
-                        ItemDelegate {
-                            Layout.fillWidth: true
-                            text: modelData.name + "  (" + (modelData.size / 1024).toFixed(1) + " KB · " + modelData.modified + ")"
-                            onClicked: {
-                                var text = Utility.readTextFile(modelData.path)
-                                if (text && text.length > 0) {
-                                    root.loadedFileName = modelData.name
-                                    root.parseCsvText(text)
-                                    recordRecentLocalLog(modelData.path)
-                                    rtLogListDialog.close()
-                                } else {
-                                    root.statusText = "Failed to read: " + modelData.name
-                                }
-                            }
-                        }
-
-                        ToolButton {
-                            text: "Delete"
-                            font.pixelSize: 11
-                            palette.buttonText: "#ff5555"
-                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                    name: modelData.name
+                    details: root.sizeText(modelData.size) + " · " + root.dateText(modelData.timestamp)
+                    value: root.logDistanceText(modelData.path, modelData.size)
+                    canDelete: true
+                    onClicked: {
+                        var text = Utility.readTextFile(modelData.path)
+                        if (text && text.length > 0) {
+                            root.loadedFileName = modelData.name
+                            root.parseCsvText(text)
+                            recordRecentLocalLog(modelData.path)
+                            rtLogListDialog.close()
+                        } else {
+                            root.statusText = "Failed to read: " + modelData.name
                         }
                     }
+                    onDeleteClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
                 }
             }
         }
@@ -543,7 +810,6 @@ Item {
                                   name: fname,
                                   path: p,
                                   size: 0,
-                                  modified: "",
                                   source: "Local",
                                   canDelete: false
                               })
@@ -578,99 +844,248 @@ Item {
         statusText = "Cleared recent log history."
     }
 
-    Dialog {
+    SheetDialog {
         id: recentLogsDialog
         title: "Recent Logs (Local & RT)"
-        modal: true
-        closePolicy: Popup.NoAutoClose
-        anchors.centerIn: parent
-        width: Math.min(parent.width * 0.92, 500)
-        height: Math.min(parent.height * 0.80, 540)
-
-        footer: DialogButtonBox {
-            Button {
-                text: "Clear History"
-                DialogButtonBox.buttonRole: DialogButtonBox.ResetRole
-                enabled: root.toJsArray(Utility.getSetting("recent_local_logs", [])).length > 0
-                onClicked: root.clearRecentLogsHistory()
-            }
-            Button {
-                text: "Close"
-                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-                onClicked: recentLogsDialog.close()
-            }
-        }
+        acceptText: qsTr("Close")
+        rejectText: ""
+        fullHeight: true
 
         ColumnLayout {
             anchors.fill: parent
-            spacing: 6
+            spacing: 8
 
-            Label {
+            EmptyLogs {
                 visible: root.recentLogEntries.length === 0
                 Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                color: "#9ca3af"
+                Layout.fillHeight: true
                 text: "No recent local or RT logs found."
             }
 
             ListView {
                 id: recentLogsListView
+                visible: root.recentLogEntries.length > 0
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
                 model: root.recentLogEntries
 
-                delegate: Item {
+                delegate: LogRow {
                     width: recentLogsListView.width
-                    height: recentRow.implicitHeight
-
-                    RowLayout {
-                        id: recentRow
-                        anchors.fill: parent
-                        spacing: 6
-
-                        Rectangle {
-                            radius: 4
-                            color: modelData.source === "RT Log" ? "#1d4ed8" : "#374151"
-                            implicitWidth: badgeLbl.implicitWidth + 10
-                            implicitHeight: badgeLbl.implicitHeight + 4
-
-                            Label {
-                                id: badgeLbl
-                                anchors.centerIn: parent
-                                text: modelData.source
-                                color: "#ffffff"
-                                font.pixelSize: 10
-                                font.bold: true
-                            }
+                    name: modelData.name
+                    details: modelData.source + (modelData.size > 0 ? " · " + root.sizeText(modelData.size) : "") +
+                             (modelData.timestamp ? " · " + root.dateText(modelData.timestamp) : "")
+                    value: modelData.size > 0 ? root.logDistanceText(modelData.path, modelData.size) : ""
+                    canDelete: modelData.canDelete
+                    onClicked: {
+                        var text = Utility.readTextFile(modelData.path)
+                        if (text && text.length > 0) {
+                            root.loadedFileName = modelData.name
+                            root.parseCsvText(text)
+                            root.recordRecentLocalLog(modelData.path)
+                            recentLogsDialog.close()
+                        } else {
+                            root.statusText = "Failed to read: " + modelData.name
                         }
+                    }
+                    onDeleteClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+                }
+            }
 
-                        ItemDelegate {
-                            Layout.fillWidth: true
-                            text: modelData.name + (modelData.size > 0
-                                                    ? ("  (" + (modelData.size / 1024).toFixed(1) + " KB" +
-                                                       (modelData.modified ? (" · " + modelData.modified) : "") + ")")
-                                                    : "")
-                            onClicked: {
-                                var text = Utility.readTextFile(modelData.path)
-                                if (text && text.length > 0) {
-                                    root.loadedFileName = modelData.name
-                                    root.parseCsvText(text)
-                                    root.recordRecentLocalLog(modelData.path)
-                                    recentLogsDialog.close()
-                                } else {
-                                    root.statusText = "Failed to read: " + modelData.name
-                                }
-                            }
-                        }
+            Button {
+                Layout.fillWidth: true
+                text: "Clear History"
+                flat: true
+                enabled: root.toJsArray(Utility.getSetting("recent_local_logs", [])).length > 0
+                onClicked: root.clearRecentLogsHistory()
+            }
+        }
+    }
 
-                        ToolButton {
-                            visible: modelData.canDelete
-                            text: "Delete"
-                            font.pixelSize: 11
-                            palette.buttonText: "#ff5555"
-                            onClicked: root.promptDeleteLocalFile(modelData.name, modelData.path)
+    // Faults in the log over the map or the values, so that the graphs stay in view. A tap moves the cursor to one
+    Dialog {
+        id: faultsDialog
+        parent: map.visible ? map : valuesView
+        width: parent.width
+        height: parent.height
+        padding: 8
+        topPadding: 0
+        modal: false
+        closePolicy: Popup.CloseOnEscape
+
+        background: Rectangle {
+            color: Utility.getAppHexColor("cardBackground")
+            radius: 12
+            border.color: Utility.getAppHexColor("raisedBackground")
+        }
+
+        header: RowLayout {
+            Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                text: qsTr("Faults")
+                font.pointSize: 13
+                font.weight: Font.Medium
+                color: Utility.getAppHexColor("titleText")
+            }
+
+            ToolButton {
+                text: "×"
+                font.pixelSize: 18
+                Accessible.name: qsTr("Close")
+                onClicked: faultsDialog.close()
+            }
+        }
+
+        ListView {
+            anchors.fill: parent
+            clip: true
+            model: root.faultRuns
+
+            delegate: ItemDelegate {
+                readonly property var time: root.faultTimeText(modelData)
+                width: ListView.view.width
+                highlighted: root.currentIndex >= modelData.start && root.currentIndex <= modelData.end
+                onClicked: {
+                    if (modelData.start < root.viewStart || modelData.start > root.viewEnd) {
+                        root.applyZoomWindow(0, root.rawRows.length - 1, false)
+                    }
+                    root.currentIndex = modelData.start
+                }
+
+                contentItem: GridLayout {
+                    columns: 2
+                    rowSpacing: 2
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.mCommands.faultToStr(modelData.code)
+                        wrapMode: Text.WrapAnywhere
+                        font.weight: Font.Medium
+                        color: Utility.getAppHexColor("danger")
+                    }
+
+                    Text {
+                        text: time.at
+                        font.weight: Font.Medium
+                        color: Utility.getAppHexColor("lightText")
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.columnSpan: 2
+                        visible: text !== ""
+                        text: Utility.faultToDescription(modelData.code)
+                        wrapMode: Text.Wrap
+                        color: Utility.getAppHexColor("lightText")
+                    }
+
+                    Text {
+                        Layout.columnSpan: 2
+                        text: root.columnMeta[modelData.col].label + " · " + time.duration
+                        font.pointSize: 9
+                        color: Utility.getAppHexColor("normalText")
+                    }
+                }
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 1
+                    color: Utility.getAppHexColor("lightestBackground")
+                }
+            }
+        }
+    }
+
+    // Column of a graph line. Logs with many columns are grouped by device or kind.
+    SheetDialog {
+        id: columnSheet
+        property int slot: 0
+        property string group: ""
+        // Columns without data or that never change are left out
+        readonly property var shown: root.columnMeta.filter(c => c.max > c.min)
+        readonly property bool grouped: shown.length > 16
+        // Device groups first, then the kinds, of the shown columns
+        readonly property var chips: {
+            var kinds = root.columnKinds.map(kd => kd[0])
+            return root.columnGroups.filter(g => kinds.indexOf(g) < 0 && g !== "Other").concat(kinds, "Other")
+                .filter(t => shown.some(c => c.tags.indexOf(t) >= 0))
+        }
+        // Columns in the picked group or kind that have all searched words, in group order when grouped
+        readonly property var rows: {
+            var terms = columnField.displayText.toLowerCase().split(" ")
+            return shown.filter(c => (group === "" || c.tags.indexOf(group) >= 0) &&
+                                terms.every(t => [c.label, c.key, c.unit].concat(c.tags).join(" ").toLowerCase().indexOf(t) >= 0))
+                .sort((a, b) => (grouped ? root.columnGroups.indexOf(a.group) - root.columnGroups.indexOf(b.group) : 0) || a.index - b.index)
+        }
+
+        title: qsTr("Select Value")
+        rejectText: ""
+        fullHeight: true
+        onClosed: {
+            group = ""
+            columnField.text = ""
+            // Or the field takes the focus and the keyboard on the next open
+            columnField.focus = false
+        }
+
+        ColumnLayout {
+            anchors.fill: parent
+            spacing: 8
+
+            InputField {
+                id: columnField
+                Layout.fillWidth: true
+                placeholderText: qsTr("Search %1 values").arg(columnSheet.shown.length)
+                inputMethodHints: Qt.ImhNoPredictiveText
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                visible: columnSheet.grouped
+                spacing: 6
+
+                Repeater {
+                    model: columnSheet.chips
+
+                    Chip {
+                        topInset: 0
+                        text: modelData
+                        checked: columnSheet.group === modelData
+                        onClicked: {
+                            Qt.inputMethod.hide()
+                            columnSheet.group = checked ? "" : modelData
                         }
+                    }
+                }
+            }
+
+            ListView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                model: columnSheet.rows
+                section.property: columnSheet.grouped ? "group" : ""
+                section.delegate: SectionHeader {
+                    width: ListView.view.width
+                    text: section
+                }
+
+                delegate: LogRow {
+                    width: ListView.view.width
+                    // Without the device's word in front, as the section header shows it
+                    name: columnSheet.grouped && modelData.group === modelData.word &&
+                          root.columnKinds.every(kd => kd[0] !== modelData.group) ?
+                              modelData.label.slice(modelData.word.length + 1) || modelData.label : modelData.label
+                    readonly property int decimals: root.colDecimals(modelData)
+                    details: modelData.min.toFixed(decimals) + " – " + modelData.max.toFixed(decimals) + " " + modelData.unit
+                    // A dot in the colour of each line that shows this column
+                    value: root.slotColIdx.map((c, s) => c === modelData.index ? "<font color='" + root.slotColors[s] + "'>●</font>" : "").join("")
+                    onClicked: {
+                        root.setSlotColumn(columnSheet.slot, modelData.index)
+                        columnSheet.close()
                     }
                 }
             }
@@ -680,14 +1095,13 @@ Item {
     property var trackCoords: []
     property var rawRows: []
     property var columnMeta: []
-    property var columnNames: []
+    property var columnGroups: []
     property int timeColIdx: -1
     property bool hasGps: false
     property int currentIndex: 0
     property int viewStart: 0
     property int viewEnd: 0
-    property string statusText: "Click 'Open CSV Log' to load a VESC log file."
-    property bool comboOpen: false
+    property string statusText: "Open a log from the File menu."
     property bool followMap: true
 
     property string loadedHeaderLine: ""
@@ -706,14 +1120,55 @@ Item {
         { min: 0, max: 1, rawMin: null, rawMax: null },
         { min: 0, max: 1, rawMin: null, rawMax: null }
     ]
-    readonly property var slotColors: ["#00d4ff", "#ff9900", "#ff4d6d", "#4ade80"]
+    // Darker series colours on the light card
+    readonly property var slotColors: Utility.isDarkMode() ? ["#00d4ff", "#ff9900", "#ff4d6d", "#4ade80"] :
+                                                             ["#0079a8", "#b85f00", "#d42a4c", "#1c8a4a"]
 
-    property var currentMapCoord: {
-        if (!hasGps || rawRows.length === 0) return QtPositioning.coordinate(0, 0)
-        for (var i = currentIndex; i >= 0; i--) {
-            if (rawRows[i].coord !== null) return rawRows[i].coord
+    // The marker eases after the cursor through the rows in between, so that it stays on the track
+    property real markerIndex: currentIndex
+    Behavior on markerIndex {
+        NumberAnimation { duration: 80; easing.type: Easing.OutQuad }
+    }
+
+    // Position on the track at a fractional row, between the position logged before and after it
+    function trackCoordAt(index) {
+        var n = rawRows.length
+        var i = Math.min(Math.floor(index), n - 1)
+        while (i >= 0 && rawRows[i].coord === null) i--
+        if (i < 0) return trackCoords.length > 0 ? trackCoords[0] : QtPositioning.coordinate(0, 0)
+
+        var a = rawRows[i].coord
+        var same = (c) => c === null || (c.latitude === a.latitude && c.longitude === a.longitude)
+        var start = i
+        while (start > 0 && same(rawRows[start - 1].coord)) start--
+        var next = i + 1
+        while (next < n && same(rawRows[next].coord)) next++
+        if (next >= n) return a
+
+        var b = rawRows[next].coord
+        var t = Math.min(1, (index - start) / (next - start))
+        return QtPositioning.coordinate(a.latitude + (b.latitude - a.latitude) * t,
+                                        a.longitude + (b.longitude - a.longitude) * t)
+    }
+
+    property var currentMapCoord: hasGps && rawRows.length > 0 ? trackCoordAt(markerIndex) :
+                                                                 QtPositioning.coordinate(0, 0)
+
+    // Direction of travel at the marker in degrees from north, towards the next logged position.
+    // Positions closer than 5 m are skipped as their direction is mostly GPS noise.
+    property real currentHeading: {
+        if (!hasGps || rawRows.length === 0) return 0
+        var cur = currentMapCoord
+        var row = Math.min(Math.floor(markerIndex), rawRows.length - 1)
+        for (var i = row + 1; i < rawRows.length; i++) {
+            var next = rawRows[i].coord
+            if (next !== null && cur.distanceTo(next) > 5) return cur.azimuthTo(next)
         }
-        return trackCoords.length > 0 ? trackCoords.slice(0, 1).pop() : QtPositioning.coordinate(0, 0)
+        for (var j = row; j >= 0; j--) {
+            var prev = rawRows[j].coord
+            if (prev !== null && prev.distanceTo(cur) > 5) return prev.azimuthTo(cur)
+        }
+        return 0
     }
 
     function updateStatusSummary() {
@@ -750,7 +1205,7 @@ Item {
             }
         }
 
-        var distStr = (distM / 1000.0).toFixed(2) + " km"
+        var distStr = distanceText(distM)
         var durStr = ""
         if (firstTime !== null && lastTime !== null && lastTime >= firstTime) {
             var secs = Math.round(lastTime - firstTime)
@@ -775,6 +1230,10 @@ Item {
 
     function fitRouteBounds() {
         if (!hasGps || rawRows.length === 0) return
+        if (!map.visible) {
+            routeFitPending = true
+            return
+        }
         var visibleCoords = []
         var s = Math.max(0, Math.min(viewStart, rawRows.length - 1))
         var e = Math.max(s, Math.min(viewEnd, rawRows.length - 1))
@@ -789,6 +1248,23 @@ Item {
             return
         }
         map.fitViewportToGeoShape(QtPositioning.rectangle(visibleCoords), Qt.size(40, 40))
+    }
+
+    // Eases the map to where moveMap() puts it. restart() sets the map back to the start before it is drawn.
+    function easeMap(moveMap) {
+        centerAnim.from = map.center
+        zoomAnim.from = map.zoomLevel
+        moveMap()
+        centerAnim.to = map.center
+        zoomAnim.to = map.zoomLevel
+        mapAnim.restart()
+    }
+
+    // Zoom before center, as the map limits the center latitude by the zoom level
+    ParallelAnimation {
+        id: mapAnim
+        NumberAnimation { id: zoomAnim; target: map; property: "zoomLevel"; duration: 300; easing.type: Easing.OutCubic }
+        CoordinateAnimation { id: centerAnim; target: map; property: "center"; duration: 300; easing.type: Easing.OutCubic }
     }
 
     function applyZoomWindow(startIdx, endIdx, fitMap) {
@@ -903,19 +1379,116 @@ Item {
         chartCursor.requestPaint()
     }
 
-    function parseHeaderMeta(hLine) {
+    // Names and units for the VESC Tool RT log, which has only keys in its header, as in the desktop log analysis
+    readonly property var rtLogColumns: ({
+        "ms_today": ["Time", "ms"], "input_voltage": ["Input Voltage", "V"],
+        "temp_mos_max": ["Temp MOSFET", "°C"], "temp_mos_1": ["Temp MOSFET 1", "°C"],
+        "temp_mos_2": ["Temp MOSFET 2", "°C"], "temp_mos_3": ["Temp MOSFET 3", "°C"],
+        "temp_motor": ["Temp Motor", "°C"], "current_motor": ["Current Motor", "A"],
+        "current_in": ["Current Battery", "A"], "d_axis_current": ["id", "A"], "q_axis_current": ["iq", "A"],
+        "erpm": ["ERPM", ""], "duty_cycle": ["Duty", "%"], "amp_hours_used": ["Ah Used", "Ah"],
+        "amp_hours_charged": ["Ah Charged", "Ah"], "watt_hours_used": ["Wh Used", "Wh"],
+        "watt_hours_charged": ["Wh Charged", "Wh"], "tachometer": ["Tachometer", ""],
+        "tachometer_abs": ["Tachometer ABS", ""], "encoder_position": ["Motor Pos", "°"],
+        "fault_code": ["Fault Code", ""], "vesc_id": ["VESC ID", ""], "d_axis_voltage": ["vd", "V"],
+        "q_axis_voltage": ["vq", "V"], "ms_today_setup": ["Time Setup", "ms"],
+        "amp_hours_setup": ["Ah Used Setup", "Ah"], "amp_hours_charged_setup": ["Ah Charged Setup", "Ah"],
+        "watt_hours_setup": ["Wh Used Setup", "Wh"], "watt_hours_charged_setup": ["Wh Charged Setup", "Wh"],
+        "battery_level": ["Battery Level", "%"], "battery_wh_tot": ["Battery Wh", "Wh"],
+        "current_in_setup": ["Current Battery Setup", "A"], "current_motor_setup": ["Current Motors Setup", "A"],
+        "speed_meters_per_sec": ["Speed VESC", "m/s"], "tacho_meters": ["Trip VESC", "m"],
+        "tacho_abs_meters": ["Trip VESC ABS", "m"], "num_vescs": ["VESC num", ""], "ms_today_imu": ["Time IMU", "ms"],
+        "roll": ["Roll", "rad"], "pitch": ["Pitch", "rad"], "yaw": ["Yaw", "rad"],
+        "accx": ["Accel X", "G"], "accy": ["Accel Y", "G"], "accz": ["Accel Z", "G"],
+        "gyrox": ["Gyro X", "°/s"], "gyroy": ["Gyro Y", "°/s"], "gyroz": ["Gyro Z", "°/s"],
+        "gnss_postime": ["Time GNSS", "ms"], "gnss_lat": ["Latitude", "°"], "gnss_lon": ["Longitude", "°"],
+        "gnss_alt": ["Altitude", "m"], "gnss_gvel": ["Speed GNSS", "m/s"], "gnss_vvel": ["V. Speed GNSS", "m/s"],
+        "gnss_hacc": ["H. Accuracy GNSS", "m"], "gnss_vacc": ["V. Accuracy GNSS", "m"]
+    })
+
+    // What a column measures, all that match its words and [unit]
+    readonly property var columnKinds: [
+        ["GPS", /gnss|gps|\b(lat|lon|alt)(itude|gitude)?\b/],
+        ["Time", /\b(time|ms|t day)\b|\[m?s\]/],
+        ["IMU", /\b(imu|roll|pitch|yaw|gyro|accel)/],
+        ["Status", /fault|\bok\b|\[(bool|cnt)\]/],
+        ["Temperature", /\btemp|\[°c\]/],
+        ["Energy", /hours|\b[aw]h\b/],
+        ["Power", /power|\[w\]/],
+        ["Current", /current|\[a\]/],
+        ["Voltage", /volt|\bv in\b|\[v\]/],
+        ["Speed", /speed|rpm|kmh|\bvel|\[(km\/h|mph)\]/],
+        ["Distance", /\b(dist|trip|tacho|odo)/],
+        ["Battery", /batt|\bsoc\b/]
+    ]
+
+    function parseHeaderMeta(hLine, extraCol) {
         var delim = hLine.indexOf(";") !== -1 ? ";" : (hLine.indexOf(",") !== -1 ? "," : "\t")
         var rawCols = hLine.split(delim)
-        var cols = [], names = []
+        var imperial = VescIf.useImperialUnits()
+        // RT logs end the header with the delimiter
+        if (rawCols[rawCols.length - 1].trim() === "") rawCols.pop()
+        if (extraCol) rawCols.push(extraCol)
+        var cols = []
         rawCols.forEach(function(raw, i) {
             var p = raw.trim().split(":")
             var k = (p.shift() || "").trim()
             var lbl = (p.length > 0 ? p.shift() : k).trim()
             var u = (p.length > 0 ? p.shift() : "").trim()
-            cols.push({ index: i, key: k.toLowerCase(), label: lbl, unit: u })
-            names.push(u.length > 0 ? (lbl + " (" + u + ")") : lbl)
+            var scale = 1
+            var rt = raw.indexOf(":") === -1 ? rtLogColumns[k.toLowerCase()] : undefined
+            if (rt) {
+                lbl = rt[0]
+                u = rt[1]
+                // The RT log has the duty cycle and battery level as fractions
+                if (u === "%") scale = 100
+            }
+            u = ({ "degC": "°C", "deg": "°" })[u] || u
+            // Speeds are shown in km/h or mph
+            var toKmh = ({ "m/s": 3.6, "km/h": 1, "kmh": 1, "kph": 1, "mph": 1.609344 })[u.toLowerCase()]
+            if (toKmh) {
+                scale = imperial ? toKmh / 1.609344 : toKmh
+                u = imperial ? "mph" : "km/h"
+            }
+            // Words of the label and key and the unit, like "h. speed gnss gnss h vel [km/h]"
+            var text = (lbl.replace(/([a-z])([A-Z])/g, "$1 $2") + " " + k + " [" + u + "]").replace(/_/g, " ").toLowerCase()
+            var kinds = columnKinds.filter(kd => kd[1].test(text)).map(kd => kd[0])
+            // Distances are shown in km or mi
+            var toKm = kinds.indexOf("Distance") >= 0 ? ({ "m": 0.001, "km": 1, "mi": 1.609344 })[u] : 0
+            if (toKm) {
+                scale = imperial ? toKm / 1.609344 : toKm
+                u = imperial ? "mi" : "km"
+            }
+            cols.push({ index: i, key: k.toLowerCase(), label: lbl, unit: u, scale: scale, min: Infinity, max: -Infinity,
+                        kind: kinds.length > 0 ? kinds[0] : "Other", kinds: kinds, word: lbl.split(/[ _]/)[0] })
         })
-        return { delim: delim, cols: cols, names: names }
+
+        // LogUI names motor controllers on CAN V<CAN ID>. They become M1, M2... in CAN ID order,
+        // after the motors the log already numbers and the logger's own motor.
+        var motors = cols.reduce((n, c) => Math.max(n, /^M\d+$/.test(c.word) ? parseInt(c.word.slice(1)) : 0),
+                                 cols.some(c => c.key === "current in") ? 1 : 0)
+        var canIds = cols.map(c => /^V(\d+)$/.exec(c.word)).filter(v => v).map(v => parseInt(v[1]))
+            .filter((id, i, ids) => ids.indexOf(id) === i).sort((a, b) => a - b)
+        cols.forEach(function(c) {
+            var v = /^V(\d+)$/.exec(c.word)
+            if (v) {
+                c.word = "M" + (motors + canIds.indexOf(parseInt(v[1])) + 1)
+                c.label = c.word + c.label.slice(v[0].length)
+            }
+        })
+
+        // A first word that three or more labels share groups them, like BMS or M1, unless they
+        // all measure the same known kind. The other columns are grouped by kind, Other last.
+        // Filtering finds a column by its group and by every kind it measures.
+        var groups = []
+        cols.forEach(function(c) {
+            var kinds = cols.filter(o => o.word === c.word).map(o => o.kind)
+            c.group = kinds.length >= 3 && !kinds.every(x => x === kinds[0] && x !== "Other") ? c.word : c.kind
+            c.tags = [c.group].concat(c.kinds)
+            if (groups.indexOf(c.group) < 0) groups.push(c.group)
+        })
+        groups = groups.filter(g => g !== "Other").concat(groups.filter(g => g === "Other"))
+        return { delim: delim, cols: cols, groups: groups }
     }
 
     function findColKeyIdx(colsOrCandidates, maybeCandidates) {
@@ -976,11 +1549,22 @@ Item {
         for (var j = 0; j < allLines.length; j++) {
             if (allLines[j].trim().length > 0) cleanLines.push(allLines[j])
         }
-        loadedDataLines = cleanLines
 
         var meta = parseHeaderMeta(loadedHeaderLine)
+        // A log cut off by a power loss ends in a partial line
+        if (cleanLines.length > 1 && cleanLines[cleanLines.length - 1].split(meta.delim).length <
+                loadedHeaderLine.split(meta.delim).length) {
+            cleanLines.pop()
+        }
+        loadedDataLines = cleanLines
         var latIdx = findColKeyIdx(meta.cols, ["gnss_lat", "lat", "latitude"])
         var lonIdx = findColKeyIdx(meta.cols, ["gnss_lon", "lon", "lng", "longitude"])
+        // Distance along the GPS track, to compare with the distances in the log
+        var tripCol = null
+        if (latIdx !== -1 && lonIdx !== -1 && findColKeyIdx(meta.cols, ["trip_gnss"]) === -1) {
+            meta = parseHeaderMeta(loadedHeaderLine, "trip_gnss:Trip GNSS:m")
+            tripCol = meta.cols[meta.cols.length - 1]
+        }
 
         // Pass 1: Parse values and collect unique GPS fixes (collapsing repeated coordinates)
         var rawParsed = []
@@ -992,8 +1576,10 @@ Item {
             var vals = new Array(meta.cols.length)
             for (var c = 0; c < meta.cols.length; c++) {
                 if (c < parts.length && parts[c].trim().length > 0) {
-                    var n = parseFloat(parts[c])
+                    var n = parseFloat(parts[c]) * meta.cols[c].scale
                     vals[c] = isNaN(n) ? null : n
+                    if (n < meta.cols[c].min) meta.cols[c].min = n
+                    if (n > meta.cols[c].max) meta.cols[c].max = n
                 } else {
                     vals[c] = null
                 }
@@ -1066,26 +1652,50 @@ Item {
                 }
                 prevCoord = coord
             }
+            if (tripCol) rawParsed[r].vals[tripCol.index] = distance * tripCol.scale
             rows.push({ coord: coord, vals: rawParsed[r].vals, distance: distance })
         }
+        if (tripCol) {
+            tripCol.min = 0
+            tripCol.max = distance * tripCol.scale
+        }
+
+        // Runs of rows with the same fault, from each column that logs one. Empty cells keep the
+        // last value. LogUI logs the same fault as both fault and Fault, so a label is used once.
+        var faults = [], faultLabels = []
+        meta.cols.forEach(function(col) {
+            var label = col.label.toLowerCase()
+            if (!/fault/.test(col.key + " " + label) || faultLabels.indexOf(label) >= 0) return
+            faultLabels.push(label)
+            var code = 0, run = null
+            for (var r = 0; r < rows.length; r++) {
+                if (rows[r].vals[col.index] !== null) code = Math.round(rows[r].vals[col.index])
+                if (run && code !== run.code) { faults.push(run); run = null }
+                if (!run && code !== 0) run = { col: col.index, code: code, start: r }
+                if (run) run.end = r
+            }
+            if (run) faults.push(run)
+        })
 
         if (rows.length === 0) { statusText = "No valid rows found."; return }
 
         columnMeta = meta.cols
-        columnNames = meta.names
+        columnGroups = meta.groups
         rawRows = rows
         trackCoords = coords
         hasGps = coords.length > 0
+        faults.forEach(f => f.coord = hasGps ? trackCoordAt(f.start) : null)
+        faultRuns = faults.sort((a, b) => a.start - b.start)
         viewStart = 0
         viewEnd = rows.length - 1
         currentIndex = 0
         zoomRange.first.value = 0
         zoomRange.second.value = rows.length - 1
         updateVisibleRoute()
-        var d0 = findColKeyIdx(meta.cols, ["gnss_h_vel", "speed_meters_per_sec", "impeller rpm", "m1 erpm"])
-        var d1 = findColKeyIdx(meta.cols, ["bms current in", "m1 current in", "current_in", "impeller power"])
-        var d2 = findColKeyIdx(meta.cols, ["m1 current", "current_motor", "jet temp gearbox"])
-        var d3 = findColKeyIdx(meta.cols, ["voltage in", "input_voltage", "bms soc"])
+        var d0 = findColKeyIdx(meta.cols, ["gnss_h_vel", "speed_meters_per_sec", "impeller rpm", "m1 erpm", "kmh_vesc", "m1 rpm"])
+        var d1 = findColKeyIdx(meta.cols, ["bms current in", "current in", "m1 current in", "current_in", "impeller power"])
+        var d2 = findColKeyIdx(meta.cols, ["current", "m1 current", "current_motor", "jet temp gearbox"])
+        var d3 = findColKeyIdx(meta.cols, ["voltage in", "input_voltage", "bms soc", "input voltage", "m1 input voltage"])
         var maxIdx = Math.max(0, meta.cols.length - 1)
         slotColIdx = [
                     d0 !== -1 ? d0 : 0,
@@ -1099,15 +1709,28 @@ Item {
         computeZoomedStats()
     }
 
+    // Value of a column at the cursor, from the last row up to it that has one
+    function cursorValue(colIdx) {
+        // The tiles update while a log loads, before rawRows and currentIndex do
+        for (var i = Math.min(currentIndex, rawRows.length - 1); i >= 0; i--) {
+            var v = rawRows[i].vals[colIdx]
+            if (v !== null && !isNaN(v)) return v
+        }
+        return null
+    }
+
+    // Enough decimals to tell min from max, like 57.4886 – 57.4926 °
+    function colDecimals(col) {
+        return col.max > col.min ? Math.min(7, Math.max(1, 1 - Math.floor(Math.log10(col.max - col.min)))) :
+                                   Number.isInteger(col.max) ? 0 : 1
+    }
+
     function latestSlotVal(slot) {
         var colIdx = slotColIdx[slot]
         if (colIdx < 0 || rawRows.length === 0 || colIdx >= columnMeta.length) return ""
         var unit = columnMeta[colIdx].unit
-        for (var i = currentIndex; i >= 0; i--) {
-            var v = rawRows[i].vals[colIdx]
-            if (v !== null && !isNaN(v)) return v.toFixed(1) + (unit ? " " + unit : "")
-        }
-        return "N/A"
+        var v = cursorValue(colIdx)
+        return v === null ? "N/A" : v.toFixed(1) + (unit ? " " + unit : "")
     }
 
     function slotMinMaxText(slot) {
@@ -1118,6 +1741,29 @@ Item {
 
     property var zoomedStats: []
     property bool showMapStats: true
+    // The values at the cursor in place of the map
+    property bool showValues: false
+    // The hidden map keeps the size it had, so the route is fitted when it is shown again
+    property bool routeFitPending: false
+
+    // Column, fault code, first and last row and position of each run of rows with a fault
+    property var faultRuns: []
+    property bool showFaults: true
+    onShowFaultsChanged: chartLines.requestPaint()
+
+    // When a fault began from the start of the log and how long it lasted, in rows without a time column
+    function faultTimeText(run) {
+        var t = findColKeyIdx(["ms_today", "t_day", "esc uptime", "jet uptime", "time"])
+        var next = Math.min(run.end + 1, rawRows.length - 1)
+        if (t === -1 || [0, run.start, next].some(i => rawRows[i].vals[t] === null)) {
+            return { at: "#" + (run.start + 1), duration: (run.end - run.start + 1) + " rows" }
+        }
+        var k = columnMeta[t].key.indexOf("ms_") === 0 ? 1000 : 1
+        var sec = (a, b) => ((rawRows[b].vals[t] - rawRows[a].vals[t]) / k + 86400) % 86400
+        var at = sec(0, run.start)
+        return { at: Math.floor(at / 60) + ":" + ("0" + Math.floor(at % 60)).slice(-2),
+                 duration: sec(run.start, next).toFixed(1) + " s" }
+    }
 
     function computeZoomedStats() {
         if (rawRows.length === 0) {
@@ -1127,8 +1773,18 @@ Item {
 
         var s = Math.max(0, Math.min(viewStart, rawRows.length - 1))
         var e = Math.max(s, Math.min(viewEnd, rawRows.length - 1))
-        var rStart = rawRows[s]
-        var rEnd = rawRows[e]
+        // Logs leave a cell empty when its value was not updated, so each end takes the nearest value
+        function edgeRow(from, step) {
+            var vals = rawRows[from].vals.slice()
+            for (var c = 0; c < vals.length; c++) {
+                for (var i = from + step; vals[c] === null && i >= s && i <= e && Math.abs(i - from) < 100; i += step) {
+                    vals[c] = rawRows[i].vals[c]
+                }
+            }
+            return { distance: rawRows[from].distance, vals: vals }
+        }
+        var rStart = edgeRow(s, 1)
+        var rEnd = edgeRow(e, -1)
         var items = []
 
         // 1. Samples
@@ -1139,12 +1795,12 @@ Item {
         var tachoIdx = findColKeyIdx(["tacho_meters", "tacho_abs_meters", "trip_vesc", "trip_vesc_abs"])
         var distM = gpsDistM
         if (distM <= 0 && tachoIdx !== -1 && rStart.vals[tachoIdx] !== null && rEnd.vals[tachoIdx] !== null) {
-            distM = Math.max(0, rEnd.vals[tachoIdx] - rStart.vals[tachoIdx])
+            distM = Math.max(0, rEnd.vals[tachoIdx] - rStart.vals[tachoIdx]) / columnMeta[tachoIdx].scale
         }
         if (distM > 0) {
             items.push({
                            label: "Distance",
-                           value: distM >= 1000 ? ((distM / 1000).toFixed(2) + " km") : (Math.round(distM) + " m")
+                           value: distanceText(distM)
                        })
         }
 
@@ -1166,35 +1822,36 @@ Item {
                                label: "Duration",
                                value: mins > 0 ? (mins + "m " + secs + "s") : (dtSec.toFixed(1) + "s")
                            })
+                // Rows between the ones the time was taken from
+                var r0 = s, r1 = e
+                while (rawRows[r0].vals[tIdx] === null) r0++
+                while (rawRows[r1].vals[tIdx] === null) r1--
+                items.push({ label: "Sample Rate", value: ((r1 - r0) / dtSec).toFixed(1) + " Hz" })
             }
         }
 
-        // 4. Average & Max Speed (auto-detects m/s vs km/h from column unit or key)
+        // 4. Average & Max Speed, in the unit the speed columns were converted to while parsing
+        var imperial = VescIf.useImperialUnits()
         var spdIdx = findColKeyIdx(["speed_meters_per_sec", "gnss_gvel", "gnss_h_vel", "kmh_vesc", "speed vesc", "speed"])
-        var maxSpdKmh = 0, sumSpdKmh = 0, spdCount = 0
+        var maxSpd = 0, sumSpd = 0, spdCount = 0
         if (spdIdx !== -1) {
-            var sMeta = columnMeta[spdIdx]
-            var sUnit = (typeof sMeta.unit === "string") ? sMeta.unit.toLowerCase() : ""
-            var sKey  = (typeof sMeta.key === "string") ? sMeta.key.toLowerCase() : ""
-            var toKmh = (sUnit === "km/h" || sUnit === "kmh" || sKey.indexOf("kmh") !== -1) ? 1.0 : 3.6
-
             for (var i = s; i <= e; i++) {
                 var sv = rawRows[i].vals[spdIdx]
                 if (sv !== null && !isNaN(sv)) {
-                    var kmh = Math.abs(sv) * toKmh
-                    sumSpdKmh += kmh
+                    var spd = Math.abs(sv)
+                    sumSpd += spd
                     spdCount++
-                    if (kmh > maxSpdKmh) maxSpdKmh = kmh
+                    if (spd > maxSpd) maxSpd = spd
                 }
             }
         }
-        var avgSpdKmh = spdCount > 0 ? (sumSpdKmh / spdCount)
-                                     : ((distM > 0 && dtSec > 0) ? ((distM / dtSec) * 3.6) : 0)
-        if (avgSpdKmh > 0) {
-            items.push({ label: "Avg Speed", value: avgSpdKmh.toFixed(1) + " km/h" })
+        var avgSpd = spdCount > 0 ? (sumSpd / spdCount)
+                                  : ((distM > 0 && dtSec > 0) ? (distM / dtSec * (imperial ? 2.236936 : 3.6)) : 0)
+        if (avgSpd > 0) {
+            items.push({ label: "Avg Speed", value: avgSpd.toFixed(1) + (imperial ? " mph" : " km/h") })
         }
-        if (maxSpdKmh > 0) {
-            items.push({ label: "Max Speed", value: maxSpdKmh.toFixed(1) + " km/h" })
+        if (maxSpd > 0) {
+            items.push({ label: "Max Speed", value: maxSpd.toFixed(1) + (imperial ? " mph" : " km/h") })
         }
 
         // 5. Energy Consumed (Wh net on one row, Regen on its own row when present)
@@ -1218,7 +1875,7 @@ Item {
             if (distM >= 50) {
                 items.push({
                                label: "Efficiency",
-                               value: (netWh / (distM / 1000.0)).toFixed(1) + " Wh/km"
+                               value: (netWh / (distM / (imperial ? 1609.344 : 1000.0))).toFixed(1) + (imperial ? " Wh/mi" : " Wh/km")
                            })
             }
         }
@@ -1251,17 +1908,33 @@ Item {
             }
         }
 
+        // 8. Faults in view, the row opens the list
+        var faultCount = faultRuns.filter(f => f.end >= s && f.start <= e).length
+        if (faultCount > 0) {
+            items.push({ label: "Faults", value: faultCount + " →" })
+        }
+
         zoomedStats = items
     }
 
 
     onRawRowsChanged: rangeCache = ({})
 
-    onCurrentIndexChanged: {
-        chartCursor.requestPaint()
+    onCurrentIndexChanged: chartCursor.requestPaint()
+
+    Connections {
+        target: VescIf
+
+        function onUseImperialUnitsChanged() {
+            root.reparseWithFilter()
+        }
+    }
+
+    onCurrentMapCoordChanged: {
         if (followMap && hasGps && rawRows.length > 0) {
             var c = currentMapCoord
             if (c.isValid && (c.latitude !== 0 || c.longitude !== 0)) {
+                mapAnim.stop()
                 map.center = c
             }
         }
@@ -1288,66 +1961,79 @@ Item {
         }
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
         anchors.margins: 8
-        spacing: 6
+        columns: root.wide ? 2 : 1
+        rows: 2
+        flow: root.headerOverMap ? GridLayout.TopToBottom : GridLayout.LeftToRight
+        rowSpacing: 8
+        columnSpacing: 8
 
         // Unified Top Header Card (matches chartBox styling)
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: headerCol.implicitHeight + 10
-            color: "#1a1d24"
-            radius: 6
-            border.color: "#333a45"
+            Layout.columnSpan: root.headerOverMap ? 1 : parent.columns
+            implicitHeight: headerCol.implicitHeight + 12
+            color: Utility.getAppHexColor("cardBackground")
+            radius: 12
+            border.color: Utility.getAppHexColor("raisedBackground")
 
             ColumnLayout {
                 id: headerCol
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 5
-                spacing: 4
+                anchors.margins: 6
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 0
 
-                // Row 1: Evenly spaced action buttons
+                // Evenly spaced action buttons
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
 
-                    Button {
+                    Chip {
                         id: fileMenuBtn
                         Layout.fillWidth: true
                         text: "File ▾"
                         onClicked: fileMenu.open()
 
-                        Menu {
+                        PopupMenu {
                             id: fileMenu
                             y: fileMenuBtn.height
 
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open RT Log..."
+                                iconFile: "Line Chart-96.png"
                                 onTriggered: root.openRtLogBrowser()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open Local CSV..."
+                                iconFile: "Open Folder-96.png"
                                 onTriggered: csvDialog.open()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Open Device CSV..."
+                                iconFile: "Download-96.png"
                                 onTriggered: root.openDeviceBrowser()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Recent Logs..."
+                                iconFile: "History-96.png"
                                 onTriggered: root.openRecentLogsDialog()
                             }
                             MenuSeparator {}
-                            MenuItem {
+                            MenuEntry {
                                 text: "Save Local Backup..."
+                                iconFile: "Save-96.png"
                                 enabled: root.loadedCsvText.length > 0
                                 onTriggered: root.saveLoadedLogLocally()
                             }
-                            MenuItem {
+                            MenuEntry {
                                 text: "Save Zoomed CSV..."
+                                iconFile: "Fit to Screen-96.png"
                                 enabled: root.loadedDataLines.length > 0 &&
                                          (root.viewStart > 0 || root.viewEnd < root.loadedDataLines.length - 1)
                                 onTriggered: root.saveZoomedLogLocally()
@@ -1355,68 +2041,23 @@ Item {
                         }
                     }
 
-                    Button {
-                        Layout.fillWidth: true
-                        text: "Fit Route"
-                        enabled: root.hasGps
-                        onClicked: {
-                            root.followMap = false
-                            root.fitRouteBounds()
-                        }
-                    }
-
-                    Button {
-                        Layout.fillWidth: true
-                        text: "Follow"
-                        checkable: true
-                        checked: root.followMap
-                        enabled: root.hasGps
-                        onToggled: {
-                            root.followMap = checked
-                            if (checked && root.currentMapCoord.isValid) {
-                                map.center = root.currentMapCoord
-                            }
-                        }
-                    }
-
-                    Button {
+                    Chip {
                         Layout.fillWidth: true
                         text: "Stats"
                         checkable: true
                         checked: root.showMapStats
-                        enabled: root.rawRows.length > 0
+                        // The stats are on the map
+                        enabled: root.rawRows.length > 0 && map.visible
+                        opacity: enabled ? 1 : 0.4
                         onToggled: root.showMapStats = checked
                     }
-                }
 
-                // Row 2: Status text + Filter toggle + Threshold stepper
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-
-                    Label {
-                        Layout.fillWidth: true
-                        Layout.minimumWidth: 60
-                        leftPadding: 4
-                        text: root.loadedFileName.length > 0
-                              ? (root.loadedFileName + (root.statusText.length > 0 ? (" · " + root.statusText) : ""))
-                              : root.statusText
-                        font.pixelSize: 11
-                        color: "#9ca3af"
-                        elide: Text.ElideMiddle
-                    }
-
-                    Button {
+                    Chip {
                         id: filterBtn
+                        Layout.fillWidth: true
                         text: "Filter"
                         checkable: true
                         checked: root.filterOutliers
-                        implicitHeight: 32
-                        topInset: 0
-                        bottomInset: 0
-                        leftPadding: 12
-                        rightPadding: 12
-                        font.pixelSize: 12
                         onToggled: {
                             root.filterOutliers = checked
                             root.reparseWithFilter()
@@ -1425,6 +2066,7 @@ Item {
 
                     SpinBox {
                         id: threshSpin
+                        background: InputBackground {}
                         from: 10
                         to: 2000
                         stepSize: 10
@@ -1451,10 +2093,25 @@ Item {
             id: map
             Layout.fillWidth: true
             Layout.fillHeight: true
+            // Half the page on phones, so that the header fits above it
+            Layout.preferredWidth: root.headerOverMap ? 3 : 2
+            // Beside the values and the graphs when all show
+            Layout.rowSpan: root.showAll ? 2 : 1
+            visible: root.showAll || !root.showValues
+            onVisibleChanged: {
+                if (visible && root.routeFitPending) {
+                    root.routeFitPending = false
+                    Qt.callLater(root.fitRouteBounds)
+                }
+            }
             plugin: mapPlugin
             center: QtPositioning.coordinate(57.49, 13.11)
             zoomLevel: 13
-            enabled: !root.comboOpen
+            enabled: !columnSheet.visible
+
+            // Keeps the stats card inside when the map is resized
+            onWidthChanged: statsCard.x = Math.min(statsCard.x, width - statsCard.width - 4)
+            onHeightChanged: statsCard.y = Math.min(statsCard.y, height - statsCard.height - 4)
 
             onSupportedMapTypesChanged: {
                 if (supportedMapTypes.length > 0) {
@@ -1487,6 +2144,7 @@ Item {
 
                 onActiveChanged: {
                     if (active) {
+                        mapAnim.stop()
                         lastPos = centroid.position
                         root.followMap = false
                     }
@@ -1509,6 +2167,7 @@ Item {
 
                 onActiveChanged: {
                     if (active) {
+                        mapAnim.stop()
                         root.followMap = false
                         anchorGeo = map.toCoordinate(centroid.position, false)
                     } else if (mapDrag.active) {
@@ -1532,13 +2191,41 @@ Item {
                 }
             }
 
-            WheelHandler {
+            // Touchpads pan and pinch, wheels zoom and leave sideways scrolling to the pages. Ctrl+wheel, also a
+            // Windows touchpad pinch, zooms.
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                cursorShape: undefined
                 onWheel: (event) => {
+                             var pixels = event.phase !== Qt.NoScrollPhase &&
+                                     (event.pixelDelta.x !== 0 || event.pixelDelta.y !== 0)
+                             var ctrl = (event.modifiers & Qt.ControlModifier) && event.angleDelta.y !== 0
+                             if (!ctrl && !pixels && Math.abs(event.angleDelta.y) <= Math.abs(event.angleDelta.x)) {
+                                 event.accepted = false
+                                 return
+                             }
+                             mapAnim.stop()
+                             if (pixels && !ctrl) {
+                                 map.pan(-event.pixelDelta.x, -event.pixelDelta.y)
+                                 return
+                             }
                              var pt = Qt.point(event.x, event.y)
                              var geo = map.toCoordinate(pt, false)
-                             map.zoomLevel += (event.angleDelta.y > 0 ? 0.5 : -0.5)
+                             map.zoomLevel += event.angleDelta.y / 240
                              if (geo.isValid) map.alignCoordinateToPoint(geo, pt)
                          }
+            }
+
+            // Rounds the corners of the map by covering them with the page colour
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: -6
+                z: 5
+                radius: 18
+                color: "transparent"
+                border.width: 6
+                border.color: Utility.getAppHexColor("darkBackground")
             }
 
             // Floating, movable stats card (translucent with outlined text for readability)
@@ -1548,11 +2235,11 @@ Item {
                 z: 10
                 x: 10
                 y: 10
-                width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 10))
-                height: statsCol.implicitHeight + 10
-                radius: 6
-                color: "#8c14171d"
-                border.color: "#66333a45"
+                width: Math.min(map.width - 20, Math.max(120, statsCol.implicitWidth + 16))
+                height: statsCol.implicitHeight + 16
+                radius: 12
+                color: Qt.alpha(Utility.getAppHexColor("cardBackground"), 0.55)
+                border.color: Qt.alpha(Utility.getAppHexColor("raisedBackground"), 0.4)
                 border.width: 1
 
                 onXChanged: {
@@ -1581,7 +2268,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.margins: 5
+                    anchors.margins: 8
                     spacing: 2
 
                     RowLayout {
@@ -1592,9 +2279,9 @@ Item {
                             text: "⋮⋮ Stats"
                             font.pixelSize: 11
                             font.bold: true
-                            color: "#ffffff"
+                            color: Utility.getAppHexColor("titleText")
                             style: Text.Outline
-                            styleColor: "#cc000000"
+                            styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
                         }
 
                         Item { Layout.fillWidth: true }
@@ -1605,7 +2292,7 @@ Item {
                             implicitHeight: 20
                             padding: 0
                             font.pixelSize: 13
-                            palette.buttonText: "#d1d5db"
+                            Material.foreground: Utility.getAppHexColor("lightText")
                             onClicked: root.showMapStats = false
                         }
                     }
@@ -1613,36 +2300,342 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         height: 1
-                        color: "#55ffffff"
+                        color: Qt.alpha(Utility.getAppHexColor("lightText"), 0.33)
                     }
 
                     Repeater {
                         model: root.zoomedStats
                         RowLayout {
+                            id: statRow
+                            // The fault count on a red badge, as the row opens the list
+                            readonly property bool isFaults: modelData.label === "Faults"
                             Layout.fillWidth: true
                             spacing: 8
+
+                            TapHandler {
+                                enabled: parent.isFaults
+                                margin: 8
+                                onTapped: faultsDialog.open()
+                            }
 
                             Label {
                                 text: modelData.label + ":"
                                 font.pixelSize: 11
-                                color: "#e5e7eb"
+                                color: Utility.getAppHexColor("lightText")
                                 style: Text.Outline
-                                styleColor: "#cc000000"
+                                styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
                             }
 
                             Item { Layout.fillWidth: true }
 
                             Label {
                                 text: modelData.value
-                                font.family: "Monospace"
                                 font.pixelSize: 11
                                 font.bold: true
-                                color: "#ffffff"
-                                style: Text.Outline
-                                styleColor: "#cc000000"
+                                color: parent.isFaults ? "white" : Utility.getAppHexColor("titleText")
+                                style: parent.isFaults ? Text.Normal : Text.Outline
+                                styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
+                                leftPadding: parent.isFaults ? 8 : 0
+                                rightPadding: leftPadding
+                                topPadding: parent.isFaults ? 2 : 0
+                                bottomPadding: topPadding
+                                background: Rectangle {
+                                    visible: statRow.isFaults
+                                    radius: height / 2
+                                    color: Utility.getAppHexColor("danger")
+                                }
                             }
                         }
                     }
+                }
+            }
+
+            Column {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 4
+                z: 10
+
+                // Top right on both the map and the values, where the values one shows the map icon
+                RoundButton {
+                    visible: !root.showAll
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Value Tiles-96.png"
+                    Accessible.name: qsTr("Values")
+                    onClicked: root.showValues = true
+                }
+
+                RoundButton {
+                    visible: root.hasGps
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Fit to Screen-96.png"
+                    Accessible.name: qsTr("Fit Route")
+                    onClicked: {
+                        root.followMap = false
+                        root.easeMap(root.fitRouteBounds)
+                    }
+                }
+
+                RoundButton {
+                    visible: root.hasGps
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/icons8-target-96.png"
+                    Accessible.name: qsTr("Follow")
+                    checkable: true
+                    checked: root.followMap
+                    highlighted: checked
+                    onToggled: {
+                        root.followMap = checked
+                        if (checked && root.currentMapCoord.isValid) {
+                            root.easeMap(() => map.center = root.currentMapCoord)
+                        }
+                    }
+                }
+
+                // Shows the faults on the map and graphs, holding it opens the list
+                RoundButton {
+                    visible: root.faultRuns.length > 0
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Brake Warning-96.png"
+                    Accessible.name: qsTr("Faults")
+                    checkable: true
+                    checked: root.showFaults
+                    highlighted: checked
+                    onToggled: root.showFaults = checked
+                    onPressAndHold: faultsDialog.open()
+                }
+            }
+
+            MapItemView {
+                model: root.showFaults ? root.faultRuns.filter(f => f.coord && f.end >= root.viewStart && f.start <= root.viewEnd) : []
+                // Over the route, under the marker
+                delegate: MapQuickItem {
+                    z: 1
+                    coordinate: modelData.coord
+                    anchorPoint: Qt.point(8, 8)
+                    sourceItem: Rectangle {
+                        width: 16; height: 16; radius: 8
+                        color: Utility.getAppHexColor("danger"); border.color: "white"; border.width: 2
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "!"
+                            color: "white"
+                            font.pixelSize: 10
+                            font.bold: true
+                        }
+                    }
+                }
+            }
+
+            Label {
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: 8
+                z: 10
+                width: Math.min(implicitWidth, map.width * 0.6)
+                horizontalAlignment: Text.AlignRight
+                text: root.loadedFileName.length > 0
+                      ? (root.loadedFileName + (root.statusText.length > 0 ? (" · " + root.statusText) : ""))
+                      : root.statusText
+                font.pixelSize: 11
+                color: Utility.getAppHexColor("lightText")
+                style: Text.Outline
+                styleColor: Qt.alpha(Utility.getAppHexColor("darkBackground"), 0.8)
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+        }
+
+        // Every value at the cursor, in the place of the map
+        ColumnLayout {
+            id: valuesView
+            Layout.fillWidth: true
+            // Above the graphs when all show, as tall as its tiles up to a bit under half the page, the
+            // graphs get the rest. Else in the place of the map
+            Layout.fillHeight: !root.showAll
+            Layout.preferredHeight: root.showAll ? Math.min(valuesHeader.implicitHeight + spacing + valuesGrid.rowsHeight,
+                                                            root.height * 0.45) : -1
+            Layout.preferredWidth: root.showAll ? 3 : map.Layout.preferredWidth
+            visible: root.showAll || root.showValues
+            spacing: 4
+            onVisibleChanged: swapMenu.close()
+
+            RowLayout {
+                id: valuesHeader
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 4
+                    text: root.rawRows.length > 0 ? "#" + (root.currentIndex + 1) + " / " + root.rawRows.length : ""
+                    color: Utility.getAppHexColor("normalText")
+                }
+
+                Chip {
+                    topInset: 0
+                    visible: root.faultRuns.length > 0
+                    text: qsTr("Faults")
+                    tinted: true
+                    tint: Utility.getAppHexColor("danger")
+                    tintText: Utility.getAppHexColor("dangerText")
+                    onClicked: faultsDialog.open()
+                }
+
+                // Where the Values button is on the map
+                RoundButton {
+                    visible: !root.showAll
+                    Layout.topMargin: 4
+                    Layout.rightMargin: 4
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Waypoint Map-96.png"
+                    Accessible.name: qsTr("Map")
+                    onClicked: root.showValues = false
+                }
+            }
+
+            GridView {
+                id: valuesGrid
+                // Height of all the rows of tiles
+                readonly property real rowsHeight: Math.ceil(count / Math.max(1, Math.floor(width / 120))) * cellHeight
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                // As many tiles as fit at 120 wide or more
+                cellWidth: width / Math.max(1, Math.floor(width / 120))
+                cellHeight: 46
+                // The menu of a tile is placed at it, so it closes when the tiles move
+                onWidthChanged: swapMenu.close()
+                // Columns with data, in the groups of the value picker. They keep their places when the
+                // plotted values change, the plotted ones are marked in the colours of their lines.
+                model: root.columnMeta.filter(c => c.max >= c.min)
+                       .sort((a, b) => root.columnGroups.indexOf(a.group) - root.columnGroups.indexOf(b.group) || a.index - b.index)
+
+                delegate: Item {
+                    width: valuesGrid.cellWidth
+                    height: valuesGrid.cellHeight
+
+                    ValueTile {
+                        id: tile
+                        readonly property var val: root.cursorValue(modelData.index)
+                        // Lines that plot it
+                        readonly property var slots: [0, 1, 2, 3].filter(s => root.slotColIdx[s] === modelData.index)
+                        // Marked like a checked chip while its menu is open
+                        readonly property bool picked: swapMenu.visible && swapMenu.colIdx === modelData.index
+                        anchors.fill: parent
+                        anchors.margins: 3
+                        color: picked ? Qt.alpha(Material.accent, 0.12) : Utility.getAppHexColor("cardBackground")
+                        border.width: picked ? 1.5 : 1
+                        border.color: picked ? Material.accent : Utility.getAppHexColor("raisedBackground")
+                        title: modelData.label
+                        value: val === null ? "–" : val.toFixed(root.colDecimals(modelData))
+                        unit: modelData.unit
+                        // Smaller than elsewhere, the title like the min and max under the graphs
+                        titleFont.pixelSize: 10
+                        valueFont.pointSize: 12
+
+                        // A bar in the colour of each line that plots it, in the margin at the left edge
+                        Column {
+                            x: 3
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 2
+
+                            Repeater {
+                                model: tile.slots
+
+                                Rectangle {
+                                    width: 3
+                                    height: (tile.height - 16 - (tile.slots.length - 1) * 2) / tile.slots.length
+                                    radius: 1.5
+                                    color: root.slotColors[modelData]
+                                }
+                            }
+                        }
+
+                        // A tap plots the value in place of one of the lines, if it is not plotted yet
+                        TapHandler {
+                            enabled: tile.slots.length === 0
+                            onTapped: swapMenu.show(modelData.index, tile)
+                        }
+                    }
+                }
+            }
+
+            // The lines to plot a tapped value in place of, at its tile. One for all the tiles, as the grid
+            // makes them again while it scrolls.
+            PopupMenu {
+                id: swapMenu
+                property int colIdx: -1
+                width: Math.min(280, root.width - 32)
+                // A press outside only closes it, without scrubbing the graphs under it. The page dims a little
+                // and the menu is raised above the tiles, so that it stands out from them.
+                modal: true
+
+                Overlay.modal: Rectangle {
+                    color: Qt.alpha("black", Utility.isDarkMode() ? 0.4 : 0.2)
+                }
+
+                background: Rectangle {
+                    color: Utility.getAppHexColor(Utility.isDarkMode() ? "raisedBackground" : "darkBackground")
+                    border.color: Utility.getAppHexColor("lightestBackground")
+                    radius: 16
+                }
+
+                function show(col, tile) {
+                    colIdx = col
+                    // Under the tile, or over it where the page has no room
+                    var p = tile.mapToItem(valuesView, 0, 0)
+                    x = p.x
+                    y = tile.mapToItem(root, 0, tile.height).y + implicitHeight <= root.height ? p.y + tile.height :
+                                                                                               p.y - implicitHeight
+                    open()
+                }
+
+                function swap(slot) {
+                    root.setSlotColumn(slot, colIdx)
+                    if (!root.slotEnabled[slot]) root.toggleSlot(slot, true)
+                }
+
+                function label(slot) {
+                    return root.columnMeta[root.slotColIdx[slot]]?.label ?? ""
+                }
+
+                // A dot and the name in the colour of the line, like its picker under the graphs. The name is
+                // from the log, so it is escaped for the rich text.
+                function entryText(slot) {
+                    return "<font color='" + root.slotColors[slot] + "'>● " +
+                            label(slot).replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>"
+                }
+
+                Label {
+                    leftPadding: 10
+                    topPadding: 6
+                    bottomPadding: 4
+                    text: qsTr("Plot %1 in place of").arg(root.columnMeta[swapMenu.colIdx]?.label ?? "")
+                    elide: Text.ElideRight
+                    font.pointSize: 10
+                    color: Utility.getAppHexColor("normalText")
+                }
+
+                // Faded while the line is hidden, the swap shows it again
+                MenuEntry {
+                    text: swapMenu.entryText(0)
+                    Accessible.name: swapMenu.label(0)
+                    opacity: root.slotEnabled[0] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(0)
+                }
+                MenuEntry {
+                    text: swapMenu.entryText(1)
+                    Accessible.name: swapMenu.label(1)
+                    opacity: root.slotEnabled[1] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(1)
+                }
+                MenuEntry {
+                    text: swapMenu.entryText(2)
+                    Accessible.name: swapMenu.label(2)
+                    opacity: root.slotEnabled[2] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(2)
+                }
+                MenuEntry {
+                    text: swapMenu.entryText(3)
+                    Accessible.name: swapMenu.label(3)
+                    opacity: root.slotEnabled[3] ? 1 : 0.5
+                    onTriggered: swapMenu.swap(3)
                 }
             }
         }
@@ -1664,20 +2657,90 @@ Item {
         }
         MapQuickItem {
             id: currentMarker
+            z: 2
             visible: root.hasGps
             coordinate: root.currentMapCoord
-            anchorPoint: Qt.point(8, 8)
-            sourceItem: Rectangle { width: 16; height: 16; radius: 8; color: "#ff3333"; border.color: "white"; border.width: 2 }
+            anchorPoint: Qt.point(12, 12)
+            sourceItem: Item {
+                width: 24
+                height: 24
+
+                Shape {
+                    anchors.fill: parent
+                    // Unwrapped so that it turns the short way. A smoothed animation keeps
+                    // turning while the direction changes, other animations restart on each change.
+                    property real heading: 0
+                    readonly property real target: root.currentHeading - map.bearing
+                    onTargetChanged: heading += ((target - heading) % 360 + 540) % 360 - 180
+                    rotation: heading
+                    preferredRendererType: Shape.CurveRenderer
+
+                    Behavior on heading {
+                        SmoothedAnimation { velocity: 1800 }
+                    }
+
+                    ShapePath {
+                        fillColor: "#ff3333"
+                        strokeColor: "white"
+                        strokeWidth: 2
+                        joinStyle: ShapePath.RoundJoin
+                        startX: 12; startY: 2
+                        PathLine { x: 21; y: 21 }
+                        PathLine { x: 12; y: 16 }
+                        PathLine { x: 3; y: 21 }
+                        PathLine { x: 12; y: 2 }
+                    }
+                }
+            }
         }
         Rectangle {
             id: chartBox
-            readonly property bool compactMode: root.width < 750
+            readonly property bool compactMode: root.wide || root.width < 750
+            property bool collapsed: false
+            property real expansion: collapsed && !root.wide ? 0 : 1
+            Behavior on expansion {
+                NumberAnimation { id: expandAnim; duration: 200; easing.type: Easing.OutCubic }
+            }
             Layout.fillWidth: true
-            Layout.preferredHeight: compactMode ? 275 : 230
-            color: "#1a1d24"; radius: 6; border.color: "#333a45"
+            Layout.fillHeight: root.wide
+            Layout.rowSpan: root.headerOverMap ? 2 : 1
+            Layout.preferredWidth: 3
+            // Collapsed it keeps the series and a strip of the graphs. Expanded it takes half the page on tall
+            // screens, as it collapses with one tap, and leaves room for the map on short ones
+            readonly property real collapsedHeight: 116 + seriesGrid.implicitHeight
+            Layout.preferredHeight: Math.round(collapsedHeight + expansion * Math.max(0, Math.min(Math.max(compactMode ? 305 : 260, root.height / 2),
+                                                                                                root.height - 140) - collapsedHeight))
+            color: Utility.getAppHexColor("cardBackground"); radius: 12; border.color: Utility.getAppHexColor("raisedBackground")
             ColumnLayout {
-                anchors.fill: parent; anchors.margins: 6; spacing: 4
+                anchors.fill: parent; anchors.margins: 8; anchors.topMargin: root.wide ? 8 : 0; spacing: 6
+
+                // Tap or drag the grabber to shrink the graphs to a strip that still scrubs, below the series
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 16
+                    visible: !root.wide
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 36; height: 4; radius: 2
+                        color: Utility.getAppHexColor("disabledText")
+                    }
+
+                    TapHandler {
+                        onTapped: chartBox.collapsed = !chartBox.collapsed
+                    }
+
+                    DragHandler {
+                        target: null
+                        margin: 6
+                        enabled: !columnSheet.visible
+                        xAxis.enabled: false
+                        onActiveTranslationChanged: chartBox.collapsed = activeTranslation.y > 0
+                    }
+                }
+
                 GridLayout {
+                    id: seriesGrid
                     Layout.fillWidth: true
                     columns: chartBox.compactMode ? 2 : 4
                     columnSpacing: 8
@@ -1698,47 +2761,40 @@ Item {
                                     checked: root.slotEnabled[index]
                                     onToggled: root.toggleSlot(index, checked)
                                     padding: 0
-                                    // Color dot overlaid neatly or tinting the checkbox
-                                    Rectangle {
-                                        anchors.right: parent.right
-                                        anchors.bottom: parent.bottom
-                                        width: 7; height: 7; radius: 3.5
-                                        color: root.slotColors[index]
-                                        border.color: "#1a1d24"; border.width: 1
-                                    }
+                                    implicitWidth: 28
+                                    implicitHeight: 32
+                                    Material.accent: root.slotColors[index]
                                 }
-                                ComboBox {
-                                    id: colCombo
+                                AbstractButton {
+                                    id: columnButton
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 40
-                                    implicitHeight: 28
+                                    implicitHeight: 32
+                                    background: InputBackground {}
                                     leftPadding: 4
                                     rightPadding: 18
-                                    enabled: root.columnNames.length > 0
-                                    model: root.columnNames
-                                    currentIndex: root.slotColIdx[index]
-                                    onActivated: (idx) => root.setSlotColumn(index, idx)
-
-                                    popup.width: Math.max(width, 240)
-                                    popup.modal: true
-                                    popup.dim: false
-                                    popup.onOpened: root.comboOpen = true
-                                    popup.onClosed: root.comboOpen = false
-
+                                    focusPolicy: Qt.NoFocus
+                                    enabled: root.columnMeta.length > 0
+                                    // The value next to it shows the unit
+                                    text: root.columnMeta[root.slotColIdx[index]]?.label ?? ""
+                                    onClicked: {
+                                        columnSheet.slot = index
+                                        columnSheet.open()
+                                    }
 
                                     indicator: Text {
                                         anchors.right: parent.right
                                         anchors.rightMargin: 5
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: "▾"
-                                        color: "#9ca3af"
+                                        color: Utility.getAppHexColor("normalText")
                                         font.pixelSize: 11
                                     }
 
                                     contentItem: Text {
                                         leftPadding: 4
                                         rightPadding: 2
-                                        text: colCombo.displayText
+                                        text: columnButton.text
                                         font.pixelSize: 12
                                         color: root.slotColors[index]
                                         verticalAlignment: Text.AlignVCenter
@@ -1747,7 +2803,6 @@ Item {
                                 }
                                 Label {
                                     color: root.slotColors[index]
-                                    font.family: "Monospace"
                                     font.bold: true
                                     font.pixelSize: 11
                                     text: root.rawRows.length > 0 ? root.latestSlotVal(index) : ""
@@ -1756,9 +2811,8 @@ Item {
 
                             Label {
                                 Layout.fillWidth: true
-                                leftPadding: 28
-                                color: "#9ca3af"
-                                font.family: "Monospace"
+                                leftPadding: 31
+                                color: Utility.getAppHexColor("normalText")
                                 font.pixelSize: 10
                                 elide: Text.ElideRight
                                 text: root.rawRows.length > 0 ? root.slotMinMaxText(index) : ""
@@ -1771,8 +2825,13 @@ Item {
                     Layout.fillWidth: true; Layout.fillHeight: true
                     Canvas {
                         id: chartLines
-                        anchors.fill: parent
-                        onWidthChanged: requestPaint(); onHeightChanged: requestPaint()
+                        // Keeps its size and is stretched while the graphs grow or shrink, as large logs take
+                        // too long to paint every frame. It paints at the new size when they stop
+                        width: parent.width
+                        height: expandAnim.running ? paintedHeight : parent.height
+                        property real paintedHeight
+                        transform: Scale { yScale: chartLines.parent.height / Math.max(1, chartLines.height) }
+                        onWidthChanged: requestPaint(); onHeightChanged: { paintedHeight = height; requestPaint() }
                         function drawColSeries(ctx, colIdx, color, range) {
                             var data = root.rawRows
                             var s = Math.max(0, root.viewStart)
@@ -1783,24 +2842,47 @@ Item {
                             var step = Math.max(1, Math.floor(n / Math.max(1, width * 2)))
                             ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath()
                             var started = false
+                            var px = 0, py = 0
                             for (var i = s; i <= e; i += step) {
                                 var v = data[i].vals[colIdx]
                                 if (v === null || isNaN(v)) continue
                                 var x = ((i - s) / (n - 1)) * width
                                 var y = height - (((v - range.min) / span) * (height - 10) + 5)
-                                if (!started) { ctx.moveTo(x, y); started = true } else ctx.lineTo(x, y)
+                                if (!started) { ctx.moveTo(x, y); px = x; py = y; started = true } else ctx.lineTo(x, y)
+                                // Short paths stroke much faster than one long path that zigzags over itself. Each
+                                // starts a point back, so that the lines still join
+                                if ((i - s) % (16 * step) === 0) { ctx.stroke(); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y) }
+                                px = x; py = y
                             }
                             ctx.stroke()
                         }
                         onPaint: {
                             var ctx = getContext("2d")
                             ctx.clearRect(0, 0, width, height)
-                            ctx.strokeStyle = "#2a303c"; ctx.lineWidth = 1
+                            ctx.strokeStyle = Utility.getAppHexColor("raisedBackground"); ctx.lineWidth = 1
                             for (var g = 1; g <= 3; g++) {
                                 var gy = (height / 4) * g
                                 ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(width, gy); ctx.stroke()
                             }
                             if (root.rawRows.length < 2) return
+                            // A band over the rows with a fault, dashed where it began and with a tab on top,
+                            // so that it is not taken for a spike in a red line
+                            if (root.showFaults) {
+                                var span = Math.max(1, root.viewEnd - root.viewStart)
+                                var red = Utility.getAppHexColor("danger")
+                                ctx.strokeStyle = red; ctx.lineWidth = 1; ctx.setLineDash([3, 3])
+                                root.faultRuns.forEach(function(f) {
+                                    var x1 = (f.start - root.viewStart) / span * width
+                                    var x2 = (f.end - root.viewStart) / span * width
+                                    if (x2 < 0 || x1 > width) return
+                                    ctx.fillStyle = Qt.alpha(red, 0.15)
+                                    ctx.fillRect(x1, 0, Math.max(2, x2 - x1), height)
+                                    ctx.beginPath(); ctx.moveTo(x1, 0); ctx.lineTo(x1, height); ctx.stroke()
+                                    ctx.fillStyle = red
+                                    ctx.beginPath(); ctx.moveTo(x1 - 5, 0); ctx.lineTo(x1 + 5, 0); ctx.lineTo(x1, 7); ctx.closePath(); ctx.fill()
+                                })
+                                ctx.setLineDash([])
+                            }
                             for (var s = 3; s >= 0; s--) {
                                 if (root.slotEnabled[s]) {
                                     drawColSeries(ctx, root.slotColIdx[s], root.slotColors[s], root.slotRanges[s])
@@ -1821,7 +2903,7 @@ Item {
                             if (n < 2) return
                             var clampedCur = Math.max(sIdx, Math.min(eIdx, root.currentIndex))
                             var x = ((clampedCur - sIdx) / (n - 1)) * width
-                            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5
+                            ctx.strokeStyle = Utility.getAppHexColor("titleText"); ctx.lineWidth = 1.5
                             ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke()
                             var pt = root.rawRows[clampedCur]
                             for (var s = 0; s < 4; s++) {
@@ -1840,7 +2922,9 @@ Item {
                     }
                     MouseArea {
                         anchors.fill: parent
-                        enabled: root.rawRows.length > 1 && !root.comboOpen && !chartPinch.active
+                        enabled: root.rawRows.length > 1 && !columnSheet.visible && !chartPinch.active
+                        // Zoom not yet applied
+                        property real zoom: 1
 
                         function scrub(mx) {
                             var span = Math.max(1, root.viewEnd - root.viewStart)
@@ -1850,14 +2934,23 @@ Item {
                         onPressed: (m) => scrub(m.x)
                         onPositionChanged: (m) => { if (pressed) scrub(m.x) }
                         onWheel: (w) => {
-                                     if (w.angleDelta.y > 0) root.zoomAroundCursor(0.75)
-                                     else if (w.angleDelta.y < 0) root.zoomAroundCursor(1.33)
+                                     // Sideways scrolling is left to the pages. Small touchpad steps add up.
+                                     if (Math.abs(w.angleDelta.x) > Math.abs(w.angleDelta.y)) {
+                                         w.accepted = false
+                                     } else if (w.angleDelta.y !== 0) {
+                                         zoom *= Math.pow(0.75, w.angleDelta.y / 120)
+                                         var span = Math.max(10, root.viewEnd - root.viewStart)
+                                         if (Math.round(span * zoom) !== span) {
+                                             root.zoomAroundCursor(zoom)
+                                             zoom = 1
+                                         }
+                                     }
                                  }
                     }
                     // Extra touch-drag claim so parent SwipeView never steals horizontal drags
                     DragHandler {
                         target: null
-                        enabled: root.rawRows.length > 1 && !root.comboOpen && !chartPinch.active
+                        enabled: root.rawRows.length > 1 && !columnSheet.visible && !chartPinch.active
                         grabPermissions: PointerHandler.CanTakeOverFromAnything
                         onCentroidChanged: {
                             if (active) {
@@ -1871,7 +2964,7 @@ Item {
                     PinchHandler {
                         id: chartPinch
                         target: null
-                        enabled: root.rawRows.length > 2 && !root.comboOpen
+                        enabled: root.rawRows.length > 2 && !columnSheet.visible
                         grabPermissions: PointerHandler.CanTakeOverFromAnything
 
                         property real lastRatio: 0.5
@@ -1916,36 +3009,35 @@ Item {
                         }
                     }
                 }
-            }
-        }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 22
-            spacing: 6
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 22
+                    spacing: 6
 
-            Label {
-                color: "#9ca3af"
-                font.pixelSize: 11
-                text: "Zoom:"
-            }
+                    Label {
+                        color: Utility.getAppHexColor("normalText")
+                        font.pixelSize: 11
+                        text: "Zoom:"
+                    }
 
-            RangeSlider {
-                id: zoomRange
-                Layout.fillWidth: true
-                implicitHeight: 22
-                padding: 0
-                enabled: root.rawRows.length > 1
-                from: 0; to: Math.max(0, root.rawRows.length - 1); stepSize: 1
-                first.onMoved: root.applyZoomWindow(first.value, second.value, false)
-                second.onMoved: root.applyZoomWindow(first.value, second.value, false)
-            }
+                    RangeSlider {
+                        id: zoomRange
+                        Layout.fillWidth: true
+                        implicitHeight: 22
+                        padding: 0
+                        enabled: root.rawRows.length > 1
+                        from: 0; to: Math.max(0, root.rawRows.length - 1); stepSize: 1
+                        first.onMoved: root.applyZoomWindow(first.value, second.value, false)
+                        second.onMoved: root.applyZoomWindow(first.value, second.value, false)
+                    }
 
-            Label {
-                color: "#9ca3af"
-                font.family: "Monospace"
-                font.pixelSize: 11
-                text: root.rawRows.length > 0 ? (root.viewStart + 1) + "-" + (root.viewEnd + 1) : ""
+                    Label {
+                        color: Utility.getAppHexColor("normalText")
+                        font.pixelSize: 11
+                        text: root.rawRows.length > 0 ? (root.viewStart + 1) + "-" + (root.viewEnd + 1) : ""
+                    }
+                }
             }
         }
     }

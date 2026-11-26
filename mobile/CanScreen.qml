@@ -19,6 +19,7 @@
 
 import QtQuick 2.10
 import QtQuick.Controls 2.10
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 
 import Vedder.vesc.vescinterface 1.0
@@ -33,6 +34,8 @@ Item {
     property BleUart mBle: VescIf.bleDevice()
     property Commands mCommands: VescIf.commands()
     property int animationSpeed: 500
+    property real lastScan: 0
+    property string lastScanText: ""
 
     Component.onCompleted: {
         scanButton.enabled = VescIf.isPortConnected()
@@ -73,11 +76,18 @@ Item {
                 canList.currentIndex = 0;
                 canModel.clear()
                 scanButton.enabled = false
+                lastScan = 0
+                lastScanText = ""
             } else {
                 selectDeviceInList()
             }
 
-            if (VescIf.scanCanOnConnect() &&
+            if (lastScan > 0) {
+                lastScanText = qsTr("Last scan %1").arg(timeAgo(lastScan))
+            }
+
+            // Once per connection, as a scan that is still filling the list also leaves it empty
+            if (VescIf.scanCanOnConnect() && lastScan === 0 &&
                     scanButton.enabled && canList.count == 0 &&
                     VescIf.isPortConnected() &&
                     VescIf.fwRx() && VescIf.customConfigRxDone()) {
@@ -91,14 +101,24 @@ Item {
         anchors.fill: parent
         anchors.margins: 10
 
-        Text {
-            id: text
+        RowLayout {
             Layout.fillWidth: true
-            color: Utility.getAppHexColor("lightText")
-            text: qsTr("CAN Devices")
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
+            Layout.margins: 4
+            Layout.bottomMargin: 8
+
+            Text {
+                Layout.fillWidth: true
+                color: Utility.getAppHexColor("titleText")
+                text: qsTr("CAN Devices")
+                font.pointSize: 15
+                font.weight: Font.Medium
+            }
+
+            Text {
+                color: Utility.getAppHexColor("normalText")
+                text: qsTr("%1 found").arg(canModel.count)
+                font.pointSize: 10
+            }
         }
 
         ListView {
@@ -130,7 +150,7 @@ Item {
             Layout.fillHeight: true
             focus: true
             clip: true
-            spacing: 5
+            spacing: 6
 
             Component {
                 id: canDelegate
@@ -143,9 +163,12 @@ Item {
                         RotationAnimation { target: rt; from: 180; to: 0; duration: 800; easing.type: Easing.OutExpo; property: "angle" }
                     }
                     width: canList.width
-                    height: 40
-                    color: canList.currentIndex === index ? Utility.getAppHexColor("darkAccent") : Utility.getAppHexColor("normalBackground")
-                    radius: 10
+                    height: 56
+                    color: canList.currentIndex === index ? Qt.tint(Utility.getAppHexColor("darkBackground"), Qt.alpha(Material.accent, 0.1)) :
+                                                            Utility.getAppHexColor("cardBackground")
+                    border.width: canList.currentIndex === index ? 1.5 : 1
+                    border.color: canList.currentIndex === index ? Material.accent : Utility.getAppHexColor("raisedBackground")
+                    radius: 12
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
@@ -172,39 +195,31 @@ Item {
                             Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                             source: deviceIconPath
                         }
-                        Text {
+                        ColumnLayout {
                             Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                            text: name
-                            horizontalAlignment: Text.AlignHCenter
-                            color: Utility.getAppHexColor("lightText")
-                            wrapMode: Text.WordWrap
-                        }
-                        Rectangle{
-                            color: "#00000000"
-                            Layout.preferredWidth: t_metrics.boundingRect.width + 10
-                            Layout.preferredHeight: idText.implicitHeight * 1.5
-                            border.color: Utility.getAppHexColor("lightText")
-                            border.width: 2
-                            radius: 2
+                            spacing: 1
 
-                            TextMetrics {
-                                id:     t_metrics
-                                font:   idText.font
-                                text:   "LOCAL"
+                            Text {
+                                Layout.fillWidth: true
+                                text: name
+                                elide: Text.ElideRight
+                                font.weight: Font.Medium
+                                color: Utility.getAppHexColor("titleText")
                             }
 
                             Text {
-                                id:idText
-                                textFormat: Text.RichText
-                                anchors.centerIn: parent
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                text: ID
-                                font.bold: true
-                                horizontalAlignment: Text.AlignHCenter
-                                color: Utility.getAppHexColor("lightText")
-                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                                text: (ID !== "LOCAL" ? "ID " + ID + " · " : localCanId >= 0 ? "ID " + localCanId + " · " : "") + "FW " + fw
+                                elide: Text.ElideRight
+                                font.pointSize: 9
+                                color: Utility.getAppHexColor("normalText")
                             }
+                        }
+
+                        Chip {
+                            enabled: false
+                            tinted: ID === "LOCAL"
+                            text: ID === "LOCAL" ? "LOCAL" : "CAN"
                         }
                     }
                 }
@@ -213,11 +228,21 @@ Item {
             delegate: canDelegate
         }
 
+        Text {
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
+            visible: lastScanText !== ""
+            text: lastScanText
+            font.pointSize: 9
+            color: Utility.getAppHexColor("normalText")
+        }
+
         Button {
             id: scanButton
             text: qsTr("CAN Scan")
             enabled: false
             Layout.fillWidth: true
+            icon.source: "qrc" + Utility.getThemePath() + "icons/Refresh-96.png"
             onClicked: {
                 scanButton.enabled = false
                 canModel.clear()
@@ -248,26 +273,9 @@ Item {
         column.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Connecting..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 
     Connections {
@@ -288,6 +296,7 @@ Item {
 
             scanButton.enabled = true
             scanButton.text = qsTr("Scan")
+            lastScan = Date.now()
 
             if (VescIf.isPortConnected()) {
                 canModel.clear()
@@ -325,12 +334,15 @@ Item {
 
                 canModel.append({"name": name,
                                     "ID": "LOCAL",
+                                    "fw": fwString(params),
                                     "deviceIconPath": devicePath,
                                     "logoIconPath": logoPath})
+                var canMotor = -1
                 for (var i = 0;i < devs.length;i++) {
                     params = Utility.getFwVersionBlockingCan(VescIf, devs[i])
                     name = params.hw
                     if (params.hwTypeStr() === "VESC") { //is a motor
+                        canMotor = canMotor < 0 ? devs[i] : canMotor
                         devicePath = theme + "icons/motor_side.png"
                         if (params.fwName.length !== 0) {
                             name = params.hw + "-" + params.fwName
@@ -355,11 +367,14 @@ Item {
                     name = name.replace("_", " ")
                     canModel.append({"name": name,
                                         "ID": devs[i].toString(),
+                                        "fw": fwString(params),
                                         "deviceIconPath": devicePath,
                                         "logoIconPath": logoPath})
                 }
 
                 canList.currentIndex = 0
+
+                canMotorId = canMotor
 
                 if (!isTimeout) {
                     VescIf.emitStatusMessage("CAN Scan Finished", true)

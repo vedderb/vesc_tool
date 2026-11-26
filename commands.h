@@ -142,7 +142,7 @@ signals:
     void canFrameRx(QByteArray data, quint32 id, bool isExtended);
     void bmsValuesRx(BMS_VALUES val);
     void customConfigChunkRx(int confInd, int lenConf, int ofsConf, QByteArray data);
-    void customConfigRx(int confInd, QByteArray data);
+    void customConfigRx(int confInd, QByteArray data, bool isDefault);
     void customConfigAckReceived(int confId);
     void pswStatusRx(PSW_STATUS stat);
     void qmluiHwRx(int lenQml, int ofsQml, QByteArray data);

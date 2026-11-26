@@ -1,0 +1,106 @@
+/** \file env.h */
+/*
+    Copyright 2018, 2025 Joel Svensson        svenssonjoel@yahoo.se
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#ifndef ENV_H_
+#define ENV_H_
+
+#include "lbm_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** Global environment hashtable size */
+#define GLOBAL_ENV_ROOTS 32
+/** Symbol to hashtable entry hashfunction */
+#define GLOBAL_ENV_MASK  0x1F
+
+//environment interface
+/** Initialize the global environment. This sets the global environment to NIL
+ *
+ * \return true on success and false on failure.
+ */
+bool lbm_init_env(void);
+/**
+ *
+ * \return Pointer to the global environment
+ */
+lbm_value *lbm_get_global_env(void);
+/**
+ * \return the size of the global env in number of heap cells.
+ */
+lbm_uint lbm_get_global_env_size(void);
+/** Copy the spine of an environment. The list structure is
+ * recreated but the values themselves are not copied but rather
+ * just referenced.
+ *
+ * \internalonly
+ *
+ * \param env Environment to copy.
+ * \return Copy of environment.
+ */
+lbm_value lbm_env_copy_spine(lbm_value env);
+/** Lookup a value in an environment.
+ * \recommendpause
+ * \param res Result stored here
+ * \param sym The key to look for in the environment
+ * \param env The environment to search for the key.
+ * \return True on success or false otherwise.
+ */
+bool lbm_env_lookup_b(lbm_value *res, lbm_value sym, lbm_value env);
+/** Lookup a value in the global environment.
+ * \recommendpause
+ * \param res Result stored here
+ * \param sym The key to look for in the environment
+ * \param env The environment to search for the key.
+ * \return True on success or false otherwise.
+ */
+bool lbm_global_env_lookup(lbm_value *res, lbm_value sym);
+/** Create a new binding on the environment or replace an old binding.
+ *
+ * \evalpaused
+ *
+ * \param env Environment to modify.
+ * \param key A symbol to associate with a value.
+ * \param val The value.
+ * \return The modified environment or lbm_enc_sym(SYM_MERROR) if GC needs to be run.
+ */
+lbm_value lbm_env_set(lbm_value env, lbm_value key, lbm_value val);
+
+/** Modifies an existing binding on the environment.
+ *
+ * \param env The environment to modify.
+ * \param key The key.
+ * \param val The new value to associate with the key.
+ * \return The modified environment of Success and lbm_enc_sym(SYM_NOT_FOUND) if the key does not exist.
+ */
+lbm_value lbm_env_modify_binding(lbm_value env, lbm_value key, lbm_value val);
+/** Removes a binding (destructively) from the input environment.
+ *
+ * \evalpaused
+ *
+ * \param env Environment to modify.
+ * \param key Key to remove from environment.
+ * \return Updated environment or not_found symbol.
+ */
+lbm_value lbm_env_drop_binding(lbm_value env, lbm_value key);
+
+#ifdef __cplusplus
+}
+#endif
+#endif

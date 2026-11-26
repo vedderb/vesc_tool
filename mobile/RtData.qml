@@ -32,9 +32,13 @@ Item {
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property bool isHorizontal: rtData.width > rtData.height
-    property int gaugeSize: Math.min(width / 2 - 10,
-                                     (height - valMetrics.height * 10) /
-                                     (isHorizontal ? 1 : 2) - (isHorizontal ? 30 : 20))
+    property bool sideBySide: mainIsTablet && mainIsHorizontal && width >= 700
+    // Space left above the value tiles, including their margins and the layout spacing
+    property int gaugeSize: sideBySide ? Math.min((width - 340) / 2, height / 2) / 1.12 - 15 :
+                                         Math.min(width / 2 - 15,
+                                                  (height - valueGrid.implicitHeight - (phoneLandscape ? 35 : 50)) /
+                                                  (isHorizontal ? 1 : 2) - 5)
+    property var tileValues: []
 
     Component.onCompleted: {
         currentGauge.minimumValue = -mMcConf.getParamDouble("l_current_max")
@@ -42,15 +46,19 @@ Item {
         mCommands.emitEmptyValues()
     }
 
-    ColumnLayout {
+    GridLayout {
         anchors.fill: parent
         anchors.topMargin: 5
+        columns: sideBySide ? 2 : 1
 
         GridLayout {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            columns: isHorizontal ? 4 : 2
-            Layout.leftMargin: 5
+            Layout.alignment: Qt.AlignHCenter
+            Layout.fillHeight: !sideBySide
+            columns: isHorizontal && !sideBySide ? 4 : 2
+            // Room for the gauge rims, which reach past the gauges
+            columnSpacing: sideBySide || phoneLandscape ? gaugeSize / 8 : 5
+            rowSpacing: columnSpacing
+            Layout.leftMargin: sideBySide ? gaugeSize / 16 + 5 : 5
             Layout.rightMargin: 5
             Layout.topMargin: 5
             Layout.bottomMargin: 5
@@ -67,6 +75,7 @@ Item {
                 typeText: "Current"
                 Layout.preferredWidth: gaugeSize
                 Layout.preferredHeight: gaugeSize
+                Layout.maximumWidth: gaugeSize
             }
 
             CustomGauge {
@@ -82,6 +91,7 @@ Item {
                 typeText: "Duty"
                 Layout.preferredWidth: gaugeSize
                 Layout.preferredHeight: gaugeSize
+                Layout.maximumWidth: gaugeSize
             }
 
             CustomGauge {
@@ -97,6 +107,7 @@ Item {
                 typeText: "ERPM"
                 Layout.preferredWidth: gaugeSize
                 Layout.preferredHeight: gaugeSize
+                Layout.maximumWidth: gaugeSize
             }
 
             CustomGauge {
@@ -114,56 +125,35 @@ Item {
                 typeText: "Power"
                 Layout.preferredWidth: gaugeSize
                 Layout.preferredHeight: gaugeSize
+                Layout.maximumWidth: gaugeSize
             }
         }
 
-        Rectangle {
-            id: textRect
-            color: Utility.getAppHexColor("darkBackground")
-
-            Rectangle {
-                anchors.bottom: parent.top
-                width: parent.width
-                height: 2
-                color: Utility.getAppHexColor("lightAccent")
-            }
-
+        GridLayout {
+            id: valueGrid
             Layout.fillWidth: true
-            Layout.preferredHeight: isHorizontal ? valMetrics.height * 5 + 20 : valMetrics.height * 10 + 20
-            Layout.alignment: Qt.AlignBottom
-                Text {
-                    id: valText
-                    anchors.top: parent.top
-                    anchors.topMargin: 10
-                    anchors.leftMargin: 10
-                    anchors.left: parent.left
-                    width: isHorizontal ? parent.width/2 : parent.width
-                    color: Utility.getAppHexColor("lightText")
-                    text: VescIf.getConnectedPortName()
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    font.family: "DejaVu Sans Mono"
-                    verticalAlignment: Text.AlignVCenter
-                }
-                Text {
-                    id: valText2
-                    anchors.topMargin:  isHorizontal ? 10 : -10
-                    anchors.leftMargin: 10
-                    anchors.top: isHorizontal ? parent.top : valText.bottom
-                    width: isHorizontal ? parent.width/2 : parent.width
-                    anchors.left: isHorizontal ? valText.right : parent.left
-                    color: Utility.getAppHexColor("lightText")
-                    text: ""
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    font.family: "DejaVu Sans Mono"
-                    verticalAlignment: Text.AlignVCenter
-                }
+            Layout.margins: 10
+            columns: isHorizontal && !sideBySide ? 5 : 2
+            rowSpacing: 6
+            columnSpacing: 6
 
-            TextMetrics {
-                id: valMetrics
-                font: valText.font
-                text: valText.text
+            Repeater {
+                model: ["Battery", "I Battery", "Temp MOS", "Temp Motor", "Ah Draw",
+                    "Ah Charge", "Wh Draw", "Wh Charge", "ABS Tacho", "Fault"].concat(
+                    sideBySide ? ["Id", "Iq", "Vd", "Vq", "Tacho", "Position"] : [])
+
+                ValueTile {
+                    readonly property var entry: tileValues[index] || ["", "", -1]
+                    Layout.fillWidth: true
+                    implicitHeight: 44
+                    title: modelData
+                    value: entry[0]
+                    unit: entry[1]
+                    level: entry[2]
+                    levelColor: Utility.getAppHexColor(index === 0 ? "positiveText" : level < 0.6 ? "infoText" :
+                                                                                          level < 0.85 ? "warning" : "danger")
+                    valueColor: Utility.getAppHexColor(index !== 9 ? "titleText" : value === "None" ? "positiveText" : "dangerText")
+                }
             }
         }
     }
@@ -195,7 +185,7 @@ Item {
             var rpmMax = (values.v_in * 60.0) / (Math.sqrt(3.0) * 2.0 * Math.PI * fl)
             var rpmMaxRound = (Math.ceil(rpmMax / 5000.0) * 5000.0) / 1000
 
-            if (rpmMaxRound > rpmGauge.maximumValue || rpmMaxRound < (rpmGauge.maximumValue * 0.6)) {
+            if (rpmMaxRound > 0 && (rpmMaxRound > rpmGauge.maximumValue || rpmMaxRound < (rpmGauge.maximumValue * 0.6))) {
                 rpmGauge.maximumValue = rpmMaxRound
                 rpmGauge.minimumValue = -rpmMaxRound
             }
@@ -207,26 +197,33 @@ Item {
                                     mMcConf.getParamDouble("l_watt_max"))
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
 
-            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
+            if (powerMaxRound > 0 && (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6))) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = -powerMaxRound
             }
 
             powerGauge.value = (values.current_in * values.v_in)
 
-            valText.text =
-                    "Battery    : " + parseFloat(values.v_in).toFixed(2) + " V\n" +
-                    "I Battery  : " + parseFloat(values.current_in).toFixed(2) + " A\n" +
-                    "Temp MOS   : " + parseFloat(values.temp_mos).toFixed(2) + " \u00B0C\n" +
-                    "Temp Motor : " + parseFloat(values.temp_motor).toFixed(2) + " \u00B0C\n" +
-                    "Ah Draw    : " + parseFloat(values.amp_hours * 1000.0).toFixed(1) + " mAh\n"
-
-            valText2.text =
-                    "Ah Charge  : " + parseFloat(values.amp_hours_charged * 1000.0).toFixed(1) + " mAh\n" +
-                    "Wh Draw    : " + parseFloat(values.watt_hours).toFixed(2) + " Wh\n" +
-                    "Wh Charge  : " + parseFloat(values.watt_hours_charged).toFixed(2) + " Wh\n" +
-                    "ABS Tacho  : " + values.tachometer_abs + " Counts\n" +
-                    "Fault      : " + values.fault_str
+            tileValues = [
+                        [parseFloat(values.v_in).toFixed(2), "V", -1],
+                        [parseFloat(values.current_in).toFixed(2), "A", -1],
+                        [parseFloat(values.temp_mos).toFixed(1), "\u00B0C",
+                         values.temp_mos / mMcConf.getParamDouble("l_temp_fet_end")],
+                        [parseFloat(values.temp_motor).toFixed(1), "\u00B0C",
+                         values.temp_motor / mMcConf.getParamDouble("l_temp_motor_end")],
+                        [parseFloat(values.amp_hours * 1000.0).toFixed(1), "mAh", -1],
+                        [parseFloat(values.amp_hours_charged * 1000.0).toFixed(1), "mAh", -1],
+                        [parseFloat(values.watt_hours).toFixed(2), "Wh", -1],
+                        [parseFloat(values.watt_hours_charged).toFixed(2), "Wh", -1],
+                        [values.tachometer_abs, "Counts", -1],
+                        [values.fault_code === 0 ? "None" : values.fault_str.replace("FAULT_CODE_", ""), "", -1],
+                        [parseFloat(values.id).toFixed(2), "A", -1],
+                        [parseFloat(values.iq).toFixed(2), "A", -1],
+                        [parseFloat(values.vd).toFixed(2), "V", -1],
+                        [parseFloat(values.vq).toFixed(2), "V", -1],
+                        [values.tachometer, "Counts", -1],
+                        [parseFloat(values.position).toFixed(1), "\u00B0", -1]
+                    ]
         }
     }
 }

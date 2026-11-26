@@ -28,6 +28,8 @@ import Vedder.vesc.utility 1.0
 
 Item {
     property var dialogParent: Overlay.overlay
+    // Wizard step title. When set, it and the hint go beside the list on landscape phones
+    property string title: ""
 
     // TODO: This is not pretty...
     implicitHeight: text.implicitHeight +
@@ -68,20 +70,35 @@ Item {
         enableDialog()
     }
 
-    ColumnLayout {
+    GridLayout {
         id: column
         anchors.fill: parent
-        anchors.leftMargin: notchLeft
-        anchors.rightMargin: notchRight
+        columns: phoneLandscape && title !== "" ? 2 : 1
+        columnSpacing: 12
 
-        Text {
-            id: text
+        ColumnLayout {
             Layout.fillWidth: true
-            color: {color = Utility.getAppHexColor("lightText")}
-            text: qsTr("Select which VESCs have inverted motor direction. Press the FWD or REV button to try.")
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
+            Layout.preferredWidth: 1
+            Layout.alignment: Qt.AlignTop
+            spacing: 2
+
+            Text {
+                Layout.fillWidth: true
+                visible: column.columns > 1
+                text: title
+                color: Utility.getAppHexColor("lightText")
+                font.bold: true
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                id: text
+                Layout.fillWidth: true
+                color: Utility.getAppHexColor("normalText")
+                text: qsTr("Tap Forward to spin a motor briefly. If it turns the wrong way, flip the Inverted switch.")
+                font.pointSize: 11
+                wrapMode: Text.WordWrap
+            }
         }
 
         ListModel {
@@ -92,6 +109,7 @@ Item {
             id: canIdList
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.preferredWidth: 1
             focus: true
             clip: true
             spacing: 5
@@ -103,58 +121,57 @@ Item {
                     property variant modelData: model
 
                     width: canIdList.width
-                    height: 130
-                    color: Utility.getAppHexColor("darkBackground")
-                    radius: 5
+                    height: cardColumn.implicitHeight + 24
+                    color: Utility.getAppHexColor("cardBackground")
+                    border.color: Utility.getAppHexColor("raisedBackground")
+                    radius: 12
 
-                    RowLayout {
+                    ColumnLayout {
+                        id: cardColumn
                         anchors.fill: parent
+                        anchors.margins: 12
                         spacing: 10
 
-                        Rectangle {
-                            Layout.leftMargin: 5
+                        RowLayout {
                             Layout.fillWidth: true
+                            spacing: 12
 
-                            color: Utility.getAppHexColor("lightAccent")
-                            height: column.height
-                            radius: height / 2
+                            Image {
+                                id: image
+                                fillMode: Image.PreserveAspectFit
+                                Layout.preferredWidth: 40
+                                Layout.preferredHeight: 40
+                                source: isCan ? "qrc" + Utility.getThemePath() + "icons/can_off.png" : "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+                            }
 
                             ColumnLayout {
-                                id: column
-                                anchors.centerIn: parent
+                                Layout.fillWidth: true
+                                spacing: 2
 
-                                Image {
-                                    id: image
-                                    fillMode: Image.PreserveAspectFit
-                                    Layout.preferredWidth: 60
-                                    Layout.preferredHeight: 60
-                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: isCan ? "qrc" + Utility.getThemePath() + "icons/can_off.png" : "qrc" + Utility.getThemePath() + "icons/Connected-96.png"
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: name
+                                    color: Utility.getAppHexColor("lightText")
+                                    font.weight: Font.Medium
+                                    wrapMode: Text.WordWrap
                                 }
 
                                 Text {
                                     Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    text: name + "\nID: " + canId
-                                    horizontalAlignment: Text.AlignHCenter
-                                    color: Utility.getAppHexColor("lightText")
-                                    wrapMode: Text.WordWrap
+                                    text: qsTr("ID %1").arg(canId)
+                                    color: Utility.getAppHexColor("normalText")
+                                    font.pointSize: 11
                                 }
                             }
-                        }
 
-                        ColumnLayout {
                             Text {
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                                Layout.rightMargin: 5
-                                color: Utility.getAppHexColor("lightText")
+                                color: Utility.getAppHexColor("normalText")
+                                font.pointSize: 11
                                 text: "Inverted"
-                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             Switch {
                                 id: invertSwitch
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                                 enabled: true
                                 checked: isInv
                                 onToggled: {
@@ -174,15 +191,14 @@ Item {
                             }
                         }
 
-                        ColumnLayout {
-                            Layout.rightMargin: 10
-                            spacing: -5
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
 
                             Button {
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                                Layout.preferredWidth: 70
-                                Layout.preferredHeight: 55
-                                text: "FWD"
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1
+                                text: qsTr("Forward")
 
                                 onClicked: {
                                     disableDialog()
@@ -201,10 +217,9 @@ Item {
                             }
 
                             Button {
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                                Layout.preferredWidth: 70
-                                Layout.preferredHeight: 55
-                                text: "REV"
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1
+                                text: qsTr("Reverse")
 
                                 onClicked: {
                                     disableDialog()
@@ -241,24 +256,8 @@ Item {
         column.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Communicating..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true        
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 }

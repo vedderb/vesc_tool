@@ -19,7 +19,7 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -33,104 +33,206 @@ Item {
         dialog.open()
     }
 
+    component SettingSwitch: SwitchDelegate {
+        id: control
+        property string hint: ""
+
+        Layout.fillWidth: true
+
+        contentItem: Item {
+            implicitHeight: labels.implicitHeight
+
+            Column {
+                id: labels
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - control.indicator.width - control.spacing
+                spacing: 2
+
+                Text {
+                    width: parent.width
+                    text: control.text
+                    color: Utility.getAppHexColor("titleText")
+                    wrapMode: Text.WordWrap
+                }
+
+                Text {
+                    width: parent.width
+                    visible: control.hint !== ""
+                    text: control.hint
+                    font.pointSize: 9
+                    color: Utility.getAppHexColor("normalText")
+                    wrapMode: Text.WordWrap
+                }
+            }
+        }
+    }
+
+    component SettingGroup: Rectangle {
+        default property alias content: groupColumn.data
+
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignTop
+        implicitHeight: groupColumn.implicitHeight
+        radius: 12
+        color: Utility.getAppHexColor("cardBackground")
+        border.color: Utility.getAppHexColor("raisedBackground")
+
+        ColumnLayout {
+            id: groupColumn
+            width: parent.width
+            spacing: 0
+        }
+    }
+
     Dialog {
         id: dialog
-        standardButtons: Dialog.Close
         modal: true
         focus: true
         title: "VESC Tool Settings"
 
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: Utility.getAppHexColor("overlay")
         }
 
-        width: parent.width - 20
+        // Landscape phones: over the app bars too, only inside the safe area
+        readonly property bool fullWindow: phoneLandscape
+        parent: fullWindow ? Overlay.overlay : dialogParent
+        x: fullWindow ? notchLeft : 0
+        y: fullWindow ? notchTop : 0
+        width: parent.width - (fullWindow ? notchLeft + notchRight : 0)
+        height: parent.height - (fullWindow ? notchTop + notchBot : 0)
+        leftInset: fullWindow ? -notchLeft : 0
+        rightInset: fullWindow ? -notchRight : 0
+        topInset: fullWindow ? -notchTop : 0
+        bottomInset: fullWindow ? -notchBot : 0
         closePolicy: Popup.CloseOnEscape
+        leftPadding: 14
+        rightPadding: 14
+        topPadding: 0
 
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+        }
+
+        header: PageHeader {
+            title: dialog.title
+            onCloseClicked: dialog.close()
+        }
 
         ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
 
-            ColumnLayout {
-                anchors.fill: parent
+            GridLayout {
+                width: parent.width
+                flow: GridLayout.TopToBottom
+                // Four header and group pairs, two pairs per column on tablets and in landscape
+                rows: mainIsTablet || mainIsHorizontal ? 4 : 8
+                uniformCellWidths: true
+                columnSpacing: 14
+                rowSpacing: 8
 
-                CheckBox {
-                    id: imperialBox
-                    Layout.fillWidth: true
-                    text: "Use Imperial Units"
-                    checked: VescIf.useImperialUnits()
+                SectionHeader {
+                    text: "Units"
                 }
 
-                CheckBox {
-                    id: negativeSpeedBox
-                    Layout.fillWidth: true
-                    text: "Use Negative Speed"
-                    checked: VescIf.speedGaugeUseNegativeValues()
+                SettingGroup {
+                    SettingSwitch {
+                        id: imperialBox
+                        text: "Use Imperial Units"
+                        hint: qsTr("Speed and distance in mph and miles")
+                        checked: VescIf.useImperialUnits()
+                    }
+
+                    SettingSwitch {
+                        id: negativeSpeedBox
+                        text: "Use Negative Speed"
+                        hint: qsTr("Show reverse as negative speed")
+                        checked: VescIf.speedGaugeUseNegativeValues()
+                    }
                 }
 
-                CheckBox {
-                    id: screenOnBox
-                    Layout.fillWidth: true
-                    text: "Keep Screen On"
-                    checked: VescIf.keepScreenOn()
-                    visible: Qt.platform.os !== "ios"
-                    enabled: Qt.platform.os !== "ios"
+                SectionHeader {
+                    text: "Display"
                 }
 
-                CheckBox {
-                    id: screenRotBox
-                    Layout.fillWidth: true
-                    text: "Allow Screen Rotation"
-                    checked: VescIf.getAllowScreenRotation()
-                    visible: Qt.platform.os !== "ios"
-                    enabled: Qt.platform.os !== "ios"
+                SettingGroup {
+                    SettingSwitch {
+                        id: darkModeBox
+                        text: "Use Dark Mode"
+                        hint: qsTr("Applies after restart")
+                        checked: Utility.isDarkMode()
+                        onCheckedChanged: {
+                            Utility.setDarkMode(checked)
+                        }
+                    }
+
+                    SettingSwitch {
+                        id: screenOnBox
+                        text: "Keep Screen On"
+                        checked: VescIf.keepScreenOn()
+                        visible: Qt.platform.os !== "ios"
+                        enabled: Qt.platform.os !== "ios"
+                    }
+
+                    SettingSwitch {
+                        id: screenRotBox
+                        text: "Allow Screen Rotation"
+                        checked: VescIf.getAllowScreenRotation()
+                        visible: Qt.platform.os !== "ios"
+                        enabled: Qt.platform.os !== "ios"
+                    }
                 }
 
-                CheckBox {
-                    id: qmlUiBox
-                    Layout.fillWidth: true
-                    text: "Load QML UI on Connect"
-                    checked: VescIf.getLoadQmlUiOnConnect()
+                SectionHeader {
+                    text: "Connection"
                 }
 
-                CheckBox {
-                    id: qmlUiAskBox
-                    Layout.fillWidth: true
-                    text: "Ask before loading QML UI"
-                    checked: VescIf.askQmlLoad()
+                SettingGroup {
+                    SettingSwitch {
+                        id: reconnectLastCanBox
+                        text: "Reconnect CAN on connect"
+                        checked: VescIf.reconnectLastCan()
+                    }
+
+                    SettingSwitch {
+                        id: scanCanConnectBox
+                        text: "Scan CAN on connect"
+                        checked: VescIf.scanCanOnConnect()
+                    }
+
+                    SettingSwitch {
+                        visible: rideSession !== null && rideSession.supported
+                        text: qsTr("Ride display on connect")
+                        hint: Qt.platform.os === "android" ? qsTr("Notification with speed, battery and trip") :
+                                                             qsTr("Live Activity with speed, battery and trip")
+                        checked: rideSession !== null && rideSession.autoStart
+                        onToggled: rideSession.autoStart = checked
+                    }
                 }
 
-                CheckBox {
-                    id: reconnectLastCanBox
-                    Layout.fillWidth: true
-                    text: "Reconnect CAN on connect"
-                    checked: VescIf.reconnectLastCan()
+                SectionHeader {
+                    text: "Custom UI & Notifications"
                 }
 
-                CheckBox {
-                    id: scanCanConnectBox
-                    Layout.fillWidth: true
-                    text: "Scan CAN on connect"
-                    checked: VescIf.scanCanOnConnect()
-                }
+                SettingGroup {
+                    SettingSwitch {
+                        id: qmlUiBox
+                        text: "Load QML UI on Connect"
+                        checked: VescIf.getLoadQmlUiOnConnect()
+                    }
 
-                CheckBox {
-                    id: fwUpdateAvailableBox
-                    Layout.fillWidth: true
-                    text: "Show firmware update message"
-                    checked: VescIf.showFwUpdateAvailable()
-                }
+                    SettingSwitch {
+                        id: qmlUiAskBox
+                        text: "Ask before loading QML UI"
+                        hint: qsTr("Code from the device is not verified")
+                        checked: VescIf.askQmlLoad()
+                    }
 
-                CheckBox {
-                    id: darkModeBox
-                    Layout.fillWidth: true
-                    text: "Use Dark Mode"
-                    checked: Utility.isDarkMode()
-                    onCheckedChanged: {
-                        Utility.setDarkMode(checked)
+                    SettingSwitch {
+                        id: fwUpdateAvailableBox
+                        text: "Show firmware update message"
+                        checked: VescIf.showFwUpdateAvailable()
                     }
                 }
             }
@@ -174,22 +276,11 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: darkChangedDialog
-        standardButtons: Dialog.Yes | Dialog.No
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
+        acceptText: qsTr("Quit now")
+        rejectText: qsTr("Later")
         title: "Theme Changed"
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
 
         Text {
             id: detectRlLabel

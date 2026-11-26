@@ -19,7 +19,8 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -27,416 +28,276 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
-    property int parentWidth: 10
-    property int parentHeight: 10
-
     property var dialogParent: Overlay.overlay
     property Commands mCommands: VescIf.commands()
     property ConfigParams mMcConf: VescIf.mcConfig()
     property ConfigParams mInfoConf: VescIf.infoConfig()
+    readonly property real dockWidth: dialog.visible ? dialog.dockWidth : 0
+
+    property var modes: [
+        {label: "Motor current", suffix: " A", decimals: 1, to: 500.0, step: 1.0, brake: "Brake",
+            set: v => mCommands.setCurrent(v), stop: v => mCommands.setCurrentBrake(v)},
+        {label: "Duty cycle", suffix: "", decimals: 3, to: 1.0, step: 0.01, brake: "0 Duty (brake)",
+            set: v => mCommands.setDutyCycle(v), stop: v => mCommands.setDutyCycle(0.0)},
+        {label: "Speed", suffix: " ERPM", decimals: 1, to: 500000, step: 500, brake: "0 ERPM (brake)",
+            set: v => mCommands.setRpm(v), stop: v => mCommands.setRpm(0.0)},
+        {label: "Position", suffix: " \u00B0", decimals: 3, to: 360, step: 0.1, brake: "",
+            set: v => mCommands.setPos(v)}
+    ]
+    property var values: [3.0, 0.1, 3000, 20]
+    property var mode: modes[modeBar.currentIndex]
+    property real value: values[modeBar.currentIndex]
+    property var readouts: []
 
     function openDialog() {
         dialog.open()
         opacitySlider.value = 1
     }
 
-    Dialog {
+    function setValue(v) {
+        if (!isNaN(v)) {
+            // Assigning the same array does not update the bindings
+            var newValues = values.slice()
+            newValues[modeBar.currentIndex] = Math.min(Math.max(v, 0.0), mode.to)
+            values = newValues
+        }
+    }
+
+    // Runs the action while pressed and releases the motor afterwards unless told to continue
+    function hold(pressed, action) {
+        if (pressed) {
+            action()
+        } else if (!maintainBox.checked) {
+            mCommands.setCurrent(0.0)
+        }
+    }
+
+    SheetDialog {
         id: dialog
-        parent: dialogParent
-        standardButtons: Dialog.Close
+        parent: phoneLandscape ? Overlay.overlay : dialogParent
+        sheetWidth: phoneLandscape ? parent.width : Math.min(parent.width, 640)
+        insetLeft: phoneLandscape ? notchLeft : 0
+        insetRight: phoneLandscape ? notchRight : 0
+        title: phoneLandscape ? "" : "Controls"
         modal: false
-        focus: true
-        width: parentWidth - 40 - notchLeft - notchRight
-        height: parentHeight - 40
         closePolicy: Popup.CloseOnEscape
-        x: (parentWidth - width)/2
-        y: (parentHeight - height)/2
-        background.opacity: opacitySlider.value
+        dockWidth: mainIsTablet && mainIsHorizontal && appWindow.width - canDockWidth >= 1080 ? 380 : 0
+        // The cards fade with the sheet, so that the page shows through, while the controls stay solid
+        readonly property real fade: dockWidth > 0 ? 1 : opacitySlider.value
+        background.opacity: fade
 
-        ColumnLayout {
+        ScrollView {
             anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
 
-            SwipeView {
-                id: swipeView
-                currentIndex: tabBar.currentIndex
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                clip: true
+            // Mode and setpoint left of the buttons on landscape phones
+            GridLayout {
+                width: parent.width
+                flow: GridLayout.TopToBottom
+                rows: phoneLandscape ? 4 : 7
+                rowSpacing: 10
+                columnSpacing: 16
+                uniformCellWidths: true
 
-                Page {
-                    background: Rectangle {
-                        opacity: 0.0
-                    }
-
-                    Loader {
-                        anchors.fill: parent
-                        asynchronous: true
-                        visible: status == Loader.Ready
-                        sourceComponent: ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 0
-
-                            DoubleSpinBox {
-                                id: currentBox
-                                Layout.fillWidth: true
-                                decimals: 1
-                                prefix: "I: "
-                                suffix: " A"
-                                realFrom: 0.0
-                                realTo: 500.0
-                                realValue: 3.0
-                                realStepSize: 1.0
-                            }
-
-                            Rectangle {
-                                Layout.fillHeight: true
-                            }
-
-                            CheckBox {
-                                id: maintainCurrentBox
-                                text: "Continue after release"
-                            }
-
-                            RowLayout {
-                                Layout.fillWidth: true
-
-                                Button {
-                                    Layout.fillWidth: true
-                                    Layout.preferredWidth: 100
-                                    text: "Set REV"
-
-                                    onPressedChanged: {
-                                        if (pressed) {
-                                            mCommands.setCurrent(-currentBox.realValue)
-                                        } else if (!maintainCurrentBox.checked) {
-                                            mCommands.setCurrent(0.0)
-                                        }
-                                    }
-                                }
-
-                                Button {
-                                    Layout.fillWidth: true
-                                    Layout.preferredWidth: 100
-                                    text: "Set FWD"
-
-                                    onPressedChanged: {
-                                        if (pressed) {
-                                            mCommands.setCurrent(currentBox.realValue)
-                                        } else if (!maintainCurrentBox.checked) {
-                                            mCommands.setCurrent(0.0)
-                                        }
-                                    }
-                                }
-                            }
-
-                            Button {
-                                Layout.fillWidth: true
-                                text: "Brake"
-
-                                onPressedChanged: {
-                                    if (pressed) {
-                                        mCommands.setCurrentBrake(currentBox.realValue)
-                                    } else if (!maintainCurrentBox.checked) {
-                                        mCommands.setCurrent(0.0)
-                                    }
-                                }
-                            }
-
-                            Button {
-                                Layout.fillWidth: true
-                                text: "Release"
-
-                                onClicked: {
-                                    mCommands.setCurrent(0.0)
-                                }
-                            }
-                        }
-                    }
+                SegmentedBar {
+                    id: modeBar
+                    Layout.fillWidth: true
+                    model: ["Current", "Duty", "RPM", "Position"]
+                    color: Qt.alpha(Utility.getAppHexColor("darkBackground"), dialog.fade)
+                    border.color: Qt.alpha(Utility.getAppHexColor("raisedBackground"), dialog.fade)
+                    onActivated: function(index) { currentIndex = index }
                 }
 
-                Page {
-                    background: Rectangle {
-                        opacity: 0.0
-                    }
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.rowSpan: phoneLandscape ? 3 : 1
+                    implicitHeight: setpoint.implicitHeight + 28
+                    radius: 12
+                    color: Qt.alpha(Utility.getAppHexColor("cardBackground"), dialog.fade)
+                    border.color: Qt.alpha(Utility.getAppHexColor("raisedBackground"), dialog.fade)
 
                     ColumnLayout {
-                        anchors.fill: parent
-                        spacing: 0
+                        id: setpoint
+                        anchors.centerIn: parent
+                        width: parent.width - 28
+                        spacing: 8
 
-                        DoubleSpinBox {
-                            id: dutyBox
-                            Layout.fillWidth: true
-                            prefix: "D: "
-                            decimals: 3
-                            realFrom: 0.0
-                            realTo: 1.0
-                            realValue: 0.1
-                            realStepSize: 0.01
-                        }
-
-                        Rectangle {
-                            Layout.fillHeight: true
-                        }
-
-                        CheckBox {
-                            id: maintainDutyBox
-                            text: "Continue after release"
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: mode.label
+                            font.pointSize: 10
+                            color: Utility.getAppHexColor("normalText")
                         }
 
                         RowLayout {
-                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: 12
 
-                            Button {
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 100
-                                text: "Set REV"
+                            RoundButton {
+                                text: "\u2212"
+                                font.pointSize: 18
+                                autoRepeat: true
+                                onClicked: setValue(value - mode.step)
+                            }
 
-                                onPressedChanged: {
-                                    if (pressed) {
-                                        mCommands.setDutyCycle(-dutyBox.realValue)
-                                    } else if (!maintainDutyBox.checked) {
-                                        mCommands.setCurrent(0.0)
-                                    }
+                            TextInput {
+                                Layout.preferredWidth: 170
+                                horizontalAlignment: TextInput.AlignHCenter
+                                // Editing replaces the text binding
+                                property string valueText: parseFloat(value).toFixed(mode.decimals) + mode.suffix
+                                text: valueText
+                                onValueTextChanged: text = valueText
+                                onActiveFocusChanged: if (activeFocus) selectAll()
+                                font.pointSize: 26
+                                font.weight: Font.Medium
+                                color: Utility.getAppHexColor("titleText")
+                                // The iOS number pads have no return key
+                                inputMethodHints: Qt.platform.os === "ios" ? Qt.ImhPreferNumbers | Qt.ImhNoPredictiveText : Qt.ImhFormattedNumbersOnly
+                                onEditingFinished: {
+                                    Qt.inputMethod.hide()
+                                    setValue(parseFloat(text.replace(",", ".")))
+                                    text = valueText
+                                    focus = false
                                 }
                             }
 
-                            Button {
-                                Layout.fillWidth: true
-                                Layout.preferredWidth: 100
-                                text: "Set FWD"
-
-                                onPressedChanged: {
-                                    if (pressed) {
-                                        mCommands.setDutyCycle(dutyBox.realValue)
-                                    } else if (!maintainDutyBox.checked) {
-                                        mCommands.setCurrent(0.0)
-                                    }
-                                }
+                            RoundButton {
+                                text: "+"
+                                font.pointSize: 18
+                                autoRepeat: true
+                                onClicked: setValue(value + mode.step)
                             }
                         }
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "0 Duty (brake)"
+                        Flow {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: 6
 
-                            onPressedChanged: {
-                                if (pressed) {
-                                    mCommands.setDutyCycle(0.0)
-                                } else if (!maintainDutyBox.checked) {
-                                    mCommands.setCurrent(0.0)
-                                }
-                            }
-                        }
+                            Repeater {
+                                model: readouts
 
-                        Button {
-                            Layout.fillWidth: true
-                            text: "Release"
-
-                            onClicked: {
-                                mCommands.setCurrent(0.0)
-                            }
-                        }
-                    }
-                }
-
-                Page {
-                    background: Rectangle {
-                        opacity: 0.0
-                    }
-
-                    Loader {
-                        anchors.fill: parent
-                        asynchronous: true
-                        visible: status == Loader.Ready
-                        sourceComponent: ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 0
-
-                            DoubleSpinBox {
-                                id: speedBox
-                                Layout.fillWidth: true
-                                prefix: "\u03C9: "
-                                suffix: " ERPM"
-                                decimals: 1
-                                realFrom: 0.0
-                                realTo: 500000
-                                realValue: 3000
-                                realStepSize: 500
-                            }
-
-                            Rectangle {
-                                Layout.fillHeight: true
-                            }
-
-                            CheckBox {
-                                id: maintainSpeedBox
-                                text: "Continue after release"
-                            }
-
-                            RowLayout {
-                                Layout.fillWidth: true
-
-                                Button {
-                                    Layout.fillWidth: true
-                                    Layout.preferredWidth: 100
-                                    text: "Set REV"
-
-                                    onPressedChanged: {
-                                        if (pressed) {
-                                            mCommands.setRpm(-speedBox.realValue)
-                                        } else if (!maintainSpeedBox.checked) {
-                                            mCommands.setCurrent(0.0)
-                                        }
-                                    }
-                                }
-
-                                Button {
-                                    Layout.fillWidth: true
-                                    Layout.preferredWidth: 100
-                                    text: "Set FWD"
-
-                                    onPressedChanged: {
-                                        if (pressed) {
-                                            mCommands.setRpm(speedBox.realValue)
-                                        } else if (!maintainSpeedBox.checked) {
-                                            mCommands.setCurrent(0.0)
-                                        }
-                                    }
-                                }
-                            }
-
-                            Button {
-                                Layout.fillWidth: true
-                                text: "0 ERPM (brake)"
-
-                                onPressedChanged: {
-                                    if (pressed) {
-                                        mCommands.setRpm(0.0)
-                                    } else if (!maintainSpeedBox.checked) {
-                                        mCommands.setCurrent(0.0)
-                                    }
-                                }
-                            }
-
-                            Button {
-                                Layout.fillWidth: true
-                                text: "Release"
-
-                                onClicked: {
-                                    mCommands.setCurrent(0.0)
+                                Chip {
+                                    enabled: false
+                                    topInset: 0
+                                    text: modelData
                                 }
                             }
                         }
                     }
                 }
 
-                Page {
-                    background: Rectangle {
-                        opacity: 0.0
-                    }
-
-                    Loader {
-                        anchors.fill: parent
-                        asynchronous: true
-                        visible: status == Loader.Ready
-                        sourceComponent: ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 0
-
-                            DoubleSpinBox {
-                                id: posBox
-                                Layout.fillWidth: true
-                                prefix: "P: "
-                                suffix: " \u00B0"
-                                decimals: 3
-                                realFrom: 0
-                                realTo: 360
-                                realValue: 20
-                                realStepSize: 0.1
-                            }
-
-                            Rectangle {
-                                Layout.fillHeight: true
-                            }
-
-                            CheckBox {
-                                id: maintainPosBox
-                                text: "Continue after release"
-                            }
-
-                            Button {
-                                Layout.fillWidth: true
-                                text: "Set"
-
-                                onPressedChanged: {
-                                    if (pressed) {
-                                        mCommands.setPos(posBox.realValue)
-                                    } else if (!maintainPosBox.checked) {
-                                        mCommands.setCurrent(0.0)
-                                    }
-                                }
-                            }
-
-                            Button {
-                                Layout.fillWidth: true
-                                text: "Release"
-
-                                onClicked: {
-                                    mCommands.setCurrent(0.0)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                Text {
-                    color: Utility.getAppHexColor("lightText")
-                    text: qsTr("Opacity")
-                }
-
-                Slider {
-                    id: opacitySlider
+                RowLayout {
                     Layout.fillWidth: true
-                    from: 0.1
-                    to: 1.0
-                    value: 1.0
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+
+                        Text {
+                            text: "Continue after release"
+                            color: Utility.getAppHexColor("lightText")
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: qsTr("Off: the motor stops when you lift your finger")
+                            wrapMode: Text.WordWrap
+                            font.pointSize: 9
+                            color: Utility.getAppHexColor("normalText")
+                        }
+                    }
+
+                    Switch {
+                        id: maintainBox
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: mode.brake !== ""
+
+                    Button {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 100
+                        Layout.preferredHeight: 56
+                        text: "Set REV"
+                        onPressedChanged: hold(pressed, () => mode.set(-value))
+                    }
+
+                    Button {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 100
+                        Layout.preferredHeight: 56
+                        text: "Set FWD"
+                        onPressedChanged: hold(pressed, () => mode.set(value))
+                    }
+                }
+
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 56
+                    visible: mode.brake === ""
+                    text: "Set"
+                    onPressedChanged: hold(pressed, () => mode.set(value))
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    Button {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 100
+                        Layout.preferredHeight: 56
+                        visible: mode.brake !== ""
+                        text: mode.brake
+                        onPressedChanged: hold(pressed, () => mode.stop(value))
+                    }
+
+                    Button {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 100
+                        Layout.preferredHeight: 56
+                        text: "Release"
+                        Material.background: Qt.darker(Utility.getAppHexColor("danger"), 1.2)
+                        Material.foreground: Utility.getAppHexColor("white")
+
+                        onClicked: {
+                            mCommands.setCurrent(0.0)
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: dialog.dockWidth === 0
+
+                    Text {
+                        color: Utility.getAppHexColor("lightText")
+                        text: qsTr("Opacity")
+                    }
+
+                    Slider {
+                        id: opacitySlider
+                        Layout.fillWidth: true
+                        from: 0.1
+                        to: 1.0
+                        value: 1.0
+                    }
                 }
             }
         }
+    }
 
-        header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
-            height: tabBar.implicitHeight
-            opacity: opacitySlider.value
+    Connections {
+        target: mCommands
+        enabled: dialog.visible
 
-            TabBar {
-                id: tabBar
-                currentIndex: swipeView.currentIndex
-                anchors.fill: parent
-                implicitWidth: 0
-                clip: true
-
-                background: Rectangle {
-                    opacity: 1
-                    color: Utility.getAppHexColor("lightestBackground")
-                }
-
-                property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
-
-                Repeater {
-                    id: rep
-                    model: ["Current", "Duty", "RPM", "Position"]
-
-                    TabButton {
-                        text: modelData
-                        width: tabBar.buttonWidth
-                    }
-                }
-            }
+        function onValuesReceived(val, mask) {
+            readouts = ["Motor " + parseFloat(val.current_motor).toFixed(1) + " A",
+                        parseFloat(val.rpm).toFixed(0) + " ERPM",
+                        parseFloat(val.v_in).toFixed(1) + " V"]
         }
     }
 
@@ -448,6 +309,7 @@ Item {
         onTriggered: {
             if (VescIf.isPortConnected() && dialog.visible) {
                 mCommands.sendAlive()
+                mCommands.getValues()
             }
         }
     }

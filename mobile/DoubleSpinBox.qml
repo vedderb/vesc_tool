@@ -36,6 +36,7 @@ DoubleSpinBox {
     property string suffix: ""
     property string prefix: ""
 
+    background: InputBackground {}
     editable: true
     decimals: 2
     from: 0.0

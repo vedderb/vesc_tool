@@ -21,22 +21,14 @@ import QtQuick
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 
-import Vedder.vesc.vescinterface 1.0
-import Vedder.vesc.configparams 1.0
-import Vedder.vesc.utility 1.0
-
-Item {
+ParamEditFrame {
     id: editor
-    property string paramName: ""
-    property ConfigParams params: null
-    height: 240
-    Layout.fillWidth: true
     property real maxVal: 1.0
     property bool createReady: false
+    useSheet: true
 
     Component.onCompleted: {
         if (params != null) {
-            nameText.text = params.getLongName(paramName)
             setBits(params.getParamInt(paramName))
 
             var names = params.getParamEnumNames(paramName)
@@ -59,30 +51,6 @@ Item {
             b5Box.visible = b5Box.text.toLowerCase() != "unused"
             b6Box.visible = b6Box.text.toLowerCase() != "unused"
             b7Box.visible = b7Box.text.toLowerCase() != "unused"
-
-            var visibleCount = 0
-            if (b0Box.text.toLowerCase() != "unused") visibleCount++
-            if (b1Box.text.toLowerCase() != "unused") visibleCount++
-            if (b2Box.text.toLowerCase() != "unused") visibleCount++
-            if (b3Box.text.toLowerCase() != "unused") visibleCount++
-            if (b4Box.text.toLowerCase() != "unused") visibleCount++
-            if (b5Box.text.toLowerCase() != "unused") visibleCount++
-            if (b6Box.text.toLowerCase() != "unused") visibleCount++
-            if (b7Box.text.toLowerCase() != "unused") visibleCount++
-
-            visibleCount = Math.ceil(visibleCount / 2.0) - 1.0
-            if (visibleCount < 0.0) visibleCount = 0.0
-
-            height = 120 + visibleCount * 40
-            Layout.preferredHeight = height
-
-            if (params.getParamTransmittable(paramName)) {
-                nowButton.visible = true
-                defaultButton.visible = true
-            } else {
-                nowButton.visible = false
-                defaultButton.visible = false
-            }
 
             createReady = true
         }
@@ -119,97 +87,25 @@ Item {
         }
     }
 
-    Rectangle {
-        id: rect
-        anchors.fill: parent
-        color: Color.transparent(Utility.getAppHexColor("lightBackground"), 0.4)
-        radius: 10
-        border.color:  Utility.getAppHexColor("disabledText")
-        border.width: 3
-
-        ColumnLayout {
-            id: column
-            anchors.fill: parent
-            anchors.topMargin: 10
-            anchors.margins: 5
-
-            Text {
-                id: nameText
-                color: Utility.getAppHexColor("lightText")
-                text: paramName
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-                font.pointSize: 12
-            }
-
-            GridLayout {
-                Layout.fillWidth: true;
-                columns: 2
-                CheckBox { Layout.topMargin: 0; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b0Box; focusPolicy: Qt.NoFocus; text: "B0"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: 0; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b1Box; focusPolicy: Qt.NoFocus; text: "B1"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b2Box; focusPolicy: Qt.NoFocus; text: "B2"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b3Box; focusPolicy: Qt.NoFocus; text: "B3"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b4Box; focusPolicy: Qt.NoFocus; text: "B4"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b5Box; focusPolicy: Qt.NoFocus; text: "B5"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b6Box; focusPolicy: Qt.NoFocus; text: "B6"; onCheckedChanged: updateFromBoxes(); }
-                CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
-                    id: b7Box; focusPolicy: Qt.NoFocus; text: "B7"; onCheckedChanged: updateFromBoxes(); }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Button {
-                    id: nowButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Current"
-                    onClicked: {
-                        params.setUpdateOnly(paramName)
-                        params.requestUpdate()
-                    }
-                }
-
-                Button {
-                    id: defaultButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Default"
-                    onClicked: {
-                        params.setUpdateOnly(paramName)
-                        params.requestUpdateDefault()
-                    }
-                }
-
-                Button {
-                    id: helpButton
-                    focusPolicy: Qt.NoFocus
-
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 500
-                    flat: true
-                    text: "Help"
-                    onClicked: {
-                        VescIf.emitMessageDialog(
-                                    params.getLongName(paramName),
-                                    params.getDescription(paramName),
-                                    true, true)
-                    }
-                }
-            }
-        }
+    GridLayout {
+        Layout.fillWidth: true;
+        columns: 2
+        CheckBox { Layout.topMargin: 0; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b0Box; focusPolicy: Qt.NoFocus; text: "B0"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: 0; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b1Box; focusPolicy: Qt.NoFocus; text: "B1"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b2Box; focusPolicy: Qt.NoFocus; text: "B2"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b3Box; focusPolicy: Qt.NoFocus; text: "B3"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b4Box; focusPolicy: Qt.NoFocus; text: "B4"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b5Box; focusPolicy: Qt.NoFocus; text: "B5"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b6Box; focusPolicy: Qt.NoFocus; text: "B6"; onCheckedChanged: updateFromBoxes(); }
+        CheckBox { Layout.topMargin: -8; Layout.bottomMargin: -8; Layout.fillWidth: true;
+            id: b7Box; focusPolicy: Qt.NoFocus; text: "B7"; onCheckedChanged: updateFromBoxes(); }
     }
 
     Connections {

@@ -17,10 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
-import Qt5Compat.GraphicalEffects
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Material
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.configparams 1.0
@@ -34,6 +34,52 @@ Item {
         dialog.open()
     }
 
+    // Rich text from the info config in a scrolling card, implicitly as tall as its text
+    component TextCard: Rectangle {
+        property alias text: cardText.text
+
+        implicitHeight: cardScroll.implicitHeight + 24
+        radius: 12
+        color: Utility.getAppHexColor("cardBackground")
+        border.color: Utility.getAppHexColor("raisedBackground")
+
+        ScrollView {
+            id: cardScroll
+            anchors.fill: parent
+            anchors.topMargin: 12
+            anchors.bottomMargin: 12
+            leftPadding: 12
+            rightPadding: 12
+            clip: true
+            contentWidth: availableWidth
+
+            Text {
+                id: cardText
+                width: cardScroll.availableWidth
+                color: Utility.getAppHexColor("lightText")
+                linkColor: Utility.getAppHexColor("lightAccent")
+                wrapMode: Text.WordWrap
+                textFormat: Text.RichText
+                onLinkActivated: (link) => Qt.openUrlExternally(link)
+            }
+        }
+    }
+
+    component AcceptBox: CheckBox {
+        id: acceptBox
+        Layout.fillWidth: true
+        leftPadding: 12
+        rightPadding: 12
+        text: qsTr("Yes, I understand and accept")
+
+        background: Rectangle {
+            radius: 12
+            color: Utility.getAppHexColor("cardBackground")
+            border.width: acceptBox.checked ? 2 : 1
+            border.color: acceptBox.checked ? Material.accent : Utility.getAppHexColor("raisedBackground")
+        }
+    }
+
     Component.onCompleted: {
         introText.text = mInfoConf.getDescription("wizard_startup_intro")
         usageText.text = mInfoConf.getDescription("wizard_startup_usage")
@@ -45,170 +91,130 @@ Item {
         id: dialog
         modal: true
         focus: true
-        width: parent.width - 10 - notchLeft - notchRight
-        height: parent.height - 10
+        // Covers the app bars on landscape phones
+        readonly property bool fullWindow: phoneLandscape
+        width: mainIsTablet ? 640 : parent.width - 10 - notchLeft - notchRight
+        height: parent.height - 10 - (fullWindow ? notchTop + notchBot : 0)
         closePolicy: Popup.NoAutoClose
-        x: 5 + (notchLeft + notchRight) / 2
-        y: 5
-        parent: dialogParent
+        x: mainIsTablet ? (parent.width - width) / 2 : 5 + notchLeft
+        y: 5 + (fullWindow ? notchTop : 0)
+        parent: fullWindow ? Overlay.overlay : dialogParent
         bottomMargin: 0
         rightMargin: 0
         padding: 10
 
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 20
+        }
+
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: Utility.getAppHexColor("overlay")
         }
 
         StackLayout {
             id: stackLayout
             anchors.fill: parent
 
-            Item {
-                Text {
+            // Each step: hint, text card as tall as its text (scrolls when longer), optional accept box
+            ColumnLayout {
+                StepHint {
+                    Layout.bottomMargin: 4
+                    title: qsTr("Before you start")
+                    hint: qsTr("Read the two notices that follow and accept both to start using VESC Tool.")
+                }
+
+                TextCard {
                     id: introText
-                    color: Utility.getAppHexColor("lightText")
-                    linkColor: "lightblue"
-                    verticalAlignment: Text.AlignVCenter
-                    anchors.fill: parent
-                    wrapMode: Text.WordWrap
-                    textFormat: Text.RichText
-                    onLinkActivated: {
-                        Qt.openUrlExternally(link)
-                    }
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.maximumHeight: implicitHeight
                 }
+
+                Item { Layout.fillHeight: true }
             }
 
-            Item {
-                ColumnLayout {
-                    anchors.fill: parent
+            ColumnLayout {
+                StepHint {
+                    Layout.bottomMargin: 4
+                    title: qsTr("Safe use")
+                    hint: qsTr("Read how VESC Tool may be used, then tick the box below to continue.")
+                }
 
-                    ScrollView {
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        clip: true
-                        contentWidth: availableWidth
+                TextCard {
+                    id: usageText
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.maximumHeight: implicitHeight
+                }
 
-                        Text {
-                            id: usageText
-                            color: Utility.getAppHexColor("lightText")
-                            linkColor: "lightblue"
-                            verticalAlignment: Text.AlignVCenter
-                            width: parent.parent.width - 20
-                            wrapMode: Text.WordWrap
-                            textFormat: Text.RichText
-                            onLinkActivated: {
-                                Qt.openUrlExternally(link)
-                            }
-                        }
-                    }
+                AcceptBox {
+                    id: acceptUsageBox
 
-                    CheckBox {
-                        id: acceptUsageBox
-                        Layout.fillWidth: true
-                        text: "Yes, I understand and accept"
-
-                        onToggled: {
-                            updateButtonsEnabled()
-                        }
+                    onToggled: {
+                        updateButtonsEnabled()
                     }
                 }
+
+                Item { Layout.fillHeight: true }
             }
 
-            Item {
-                ColumnLayout {
-                    anchors.fill: parent
+            ColumnLayout {
+                StepHint {
+                    Layout.bottomMargin: 4
+                    title: qsTr("Warranty")
+                    hint: qsTr("Read the warranty terms, then tick the box below to continue.")
+                }
 
-                    ScrollView {
-                        Layout.fillHeight: true
-                        Layout.fillWidth: true
-                        clip: true
-                        contentWidth: parent.width - 20
+                TextCard {
+                    id: warrantyText
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.maximumHeight: implicitHeight
+                }
 
-                        Text {
-                            id: warrantyText
-                            color: Utility.getAppHexColor("lightText")
-                            linkColor: "lightblue"
-                            verticalAlignment: Text.AlignVCenter
-                            width: parent.parent.width - 20
-                            wrapMode: Text.WordWrap
-                            textFormat: Text.RichText
-                            onLinkActivated: {
-                                Qt.openUrlExternally(link)
-                            }
-                        }
-                    }
+                AcceptBox {
+                    id: acceptWarrantyBox
 
-                    CheckBox {
-                        id: acceptWarrantyBox
-                        Layout.fillWidth: true
-                        text: "Yes, I understand and accept"
-
-                        onToggled: {
-                            updateButtonsEnabled()
-                        }
+                    onToggled: {
+                        updateButtonsEnabled()
                     }
                 }
+
+                Item { Layout.fillHeight: true }
             }
 
-            Item {
-                Text {
+            ColumnLayout {
+                StepHint {
+                    Layout.bottomMargin: 4
+                    title: qsTr("All set")
+                    hint: qsTr("Tap Finish to start using VESC Tool.")
+                }
+
+                TextCard {
                     id: conclusionText
-                    color: Utility.getAppHexColor("lightText")
-                    linkColor: "lightblue"
-                    verticalAlignment: Text.AlignVCenter
-                    anchors.fill: parent
-                    wrapMode: Text.WordWrap
-                    textFormat: Text.RichText
-                    onLinkActivated: {
-                        Qt.openUrlExternally(link)
-                    }
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.maximumHeight: implicitHeight
                 }
+
+                Item { Layout.fillHeight: true }
             }
         }
 
-        header: Rectangle {
-            color: Utility.getAppHexColor("lightText")
-            height: tabBar.height
-
-            TabBar {
-                id: tabBar
-                currentIndex: stackLayout.currentIndex
-                anchors.fill: parent
-                implicitWidth: 0
-                clip: true
-                enabled: false
-
-                background: Rectangle {
-                    opacity: 1
-                    color: Utility.getAppHexColor("lightBackground")
-                }
-
-                property int buttons: 3
-                property int buttonWidth: 120
-
-                TabButton {
-                    text: qsTr("Intro")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Usage")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Warranty")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-                TabButton {
-                    text: qsTr("Conclusion")
-                    width: Math.max(tabBar.buttonWidth, tabBar.width / tabBar.buttons)
-                }
-            }
+        header: WizardHeader {
+            title: qsTr("Welcome to VESC Tool")
+            steps: [qsTr("Intro"), qsTr("Usage"), qsTr("Warranty"), qsTr("Conclusion")]
+            currentIndex: stackLayout.currentIndex
         }
 
         footer: RowLayout {
             spacing: 0
+
             Button {
                 id: prevButton
+                Layout.margins: 10
+                Layout.rightMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Cancel"
@@ -227,10 +233,12 @@ Item {
 
             Button {
                 id: nextButton
+                Layout.margins: 10
+                Layout.leftMargin: 5
                 Layout.fillWidth: true
                 Layout.preferredWidth: 500
                 text: "Next"
-                flat: true
+                highlighted: true
 
                 onClicked: {
                     if (stackLayout.currentIndex == (stackLayout.count - 1)) {
@@ -246,33 +254,23 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: cancelDialog
-        standardButtons: Dialog.Ok | Dialog.Close
-        modal: true
-        focus: true
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40)
-        closePolicy: Popup.CloseOnEscape
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        title: qsTr("Quit VESC Tool?")
+        acceptText: qsTr("Continue setup")
+        rejectText: qsTr("Quit")
+        closePolicy: Popup.NoAutoClose
 
         ScrollView {
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width - 20
+            contentWidth: availableWidth
 
             Text {
                 id: resultLabel
                 color: Utility.getAppHexColor("lightText")
                 verticalAlignment: Text.AlignVCenter
-                anchors.fill: parent
+                width: parent.parent.width
                 wrapMode: Text.WordWrap
                 text: "You must finish the introduction in order to use VESC Tool."
             }

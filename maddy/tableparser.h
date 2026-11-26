@@ -11,6 +11,7 @@
 #include <regex>
 
 #include "maddy/blockparser.h"
+#include "utility.h"
 
 // -----------------------------------------------------------------------------
 
@@ -21,7 +22,22 @@ namespace maddy {
 /**
  * TableParser
  *
- * For more information, see the docs folder.
+ * From Markdown (GitHub style, the second row sets the column alignment):
+ *
+ * ```
+ * | Name | Value |
+ * |:-----|------:|
+ * | a    | 1     |
+ * ```
+ *
+ * To HTML:
+ *
+ * ```
+ * <table><thead><tr><th align="left">Name</th>...</tr></thead>
+ * <tbody><tr><td align="left">a</td>...</tr></tbody></table>
+ * ```
+ *
+ * Lines starting with `|` without that second row become a paragraph.
  *
  * @class
  */
@@ -40,16 +56,13 @@ public:
     std::function<std::shared_ptr<BlockParser>(const std::string& line)> getBlockParserForLineCallback
   )
     : BlockParser(parseLineCallback, getBlockParserForLineCallback)
-    , isStarted(false)
     , isFinished(false)
-    , currentBlock(0)
-    , currentRow(0)
   {}
 
   /**
    * IsStartingLine
    *
-   * If the line has exact `|table>`, then it is starting the table.
+   * Every table row starts with `|`.
    *
    * @method
    * @param {const std::string&} line
@@ -58,14 +71,14 @@ public:
   static bool
   IsStartingLine(const std::string& line)
   {
-    static std::string matchString("|table>");
-    return line == matchString;
+    return !line.empty() && line[0] == '|';
   }
 
   /**
    * AddLine
    *
-   * Adding a line which has to be parsed.
+   * Collects rows until a line that does not start with `|`, which is then
+   * handed back to the parser.
    *
    * @method
    * @param {std::string&} line
@@ -74,52 +87,19 @@ public:
   void
   AddLine(std::string& line) override
   {
-    if (!this->isStarted && line == "|table>")
+    if (IsStartingLine(line))
     {
-      this->isStarted = true;
+      this->lines.push_back(line);
       return;
     }
 
-    if (this->isStarted)
-    {
-      if (line == "- | - | -")
-      {
-        ++this->currentBlock;
-        this->currentRow = 0;
-        return;
-      }
-
-      if (line == "|<table")
-      {
-        static std::string emptyLine = "";
-        this->parseBlock(emptyLine);
-        this->isFinished = true;
-        return;
-      }
-
-      if (this->table.size() < this->currentBlock + 1)
-      {
-        this->table.push_back(std::vector<std::vector<std::string>>());
-      }
-      this->table[this->currentBlock].push_back(std::vector<std::string>());
-
-      std::string segment;
-      std::stringstream streamToSplit(line);
-
-      while (std::getline(streamToSplit, segment, '|'))
-      {
-        this->parseLine(segment);
-        this->table[this->currentBlock][this->currentRow].push_back(segment);
-      }
-
-      ++this->currentRow;
-    }
+    this->reparseLine = line;
+    this->parseBlock(line);
+    this->isFinished = true;
   }
 
   /**
    * IsFinished
-   *
-   * A table ends with `|<table`.
    *
    * @method
    * @return {bool}
@@ -146,99 +126,110 @@ protected:
   void
   parseBlock(std::string&) override
   {
-    result << "<table>";
+    std::vector<std::string> header = splitRow(this->lines[0]);
+    std::vector<std::string> align;
 
-    bool hasHeader = false;
-    bool hasFooter = false;
-    bool isFirstBlock = true;
-    uint32_t currentBlockNumber = 0;
-
-    if (this->table.size() > 1)
+    if (this->lines.size() > 1)
     {
-      hasHeader = true;
-    }
+      static std::regex delimiter("^:?-+:?$");
 
-    if (this->table.size() >= 3)
-    {
-      hasFooter = true;
-    }
-
-    for (const std::vector<std::vector<std::string>>& block : this->table)
-    {
-      bool isInHeader = false;
-      bool isInFooter = false;
-      ++currentBlockNumber;
-
-      if (hasHeader && isFirstBlock)
+      for (const std::string& cell : splitRow(this->lines[1]))
       {
-        result << "<thead>";
-        isInHeader = true;
-      }
-      else if (hasFooter && currentBlockNumber == this->table.size())
-      {
-        result << "<tfoot>";
-        isInFooter = true;
-      }
-      else
-      {
-        result << "<tbody>";
-      }
-
-      for (const std::vector<std::string>& row : block)
-      {
-        result << "<tr>";
-
-        for (const std::string& column : row)
+        if (!std::regex_match(cell, delimiter))
         {
-          if (isInHeader)
-          {
-            result << "<th>";
-          }
-          else
-          {
-            result << "<td>";
-          }
-
-          result << column;
-
-          if (isInHeader)
-          {
-            result << "</th>";
-          }
-          else
-          {
-            result << "</td>";
-          }
+          align.clear();
+          break;
         }
 
-        result << "</tr>";
+        bool left = cell.front() == ':';
+        bool right = cell.back() == ':';
+        align.push_back(
+          left && right ? " align=\"center\"" :
+          right ? " align=\"right\"" :
+          left ? " align=\"left\"" : ""
+        );
       }
-
-      if (isInHeader)
-      {
-        result << "</thead>";
-      }
-      else if (isInFooter)
-      {
-        result << "</tfoot>";
-      }
-      else
-      {
-        result << "</tbody>";
-      }
-
-      isFirstBlock = false;
     }
 
-    result << "</table>";
+    if (align.empty() || align.size() != header.size())
+    {
+      result << "<p>";
+      for (std::string line : this->lines)
+      {
+        this->parseLine(line);
+        result << line << " ";
+      }
+      result << "</p>";
+      return;
+    }
+
+    result << "<table border=\"1\" cellspacing=\"0\" cellpadding=\"4\" style=\"border-collapse: collapse; border-style: solid; border-color: "
+           << Utility::getAppHexColor("lightestBackground").toStdString() << ";\">";
+
+    for (size_t row = 0; row < this->lines.size(); row++)
+    {
+      if (row == 1)
+      {
+        continue;
+      }
+
+      std::vector<std::string> cells = row == 0 ? header : splitRow(this->lines[row]);
+      const char* tag = row == 0 ? "th" : "td";
+
+      result << (row == 0 ? "<thead><tr>" : "<tr>");
+
+      for (size_t col = 0; col < header.size(); col++)
+      {
+        std::string cell = col < cells.size() ? cells[col] : "";
+        this->parseLine(cell);
+        result << "<" << tag << align[col] << ">" << cell << "</" << tag << ">";
+      }
+
+      result << (row == 0 ? "</tr></thead><tbody>" : "</tr>");
+    }
+
+    result << "</tbody></table>";
   }
 
 private:
-  bool isStarted;
   bool isFinished;
-  uint32_t currentBlock;
-  uint32_t currentRow;
-  std::vector<std::vector<std::vector<std::string>>> table;
+  std::vector<std::string> lines;
+
+  // Splits "| a | b \| c |" into {"a", "b | c"}
+  static std::vector<std::string>
+  splitRow(const std::string& line)
+  {
+    std::vector<std::string> cells;
+    std::string cell;
+
+    for (size_t i = 1; i <= line.size(); i++)
+    {
+      if (i < line.size() && line[i] == '\\' && i + 1 < line.size() && line[i + 1] == '|')
+      {
+        cell += '|';
+        i++;
+      }
+      else if (i == line.size() || line[i] == '|')
+      {
+        size_t first = cell.find_first_not_of(" \t");
+        cell = first == std::string::npos ? "" :
+          cell.substr(first, cell.find_last_not_of(" \t") - first + 1);
+
+        if (i < line.size() || !cell.empty())
+        {
+          cells.push_back(cell);
+        }
+
+        cell.clear();
+      }
+      else
+      {
+        cell += line[i];
+      }
+    }
+
+    return cells;
+  }
 }; // class TableParser
 
 // -----------------------------------------------------------------------------

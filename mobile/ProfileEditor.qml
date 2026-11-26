@@ -135,20 +135,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: dialog
-        modal: true
-        focus: true
-        width: parent.width - 20
-        height: Math.min(implicitHeight, parent.height - 60)
-        closePolicy: Popup.CloseOnEscape
-        x: 10
-        y: 50
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        title: qsTr("Profile")
+        rejectText: ""
 
         ColumnLayout {
             id: scrollColumn
@@ -161,15 +151,16 @@ Item {
                 contentWidth: parent.width
                 ColumnLayout {
                     anchors.fill: parent
-                    spacing: 0
+                    spacing: 8
 
                     Text {
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("normalText")
                         text: "Profile Name"
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
-                        font.pointSize: 12
+                        Layout.topMargin: 8
+                        font.pointSize: 9
+                        font.letterSpacing: 0.5
+                        font.capitalization: Font.AllUppercase
                         Layout.bottomMargin: 3
                     }
 
@@ -177,10 +168,9 @@ Item {
                         Layout.fillWidth: true
                         Layout.bottomMargin: 20
                         height: nameInput.implicitHeight + 14
-                        border.width: 2
-                        border.color: {border.color = Utility.getAppHexColor("disabledText")}
-                        color: "#33a8a8a8"
-                        radius: 3
+                        border.color: Utility.getAppHexColor("raisedBackground")
+                        color: Utility.getAppHexColor("cardBackground")
+                        radius: 12
                         TextInput {
                             id: nameInput
                             text: ""
@@ -193,12 +183,13 @@ Item {
                     }
 
                     Text {
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("normalText")
                         text: "Speed Limit"
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
-                        font.pointSize: 12
+                        Layout.topMargin: 8
+                        font.pointSize: 9
+                        font.letterSpacing: 0.5
+                        font.capitalization: Font.AllUppercase
                     }
 
                     DoubleSpinBox {
@@ -227,12 +218,13 @@ Item {
                     }
 
                     Text {
-                        color: {color = Utility.getAppHexColor("lightText")}
+                        color: Utility.getAppHexColor("normalText")
                         text: "Motor Current Scale"
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
-                        font.pointSize: 12
+                        Layout.topMargin: 8
+                        font.pointSize: 9
+                        font.letterSpacing: 0.5
+                        font.capitalization: Font.AllUppercase
                     }
 
                     DoubleSpinBox {
@@ -291,18 +283,21 @@ Item {
 
             RowLayout {
                 Layout.fillWidth: true
+                // Keeps its height on landscape phones, the settings above scroll instead
+                Layout.minimumHeight: implicitHeight
                 Button {
                     Layout.preferredWidth: 50
                     Layout.fillWidth: true
                     text: "..."
                     onClicked: menu.open()
 
-                    Menu {
+                    PopupMenu {
                         id: menu
                         width: 500
 
-                        MenuItem {
+                        MenuEntry {
                             text: "Read current configuration"
+                            iconFile: "Download-96.png"
                             onTriggered: {
                                 readCurrentConfig()
                             }
@@ -312,6 +307,7 @@ Item {
 
                 Button {
                     text: "Cancel"
+                    flat: true
                     Layout.fillWidth: true
                     onClicked: {
                         dialog.close()
@@ -321,7 +317,8 @@ Item {
 
                 Button {
                     id: okButton
-                    text: "Ok"
+                    text: qsTr("Save")
+                    highlighted: true
                     Layout.fillWidth: true
                     onClicked: {
                         dialog.close()

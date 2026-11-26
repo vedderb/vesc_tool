@@ -165,13 +165,14 @@ public:
     Q_INVOKABLE bool askQmlLoad() const;
     Q_INVOKABLE void setAskQmlLoad(bool newAskQmlLoad);
 
+    Q_INVOKABLE void storeBlePreferred(QString address, bool preferred);
+    Q_INVOKABLE bool getBlePreferred(QString address);
+
 #ifdef HAS_BLUETOOTH
     Q_INVOKABLE BleUart* bleDevice();
     Q_INVOKABLE void storeBleName(QString address, QString name);
     Q_INVOKABLE QString getBleName(QString address);
     Q_INVOKABLE QString getLastBleAddr() const;
-    Q_INVOKABLE void storeBlePreferred(QString address, bool preferred);
-    Q_INVOKABLE bool getBlePreferred(QString address);
     Q_INVOKABLE bool hasBluetooth() {return true;}
 #else
     Q_INVOKABLE BleUartDummy* bleDevice() {return mBleUart;}
@@ -201,6 +202,7 @@ public:
     Q_INVOKABLE void connectUdp(QString server, int port);
     Q_INVOKABLE void connectBle(QString address);
     Q_INVOKABLE void connectVirtual();
+    Q_INVOKABLE bool isVirtualConnected() const;
     Q_INVOKABLE bool isAutoconnectOngoing() const;
     Q_INVOKABLE double getAutoconnectProgress() const;
     Q_INVOKABLE QVector<int> scanCan();
@@ -343,7 +345,7 @@ private slots:
     void appconfUpdated();
     void mcconfUpdated();
     void ackReceived(QString ackType);
-    void customConfigRx(int confId, QByteArray data);
+    void customConfigRx(int confId, QByteArray data, bool isDefault);
 
 private:
     typedef enum {

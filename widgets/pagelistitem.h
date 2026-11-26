@@ -41,6 +41,7 @@ public:
     QString name();
     void setBold(bool bold);
     void setIndented(bool indented);
+    void setChanged(bool changed);
 
 signals:
 
@@ -50,6 +51,7 @@ private:
     QLabel *mIconLabel;
     QLabel *mNameLabel;
     QLabel *mGroupLabel;
+    QLabel *mChangedDot;
     QSpacerItem *mSpaceStart;
 
 };

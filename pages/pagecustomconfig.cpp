@@ -82,7 +82,19 @@ void PageCustomConfig::customConfigLoadDone()
             t->clearParams();
             t->addParamSubgroup(p, "General", tabNames.at(i));
         }
+
+        connect(p, &ConfigParams::changedParamsChanged, this, &PageCustomConfig::updateWriteButton, Qt::UniqueConnection);
+        updateWriteButton();
     }
+}
+
+void PageCustomConfig::updateWriteButton()
+{
+    ConfigParams *p = mVesc ? mVesc->customConfig(mConfNum) : nullptr;
+    int changes = p ? p->getChangedParams().size() : 0;
+    ui->writeButton->setIcon(changes > 0 ? Utility::getIconWithDot("/icons/Download-96.png") :
+                                           Utility::getIcon("/icons/Download-96.png"));
+    ui->writeButton->setToolTip(changes > 0 ? tr("%n unwritten change(s)", "", changes) : QString());
 }
 
 void PageCustomConfig::on_readButton_clicked()

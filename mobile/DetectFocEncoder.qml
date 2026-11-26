@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -30,6 +30,7 @@ Item {
     property real mOffset: 0.0
     property real mRatio: 0.0
     property bool mInverted: false
+    property bool mReceived: false
     property var dialogParent: Overlay.overlay
 
     property Commands mCommands: VescIf.commands()
@@ -38,13 +39,6 @@ Item {
 
     function openDialog() {
         dialog.open()
-    }
-
-    function updateDisplay() {
-        resultArea.text =
-                "Offset   : " + parseFloat(mOffset).toFixed(1) + "\n" +
-                "Ratio    : " + parseFloat(mRatio).toFixed(1) + "\n" +
-                "Inverted : " + mInverted
     }
 
     function testConnected() {
@@ -59,127 +53,128 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        updateDisplay()
-    }
-
-    Dialog {
+    SheetDialog {
         id: dialog
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        width: parent.width - 20
-        height: column.height - 40
-        closePolicy: Popup.CloseOnEscape
+        fullHeight: true
+        title: qsTr("Encoder Detection")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Encoder-96.png"
+        acceptText: qsTr("Apply")
+        acceptEnabled: mReceived
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
+        onAccepted: {
+            mMcConf.updateParamDouble("foc_encoder_offset", mOffset)
+            mMcConf.updateParamDouble("foc_encoder_ratio", mRatio)
+            mMcConf.updateParamBool("foc_encoder_inverted", mInverted)
+
+            VescIf.emitStatusMessage("Encoder Parameters Applied", true)
         }
 
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
         ScrollView {
+            id: scroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width
+            contentWidth: availableWidth
 
             ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
+                width: scroll.availableWidth
+                spacing: 12
 
-                DoubleSpinBox {
+                SectionHeader {
+                    Layout.topMargin: 0
+                    text: qsTr("Measurement")
+                }
+
+                LabeledSpinBox {
                     id: currentBox
-                    Layout.fillWidth: true
+                    // As wide as a cell of the two column grids in the other detection sheets
+                    Layout.preferredWidth: (scroll.availableWidth - 10) / 2
+                    label: qsTr("Current")
                     decimals: 2
                     realValue: 10.0
                     realFrom: 0.0
                     realTo: 200.0
-                    prefix: "I: "
                     suffix: " A"
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "Help"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            VescIf.emitMessageDialog(
-                                        mInfoConf.getLongName("help_foc_encoder_detect"),
-                                        mInfoConf.getDescription("help_foc_encoder_detect"),
-                                        true, true)
-                        }
+                Button {
+                    Layout.alignment: Qt.AlignLeft
+                    text: qsTr("How detection works")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                    flat: true
+                    onClicked: {
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("help_foc_encoder_detect"),
+                                    mInfoConf.getDescription("help_foc_encoder_detect"),
+                                    true, true)
                     }
+                }
 
-                    Button {
-                        text: "Detect"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            if (!testConnected()) {
-                                return
-                            }
+                SectionHeader {
+                    text: qsTr("Detect")
+                }
 
+                Button {
+                    Layout.fillWidth: true
+                    text: qsTr("Run detection")
+                    highlighted: !mReceived
+                    onClicked: {
+                        if (testConnected()) {
                             detectDialog.open()
                         }
                     }
                 }
 
-                TextArea {
-                    id: resultArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 200
-                    readOnly: true
-                    wrapMode: TextEdit.WordWrap
-                    font.family: "DejaVuSansMono"
+                SectionHeader {
+                    text: qsTr("Results")
                 }
 
-                Button {
-                    text: "Apply & Close"
+                GridLayout {
                     Layout.fillWidth: true
-                    onClicked: {
-                        mMcConf.updateParamDouble("foc_encoder_offset", mOffset)
-                        mMcConf.updateParamDouble("foc_encoder_ratio", mRatio)
-                        mMcConf.updateParamBool("foc_encoder_inverted", mInverted)
+                    columns: 3
+                    columnSpacing: 8
+                    rowSpacing: 8
+                    uniformCellWidths: true
 
-                        VescIf.emitStatusMessage("Encoder Parameters Applied", true)
-
-                        dialog.close()
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Offset")
+                        value: mReceived ? mOffset.toFixed(1) : "\u2013"
+                        unit: "°"
                     }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Ratio")
+                        value: mReceived ? mRatio.toFixed(1) : "\u2013"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Inverted")
+                        value: mReceived ? (mInverted ? qsTr("Yes") : qsTr("No")) : "\u2013"
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("normalText")
+                    font.pointSize: 11
+                    text: qsTr("Apply puts the results in the motor configuration. Write it to save them on the VESC.")
                 }
             }
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Detect FOC Encoder Parameters"
+        acceptText: qsTr("Start")
+        title: qsTr("Detect Encoder")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Encoder-96.png"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Text {
-            id: detectLambdaLabel
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This is going to turn the motor slowly. Make " +
-                "sure that nothing is in the way."
+        WarningBanner {
+            width: parent.width
+            text: qsTr("This turns the motor slowly. Make sure that nothing is in the way.")
         }
 
         onAccepted: {
@@ -201,7 +196,7 @@ Item {
                 mOffset = res.offset
                 mRatio = res.ratio
                 mInverted = res.inverted
-                updateDisplay()
+                mReceived = true
             }
         }
     }

@@ -21,13 +21,10 @@
 #define PAGEBMS_H
 
 #include <QWidget>
-#include <QTimer>
 #include "vescinterface.h"
-#include "widgets/qcustomplot.h"
+#include "utility.h"
 
-namespace Ui {
-class PageBms;
-}
+class QQuickWidget;
 
 class PageBms : public QWidget
 {
@@ -35,30 +32,14 @@ class PageBms : public QWidget
 
 public:
     explicit PageBms(QWidget *parent = nullptr);
-    ~PageBms();
 
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 
-private slots:
-    void bmsValuesRx(BMS_VALUES val);
-
-    void on_resetAhButton_clicked();
-    void on_resetWhButton_clicked();
-    void on_balOnButton_clicked();
-    void on_balOffButton_clicked();
-    void on_zeroCurrentButton_clicked();
-    void on_chgEnButton_clicked();
-    void on_chgDisButton_clicked();
-
 private:
-    Ui::PageBms *ui;
     VescInterface *mVesc;
-    QVector<QCPBars*> mCellBars;
-    QVector<QCPBars*> mTempBars;
-
-    void reloadCellBars(int cells);
-    void reloadTempBars(int sensors);
+    Utility *mUtil;
+    QQuickWidget *mQml;
 
 };
 

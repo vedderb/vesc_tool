@@ -392,7 +392,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
         return false;
     }
 
-    auto waitWriteRes = [this]() {
+    auto waitWriteRes = [this](quint32 expectedOffset) {
         int res = -10;
 
         QEventLoop loop;
@@ -400,10 +400,11 @@ bool CodeLoader::lispUpload(VByteArray vb)
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(1000);
         auto conn = connect(mVesc->commands(), &Commands::lispWriteCodeRx,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
+                            [&res,&loop,expectedOffset](bool erRes, quint32 offset) {
+            if (offset == expectedOffset) {
+                res = erRes ? 1 : -1;
+                loop.quit();
+            }
         });
 
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
@@ -418,7 +419,7 @@ bool CodeLoader::lispUpload(VByteArray vb)
         int res = -10;
         while (tries > 0) {
             mVesc->commands()->lispWriteCode(data, offset);
-            if ((res = waitWriteRes()) >= 0) {
+            if ((res = waitWriteRes(offset)) >= 0) {
                 return res;
             }
             tries--;
@@ -745,7 +746,7 @@ QByteArray CodeLoader::qmlCompress(QString script)
 
 bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
 {
-    auto waitWriteRes = [this]() {
+    auto waitWriteRes = [this](quint32 expectedOffset) {
         int res = -10;
 
         QEventLoop loop;
@@ -753,10 +754,11 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
         timeoutTimer.setSingleShot(true);
         timeoutTimer.start(1000);
         auto conn = connect(mVesc->commands(), &Commands::writeQmluiResReceived,
-                            [&res,&loop](bool erRes, quint32 offset) {
-            (void)offset;
-            res = erRes ? 1 : -1;
-            loop.quit();
+                            [&res,&loop,expectedOffset](bool erRes, quint32 offset) {
+            if (offset == expectedOffset) {
+                res = erRes ? 1 : -1;
+                loop.quit();
+            }
         });
 
         connect(&timeoutTimer, SIGNAL(timeout()), &loop, SLOT(quit()));
@@ -771,7 +773,7 @@ bool CodeLoader::qmlUpload(QByteArray script, bool isFullscreen)
         int res = -10;
         while (tries > 0) {
             mVesc->commands()->qmlUiWrite(data, offset);
-            if ((res = waitWriteRes()) >= 0) {
+            if ((res = waitWriteRes(offset)) >= 0) {
                 return res;
             }
             tries--;

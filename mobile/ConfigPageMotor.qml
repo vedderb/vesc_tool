@@ -57,23 +57,10 @@ Item {
         dialogParent: confPageMotorItem.dialogParent
     }
 
-    Dialog {
+    SheetDialog {
         id: directionSetupDialog
-        title: "Direction Setup"
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        padding: 10
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 10 - notchLeft - notchRight
-        closePolicy: Popup.CloseOnEscape
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        parent: confPageMotorItem.dialogParent
+        title: "Invert Motor Directions"
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Process-96.png"
 
         DirectionSetup {
             id: directionSetup
@@ -82,34 +69,15 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: measureOffsetDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Measure Offsets"
+        title: qsTr("Measure Offsets")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Offset-96.png"
+        acceptText: qsTr("Measure")
 
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: confPageMotorItem.dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        Text {
-            anchors.fill: parent
-            id: detectLambdaLabel
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            wrapMode: Text.WordWrap
-            text:
-                "This is going to measure and store all offsets. Make sure " +
-                "that the motor is not moving or disconnected. Motor rotation " +
-                "during the measurement will cause an invalid result. Do you " +
-                "want to continue?"
+        WarningBanner {
+            width: parent.width
+            text: qsTr("This measures and stores all offsets. Make sure that the motor is not moving, or disconnect it. Motor rotation during the measurement gives an invalid result.")
         }
 
         Timer {
@@ -134,7 +102,7 @@ Item {
 
     function addSeparator(text) {
         var e = editors.createSeparator(scrollCol, text)
-        e.Layout.columnSpan = isHorizontal ? 2 : 1
+        e.Layout.columnSpan = Qt.binding(function() { return scrollCol.columns })
     }
 
     function destroyEditors() {
@@ -147,6 +115,16 @@ Item {
         var e = editors.createEditorMc(scrollCol, param)
         e.Layout.preferredWidth = 500
         e.Layout.fillsWidth = true
+    }
+
+    function review() {
+        writeButton.review()
+    }
+
+    function jumpTo(group, subgroup, name) {
+        pageBox.currentIndex = pageBox.find(group)
+        tabBox.currentIndex = tabBox.model.indexOf(subgroup)
+        editors.showParam(scroll, scrollCol, name)
     }
 
     function updateEditors() {
@@ -163,37 +141,62 @@ Item {
         }
     }
 
-    ColumnLayout {
+    ParamGroupList {
+        id: groupList
+        box: pageBox
+        params: VescIf.mcConfig()
+    }
+
+    GridLayout {
         id: column
         anchors.fill: parent
-        spacing: 5
+        anchors.leftMargin: groupList.visible ? groupList.width + 10 : 0
+        // Phone landscape: buttons stacked right of the parameters
+        columns: phoneLandscape ? 2 : 1
 
         GridLayout {
+            Layout.columnSpan: column.columns
             Layout.fillWidth: true
             Layout.topMargin: 5
             columns: isHorizontal ? 2 : 1
-            ComboBox {
-                id: pageBox
+            RowLayout {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                visible: !groupList.visible
 
-                model: VescIf.mcConfig().getParamGroups()
+                ComboBox {
+                    id: pageBox
+                    background: InputBackground {}
+                    Layout.fillWidth: true
 
-                onCurrentTextChanged: {
-                    var tabTextOld = tabBox.currentText
-                    var subgroups = VescIf.mcConfig().getParamSubgroups(currentText)
+                    model: VescIf.mcConfig().getParamGroups()
 
-                    tabBox.model = subgroups
-                    tabBox.visible = subgroups.length > 1
+                    onCurrentTextChanged: {
+                        var tabTextOld = tabBox.currentText
+                        var subgroups = VescIf.mcConfig().getParamSubgroups(currentText)
 
-                    if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
-                        updateEditors()
+                        tabBox.model = subgroups
+
+                        if (tabTextOld === tabBox.currentText && tabTextOld !== "") {
+                            updateEditors()
+                        }
                     }
                 }
+
+                ToolButton {
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Search-96.png"
+                    Accessible.name: qsTr("Search parameters")
+                    onClicked: paramSearch.open()
+                }
             }
-            
-            ComboBox {
+
+            SubgroupBar {
                 id: tabBox
+                visible: count > 1 || groupList.visible
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                params: VescIf.mcConfig()
+                group: pageBox.currentText
                 
                 onCurrentTextChanged: {
                     updateEditors()
@@ -205,25 +208,29 @@ Item {
             id: scroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: column.width
+            contentWidth: scroll.width
             contentHeight: scrollCol.preferredHeight
             clip: true
 
             GridLayout {
                 id: scrollCol
-                width: column.width
-                columns: isHorizontal ? 2 : 1
+                width: scroll.width
+                columns: Math.max(1, Math.floor(width / 380))
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Button {
+        GridLayout {
+            columns: phoneLandscape ? 1 : 3
+            Layout.fillWidth: !phoneLandscape
+            Layout.alignment: Qt.AlignTop
+            WriteButton {
+                id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Write"
+                params: VescIf.mcConfig()
+                ackText: "Motor config write OK"
 
-                onClicked: {
+                onWriteRequested: {
                     mCommands.setMcconf(true)
                 }
             }
@@ -240,52 +247,53 @@ Item {
 
             Button {
                 id: menuButton
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
+                Layout.fillWidth: phoneLandscape
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
-                    parent: confPageMotorItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Read Default Settings"
+                        iconFile: "Restart-96.png"
                         onTriggered: {
                             mCommands.getMcconfDefault()
                         }
                     }
-                    MenuItem {
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "Detect BLDC Parameters..."
+                        iconFile: "Detect BLDC-96.png"
                         onTriggered: {
                             detectBldc.openDialog()
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Detect FOC Parameters..."
+                        iconFile: "Detect FOC-96.png"
                         onTriggered: {
                             detectFocParam.openDialog()
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Detect FOC Hall Sensors..."
+                        iconFile: "Hall Sensors-96.png"
                         onTriggered: {
                             detectFocHall.openDialog()
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Detect FOC Encoder..."
+                        iconFile: "Encoder-96.png"
                         onTriggered: {
                             detectFocEncoder.openDialog()
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Measure FOC Offsets"
+                        iconFile: "Offset-96.png"
                         onTriggered: {
                             if (VescIf.isPortConnected()) {
                                 measureOffsetDialog.open()
@@ -294,15 +302,33 @@ Item {
                             }
                         }
                     }
-                    MenuItem {
-                        text: "Setup Motor Directions..."
+                    MenuSeparator {}
+                    MenuEntry {
+                        text: "Invert Motor Directions..."
+                        iconFile: "Process-96.png"
                         onTriggered: {
                             directionSetupDialog.open()
                             directionSetup.scanCan()
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
+                        text: "Multi Settings..."
+                        iconFile: "Horizontal Settings Mixer-96.png"
+                        onTriggered: {
+                            multiSettings.openDialog()
+                        }
+                    }
+                    MenuEntry {
+                        text: "Controls..."
+                        iconFile: "Controller-96.png"
+                        onTriggered: {
+                            controls.openDialog()
+                        }
+                    }
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "Save XML"
+                        iconFile: "Save as-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogSave.close()
@@ -338,8 +364,9 @@ Item {
                             }
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Load XML"
+                        iconFile: "Open Folder-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogLoad.close()
@@ -408,7 +435,6 @@ Item {
             var subgroups = VescIf.mcConfig().getParamSubgroups(pageBox.currentText)
 
             tabBox.model = subgroups
-            tabBox.visible = subgroups.length > 1
 
             updateEditors()
         }

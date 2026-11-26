@@ -22,6 +22,7 @@
 #include "ios/src/setIosParameters.h"
 #endif
 #include <cmath>
+#include <QtMath>
 #include <QProgressDialog>
 #include <QEventLoop>
 #include <QNetworkAccessManager>
@@ -37,6 +38,7 @@
 #include <QNetworkInterface>
 #include <QDirIterator>
 #include <QPixmapCache>
+#include <QPainter>
 
 #include "maddy/parser.h"
 #include "heatshrink/heatshrinkif.h"
@@ -425,6 +427,20 @@ bool Utility::waitSignal(QObject *sender, QString signal, int timeoutMs)
     return timeoutTimer.isActive();
 }
 
+bool Utility::writeConfigBlocking(VescInterface *vesc, bool motor)
+{
+    if (!vesc->isPortConnected()) {
+        return false;
+    }
+
+    if (motor) {
+        vesc->commands()->setMcconf(false);
+    } else {
+        vesc->commands()->setAppConf();
+    }
+    return waitSignal(motor ? vesc->mcConfig() : vesc->appConfig(), SIGNAL(writeConfirmed()), 4000);
+}
+
 void Utility::sleepWithEventLoop(int timeMs)
 {
     QEventLoop loop;
@@ -458,6 +474,47 @@ bool Utility::canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud)
     }
 
     return res;
+}
+
+QString Utility::faultToDescription(mc_fault_code fault)
+{
+    switch (fault) {
+    case FAULT_CODE_OVER_VOLTAGE: return "Input voltage rose above Maximum Input Voltage. Usually regenerative braking on a full battery, or a BMS that cuts off charging. Reduce Battery Current Max Regen, or brake gently when full.";
+    case FAULT_CODE_UNDER_VOLTAGE: return "Input voltage dropped below Minimum Input Voltage. Usually an empty or sagging battery, a BMS cutting out, a loose connection or Minimum Input Voltage set too high. On a power supply, raise its current limit.";
+    case FAULT_CODE_DRV: return "The gate driver detected a problem and shut off the MOSFETs. Check the motor wires and connectors for shorts. If it repeats with the motor unplugged, the controller is likely damaged.";
+    case FAULT_CODE_ABS_OVER_CURRENT: return "Motor current spiked above Absolute Maximum Current. Usually motor settings that don't match the motor, Motor Current Max set too close to this limit, or a sensor or wiring problem.";
+    case FAULT_CODE_OVER_TEMP_FET: return "The MOSFETs reached MOSFET Temp Cutoff End. Let the controller cool down, improve its cooling or lower the current limits. If the controller is cold, its temperature sensor may be faulty.";
+    case FAULT_CODE_OVER_TEMP_MOTOR: return "The motor reached Motor Temp Cutoff End. If the motor isn't actually hot, check Motor Temperature Sensor Type and the sensor wiring, as a wrong type or a faulty wire gives false readings.";
+    case FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: return "The supply voltage of the gate driver is too high. This points to a hardware problem in the controller.";
+    case FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: return "The supply voltage of the gate driver is too low to switch the MOSFETs safely. This points to a hardware problem in the controller.";
+    case FAULT_CODE_MCU_UNDER_VOLTAGE: return "The 3.3 V supply of the processor dropped too low. Check accessories on the 3.3 V and 5 V outputs for shorts or too much load.";
+    case FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: return "The firmware stopped responding and the watchdog restarted the controller. Normal once after a firmware update. If it repeats, a script may be blocking the firmware. Scripts stay stopped until the next restart.";
+    case FAULT_CODE_ENCODER_SPI: return "Communication with the encoder failed. Check the encoder wiring and connector, its supply, and that Sensor Port Mode matches the encoder.";
+    case FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: return "The sin/cos encoder signal is too weak. Check the encoder wiring, the magnet position, and that Sine Amplitude and Cosine Amplitude match the encoder.";
+    case FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: return "The sin/cos encoder signal is too strong. Check that Sine Amplitude and Cosine Amplitude match the encoder, and that the magnet is not too close.";
+    case FAULT_CODE_FLASH_CORRUPTION: return "The firmware failed its integrity check. Upload the firmware again before using the controller.";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: return "Current sensor 1 reads far from zero when no current flows. This usually means the current sensing hardware is damaged.";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: return "Current sensor 2 reads far from zero when no current flows. This usually means the current sensing hardware is damaged.";
+    case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: return "Current sensor 3 reads far from zero when no current flows. This usually means the current sensing hardware is damaged.";
+    case FAULT_CODE_UNBALANCED_CURRENTS: return "The currents measured in the three motor wires don't add up to zero. This usually means a current sensor is damaged or disconnected.";
+    case FAULT_CODE_BRK: return "The hardware overcurrent protection shut off the MOSFETs. Usually a short in the motor wires or a damaged power stage. The controller stays off until it is restarted.";
+    case FAULT_CODE_RESOLVER_LOT: return "The encoder lost track of the rotor position or sent invalid data. Check the encoder wiring and shielding.";
+    case FAULT_CODE_RESOLVER_DOS: return "The resolver signal is degraded. Check the resolver wiring and shielding.";
+    case FAULT_CODE_RESOLVER_LOS: return "The resolver signal was lost. Check that the resolver is connected.";
+    case FAULT_CODE_FLASH_CORRUPTION_APP_CFG: return "The stored app configuration failed its checksum, so defaults are loaded. Restore a backup or set up the inputs again.";
+    case FAULT_CODE_FLASH_CORRUPTION_MC_CFG: return "The stored motor configuration failed its checksum, so defaults are loaded. Restore a backup or run the motor setup again before riding.";
+    case FAULT_CODE_ENCODER_NO_MAGNET: return "The encoder doesn't detect the magnet. Check that the magnet is in place, centered and close enough to the encoder.";
+    case FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: return "The magnet is too strong or too close to the encoder. Increase the gap between them.";
+    case FAULT_CODE_PHASE_FILTER: return "The measured motor voltage didn't match the commanded output at low speed. Usually a fault in the controller's voltage sensing or power stage, though some motors also trigger it.";
+    case FAULT_CODE_ENCODER_FAULT: return "The encoder reported an error or too many communication errors. Check the encoder wiring, its supply and the magnet alignment.";
+    case FAULT_CODE_LV_OUTPUT_FAULT: return "The protection on the 3.3 V or 5 V output tripped. Check accessories on those outputs for shorts or too much load.";
+    case FAULT_CODE_ENCODER_SLIP: return "The encoder and the sensorless observer disagreed on the rotor angle for 0.5 s. Usually a slipping encoder or magnet, or a wrong Encoder Offset. Only checked when Encoder Slip is enabled in Additional Faults.";
+    case FAULT_CODE_OVERSPEED: return "Motor speed went above Max ERPM. Only checked when Overspeed is enabled in Additional Faults.";
+    case FAULT_CODE_UNDERSPEED: return "Reverse motor speed went past Max ERPM Reverse. Only checked when Underspeed is enabled in Additional Faults.";
+    case FAULT_CODE_ABS_OVERSPEED: return "Motor speed went above ERPM ABS Overspeed. Only checked when Absolute Overspeed is enabled in Additional Faults.";
+    case FAULT_CODE_THROTTLE_RANGE: return "The ADC throttle voltage went outside ADC1 Abs Min Voltage to ADC1 Abs Max Voltage, or the two channels of a redundant throttle differed by more than Redundant Throttle Max Diff. Usually a broken throttle wire, connector or sensor.";
+    default: return "";
+    }
 }
 
 QString Utility::detectAllFoc(VescInterface *vesc,
@@ -518,14 +575,14 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                 case 1: sensors = "Encoder"; break;
                 case 2: sensors = "Hall Sensors"; break;
                 default: break; }
-                return QString("VESC ID            : %1\n"
-                               "Motor current      : %2 A\n"
-                               "Motor R            : %3 mΩ\n"
-                               "Motor L            : %4 µH\n"
-                               "Motor Lq-Ld        : %5 µH\n"
-                               "Motor Flux Linkage : %6 mWb\n"
-                               "Temp Comp          : %7\n"
-                               "Sensors            : %8").
+                QString text = QString("VESC ID            : %1\n"
+                                       "Motor current      : %2 A\n"
+                                       "Motor R            : %3 mΩ\n"
+                                       "Motor L            : %4 µH\n"
+                                       "Motor Lq-Ld        : %5 µH\n"
+                                       "Motor Flux Linkage : %6 mWb\n"
+                                       "Temp Comp          : %7\n"
+                                       "Sensors            : %8").
                         arg(ap->getParamInt("controller_id")).
                         arg(p->getParamDouble("l_current_max"), 0, 'f', 2).
                         arg(p->getParamDouble("foc_motor_r") * 1e3, 0, 'f', 2).
@@ -534,6 +591,16 @@ QString Utility::detectAllFoc(VescInterface *vesc,
                         arg(p->getParamDouble("foc_motor_flux_linkage") * 1e3, 0, 'f', 2).
                         arg(p->getParamBool("foc_temp_comp") ? "True" : "False").
                         arg(sensors);
+
+                if (p->getParamEnum("foc_sensor_mode") == 2) {
+                    QStringList table;
+                    for (int i = 0;i < 8;i++) {
+                        table.append(QString::number(p->getParamInt(QString("foc_hall_table__%1").arg(i))));
+                    }
+                    text += "\nHall Table         : " + table.join(", ");
+                }
+
+                return text;
             };
 
             QVector<int> canDevs;
@@ -585,36 +652,12 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -50: reason = "CAN detection timeout"; break;
             case -51: reason = "CAN detection failed"; break;
             case -100 + FAULT_CODE_NONE: reason = "No fault, detection failed for an unknown reason"; break;
-            case -100 + FAULT_CODE_OVER_VOLTAGE: reason = "Over voltage fault, check voltage is below set limit"; break;
-            case -100 + FAULT_CODE_UNDER_VOLTAGE: reason = "Under voltage fault, check voltage is above set limit. If using a power supply make sure the current limit is high enough."; break;
-            case -100 + FAULT_CODE_DRV: reason = "DRV fault, hardware fault occured. Check there are no shorts"; break;
-            case -100 + FAULT_CODE_ABS_OVER_CURRENT: reason = "Overcurrent fault, Check there are no shorts and ABS Overcurrent limit is sensible"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_FET: reason = "Mosfet Overtemperature fault, Mosfets overheated, check for shorts. Cool down device"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheated, is the current limit OK?"; break;
-            case -100 + FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: reason = "Gate Driver over voltage, check for hardware failure"; break;
-            case -100 + FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: reason = "Gate Driver under voltage, check for hardware failure"; break;
-            case -100 + FAULT_CODE_MCU_UNDER_VOLTAGE: reason = "MCU under voltage, check for hardware failure, shorts on outputs"; break;
-            case -100 + FAULT_CODE_BOOTING_FROM_WATCHDOG_RESET: reason = "Boot from watchdog reset, software locked up check for firmware corruption"; break;
-            case -100 + FAULT_CODE_ENCODER_SPI: reason = "Encoder SPI fault, check encoder connections"; break;
-            case -100 + FAULT_CODE_ENCODER_SINCOS_BELOW_MIN_AMPLITUDE: reason = "Encoder SINCOS below min amplitude, check encoder connections and magnet alignment / distance"; break;
-            case -100 + FAULT_CODE_ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE: reason = "Encoder SINCOS above max amplitude, check encoder connections and magnet alignment / distance"; break;
-            case -100 + FAULT_CODE_FLASH_CORRUPTION: reason = "Flash corruption, reflash firmware immediately!"; break;
-            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1: reason = "High offset on current sensor 1, check for hardware failure"; break;
-            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2: reason = "High offset on current sensor 2, check for hardware failure"; break;
-            case -100 + FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_3: reason = "High offset on current sensor 3, check for hardware failure"; break;
-            case -100 + FAULT_CODE_UNBALANCED_CURRENTS: reason = "Unbalanced currents, check for hardware failure"; break;
-            case -100 + FAULT_CODE_BRK: reason = "BRK, hardware protection triggered, check for shorts or possible hardware failure"; break;
-            case -100 + FAULT_CODE_RESOLVER_LOT: reason = "Encoder/Resolver: Loss of tracking"; break;
-            case -100 + FAULT_CODE_RESOLVER_DOS: reason = "Encoder/Resolver: Degradation of signal"; break;
-            case -100 + FAULT_CODE_RESOLVER_LOS: reason = "Encoder/Resolver: Loss of signal"; break;
-            case -100 + FAULT_CODE_FLASH_CORRUPTION_APP_CFG: reason = "Flash corruption, App config corrupt, rewrite app config to restore"; break;
-            case -100 + FAULT_CODE_FLASH_CORRUPTION_MC_CFG: reason = "Flash corruption, Motor config corrupt, rewrite motor config to restore"; break;
-            case -100 + FAULT_CODE_ENCODER_NO_MAGNET: reason = "Encoder no magnet, magnet is too weak or too far from the encoder"; break;
-            case -100 + FAULT_CODE_ENCODER_MAGNET_TOO_STRONG: reason = "Magnet too strong, magnet is too strong or too close to the encoder"; break;
-            case -100 + FAULT_CODE_PHASE_FILTER: reason = "Phase filter fault, invalid phase filter readings"; break;
-            case -100 + FAULT_CODE_ENCODER_FAULT: reason = "Encoder fault, check encoder connections and alignment"; break;
-
-            default: reason = QString::number(resDetect); break;
+            default:
+                reason = resDetect > -100 ? faultToDescription(mc_fault_code(resDetect + 100)) : "";
+                if (reason.isEmpty()) {
+                    reason = QString::number(resDetect);
+                }
+                break;
             }
 
             res = QString("Detection failed. Reason:\n%1").arg(reason);
@@ -877,7 +920,7 @@ bool Utility::setBatteryCutCanFromCurrentConfig(VescInterface *vesc, QVector<int
 
 /**
  * @brief Utility::setMcParamsFromCurrentConfigAllCan
- * Take the list of parameters from the current config and apply them on all VESCs on the CAN-bus (including the local one)
+ * Apply parameters to the selected VESC, or to the local VESC and the listed CAN devices.
  *
  * @param vesc
  * VescInterface pointer
@@ -924,9 +967,7 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
             config->updateParamFromOther(p.first, p.second, nullptr);
         }
 
-        vesc->commands()->setMcconf(false);
-
-        if (!waitSignal(vesc->commands(), SIGNAL(ackReceived(QString)), 4000)) {
+        if (!writeConfigBlocking(vesc, true)) {
             vesc->emitMessageDialog("Write Motor Configuration",
                                     "Could not write motor configuration.",
                                     false, false);
@@ -937,8 +978,9 @@ bool Utility::setMcParamsFromCurrentConfigAllCan(VescInterface *vesc, QVector<in
         return true;
     };
 
-    // Start with local VESC
-    vesc->canTmpOverride(false, 0);
+    auto *cmd = vesc->commands();
+    bool forward = canIds.isEmpty() && cmd->getSendCan();
+    vesc->canTmpOverride(forward, forward ? cmd->getCanSendId() : 0);
 
     if (isConnectedToHwVesc(vesc)) {
         res = updateConf();
@@ -1171,6 +1213,8 @@ bool Utility::restoreConfAll(VescInterface *vesc, bool can, bool mc, bool app)
 
     if (res && can) {
         QVector<int> canDevs = Utility::scanCanVescOnly(vesc);
+        // The scan ends its CAN override with ignoreCanChange(false)
+        vesc->ignoreCanChange(true);
 
         for (int d: canDevs) {
             vesc->commands()->setSendCan(true, d);
@@ -1669,12 +1713,20 @@ QString Utility::strCrc32(QString str)
 QString Utility::readInternalImuType(VescInterface *vesc)
 {
     QString res = "Timeout";
+    QEventLoop loop;
+    // The firmware echoes the command before the answer
     auto conn = connect(vesc->commands(), &Commands::printReceived, [&](QString str) {
+        if (!str.startsWith("-> ")) {
             res = str;
+            loop.quit();
+        }
     });
 
+    QTimer::singleShot(2000, &loop, &QEventLoop::quit);
     vesc->commands()->sendTerminalCmdSync("imu_type_internal");
-    waitSignal(vesc->commands(), SIGNAL(printReceived(QString)), 2000);
+    if (res == "Timeout") {
+        loop.exec();
+    }
 
     disconnect(conn);
 
@@ -2285,7 +2337,8 @@ QColor Utility::getAppQColor(QString colorName)
 
 QString Utility::getAppHexColor(QString colorName)
 {
-    return getAppQColor(colorName).name();
+    QColor c = getAppQColor(colorName);
+    return c.name(c.alpha() < 255 ? QColor::HexArgb : QColor::HexRgb);
 }
 
 void Utility::setPlotColors(QCustomPlot* plot)
@@ -2405,8 +2458,8 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
                 if (rxb[0] != '\n') {
                     rxLine.append(rxb[0]);
                 } else {
-                    rxLine.append('\0');
                     loop.quit();
+                    break;
                 }
             } else {
                 break;
@@ -2425,6 +2478,33 @@ QString Utility::waitForLine(QTcpSocket *socket, int timeoutMs)
     }
 
     return res;
+}
+
+// Icon with an accent dot in the top right corner, e.g. for unwritten changes
+QPixmap Utility::getIconWithDot(QString path)
+{
+    QPixmap pm = getIcon(path);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    qreal r = pm.width() * 0.17;
+    QPointF c(pm.width() - r - 1, r + 1);
+    p.setPen(QPen(getAppQColor("darkBackground"), r * 0.5));
+    p.setBrush(getAppQColor("accentText"));
+    p.drawEllipse(c, r, r);
+    return pm;
+}
+
+// Small accent dot that marks pages and tabs with unwritten changes
+QPixmap Utility::getChangedDot()
+{
+    QPixmap pm(12, 12);
+    pm.fill(Qt::transparent);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    p.setBrush(getAppQColor("accentText"));
+    p.drawEllipse(QPointF(6, 6), 3.5, 3.5);
+    return pm;
 }
 
 QPixmap Utility::getIcon(QString path)
@@ -2590,6 +2670,66 @@ QVariant Utility::getSetting(QString key, QVariant defaultValue)
 {
     QSettings set;
     return set.value(key, defaultValue);
+}
+
+// Distance in meters of a csv log, from the logged positions and else from the tachometer.
+// Negative if the log has neither.
+double Utility::logDistance(QString path)
+{
+    if (path.startsWith("file:")) {
+        path = QUrl(path).toLocalFile();
+    }
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return -1.0;
+    }
+
+    const QList<QByteArray> header = file.readLine().trimmed().split(';');
+    const int latInd = header.indexOf("gnss_lat");
+    const int lonInd = header.indexOf("gnss_lon");
+    const int tachoInd = header.indexOf("tacho_meters");
+
+    double dist = 0.0, lat = 0.0, lon = 0.0, tachoFirst = 0.0, tachoLast = 0.0;
+    bool hasPos = false, hasTacho = false;
+
+    while (!file.atEnd()) {
+        const QList<QByteArray> cols = file.readLine().split(';');
+
+        if (latInd >= 0 && lonInd >= 0 && cols.size() > qMax(latInd, lonInd)) {
+            const double latNow = cols.at(latInd).toDouble();
+            const double lonNow = cols.at(lonInd).toDouble();
+
+            if (latNow != 0.0 || lonNow != 0.0) {
+                if (hasPos) {
+                    const double dLat = qDegreesToRadians(latNow - lat);
+                    const double dLon = qDegreesToRadians(lonNow - lon);
+                    const double a = pow(sin(dLat / 2.0), 2.0) + cos(qDegreesToRadians(lat)) *
+                            cos(qDegreesToRadians(latNow)) * pow(sin(dLon / 2.0), 2.0);
+                    const double step = 2.0 * 6371007.2 * asin(sqrt(a));
+
+                    // Larger steps are skipped as in the log viewer
+                    if (step < 100.0) {
+                        dist += step;
+                    }
+                }
+
+                lat = latNow;
+                lon = lonNow;
+                hasPos = true;
+            }
+        }
+
+        if (tachoInd >= 0 && cols.size() > tachoInd) {
+            tachoLast = cols.at(tachoInd).toDouble();
+            if (!hasTacho) {
+                tachoFirst = tachoLast;
+                hasTacho = true;
+            }
+        }
+    }
+
+    return dist > 0.0 ? dist : hasTacho ? qMax(0.0, tachoLast - tachoFirst) : -1.0;
 }
 
 void Utility::setSetting(QString key, QVariant value)

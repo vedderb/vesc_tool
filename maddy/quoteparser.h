@@ -91,12 +91,20 @@ public:
 
     if (this->childParser)
     {
-      this->childParser->AddLine(line);
-
-      if (this->childParser->IsFinished())
+      // A child that ends on a line it does not own hands it back for the next child
+      std::string childLine = line;
+      while (this->childParser)
       {
+        this->childParser->AddLine(childLine);
+
+        if (!this->childParser->IsFinished())
+        {
+          break;
+        }
+
         this->result << this->childParser->GetResult().str();
-        this->childParser = nullptr;
+        childLine = this->childParser->GetReparseLine();
+        this->childParser = childLine.empty() ? nullptr : this->getBlockParserForLine(childLine);
       }
 
       return;

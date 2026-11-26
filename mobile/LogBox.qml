@@ -19,6 +19,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import QtCore
 import Qt.labs.platform 1.1
@@ -27,84 +28,128 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
-    implicitHeight: grid.implicitHeight
+    implicitHeight: column.implicitHeight
     property var dialogParent: Overlay.overlay
+    // Folders picked outside of the app are not accessible after a restart on iOS
+    property bool fixedDir: Qt.platform.os === "ios"
+    property bool logging: false
+    property string logName: ""
 
-    GridLayout {
-        id: grid
+    // The ride display on the lock screen toggles logging while the app is not visible
+    function toggleLogging(showDialogs) {
+        if (VescIf.isRtLogOpen()) {
+            VescIf.closeRtLogFile()
+            VescIf.emitStatusMessage("Log Saved", true)
+            Utility.stopGnssForegroundService()
+            logging = false
 
+            if (!VescIf.useWakeLock()) {
+                VescIf.setWakeLock(false)
+            }
+        } else if (!VescIf.isPortConnected()) {
+            if (showDialogs) {
+                VescIf.emitMessageDialog("Log Data",
+                                         "You must be connected to the VESC in order to log data.",
+                                         false, false)
+            }
+        } else if (VescIf.openRtLogFile(rtLogFileText.text)) {
+            VescIf.emitStatusMessage("Logging Started", true)
+            Utility.requestNotificationPermission()
+            Utility.startGnssForegroundService()
+            VescIf.setWakeLock(true)
+
+            if (showDialogs) {
+                VescIf.emitMessageDialog("Logging Started",
+                                         "Motor data together with your location is now being logged to:\n\n" +
+                                         displayPath(VescIf.rtLogFilePath()) + "\n\n" +
+                                         "You can open it in LogView, or transfer the file to a computer for " +
+                                         "analysis in the desktop version of VESC Tool (under Data Analysis->Log Analysis).",
+                                         true, false)
+            }
+        } else {
+            VescIf.emitStatusMessage("Logging Failed", false)
+        }
+    }
+
+    Connections {
+        target: rideSession
+
+        function onLogToggleRequested() {
+            toggleLogging(false)
+        }
+    }
+
+    ColumnLayout {
+        id: column
         anchors.fill: parent
+        spacing: 4
 
-        clip: false
-        visible: true
-        columnSpacing: 5
-        rows: 3
-        columns: 3
-
-        Button {
-            text: "Help"
+        RowLayout {
             Layout.fillWidth: true
 
-            onClicked: {
-                VescIf.emitMessageDialog(
-                            mInfoConf.getLongName("help_rt_logging"),
-                            mInfoConf.getDescription("help_rt_logging"),
-                            true, true)
+            Button {
+                text: logging ? qsTr("Stop Logging") : qsTr("Start Logging")
+                Layout.fillWidth: true
+                highlighted: true
+                Material.accent: logging ? Utility.getAppHexColor("danger") : undefined
+                focusPolicy: Qt.NoFocus
+
+                onClicked: toggleLogging(true)
+
+                Timer {
+                    repeat: true
+                    running: true
+                    interval: 500
+
+                    onTriggered: {
+                        if (logging && !VescIf.isRtLogOpen()) {
+                            Utility.stopGnssForegroundService()
+
+                            if (!VescIf.useWakeLock()) {
+                                VescIf.setWakeLock(false)
+                            }
+                        }
+
+                        logging = VescIf.isRtLogOpen()
+                        var path = VescIf.rtLogFilePath()
+                        logName = (path.startsWith("content:") ? decodeURIComponent(path) : path).split("/").pop()
+                    }
+                }
             }
-        }
 
-        Button {
-            text: "Reset"
-            Layout.fillWidth: true
-            focusPolicy: Qt.NoFocus
+            Button {
+                text: "Help"
 
-            onClicked: {
-                rtLogFileText.text = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
-            }
-        }
-
-        Button {
-            text: "Browse"
-            Layout.fillWidth: true
-            focusPolicy: Qt.NoFocus
-
-            onClicked: {
-                if (Utility.requestFilePermission()) {
-                    folderDialog.close()
-                    folderDialog.open()
-                } else {
+                onClicked: {
                     VescIf.emitMessageDialog(
-                                "File Permissions",
-                                "Unable to request file system permission.",
-                                false, false)
-                }
-            }
-
-            FolderDialog {
-                id: folderDialog
-                title: "Please choose a folder"
-                onAccepted: {
-                    rtLogFileText.text = folderDialog.folder.toString()
-                    close()
-                    parent.forceActiveFocus()
-                }
-                onRejected: {
-                    close()
-                    parent.forceActiveFocus()
+                                mInfoConf.getLongName("help_rt_logging"),
+                                mInfoConf.getDescription("help_rt_logging"),
+                                true, true)
                 }
             }
         }
 
-        TextField {
-            id: rtLogFileText
+        Label {
+            visible: fixedDir || logging
             Layout.fillWidth: true
-            Layout.columnSpan: 3
+            Layout.margins: 4
+            wrapMode: Text.Wrap
+            text: logging ? qsTr("Logging to %1. The data is saved while logging.").arg(logName) :
+                            qsTr("Logs are saved to %1").arg(displayPath(rtLogFileText.text))
+            color: Utility.getAppHexColor(logging ? "lightText" : "disabledText")
+        }
+
+        InputField {
+            id: rtLogFileText
+            visible: !fixedDir
+            Layout.fillWidth: true
             placeholderText: "File Path"
             text: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
             clip: true
 
             Component.onCompleted: {
-                if (text.length === 0) {
+                // The absolute path of the app folder changes with app updates on iOS
+                if (text.length === 0 || fixedDir) {
                     text = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
                 }
             }
@@ -114,65 +159,77 @@ Item {
             }
         }
 
-        CheckBox {
-            id: rtLogEnBox
-            text: "Enable RT Data Logging"
+        RowLayout {
             Layout.fillWidth: true
-            Layout.columnSpan: 3
 
-            focusPolicy: Qt.NoFocus
+            Button {
+                text: qsTr("Open in LogView")
+                Layout.fillWidth: true
+                focusPolicy: Qt.NoFocus
 
-            onClicked: {
-                if (checked && !VescIf.isPortConnected()) {
-                    VescIf.emitMessageDialog("Log Data",
-                                             "You must be connected to the VESC in order to log data.",
-                                             false, false)
-                    checked = false
-                    return
+                onClicked: {
+                    mainSwipeView.setCurrentIndex(logViewPage.SwipeView.index)
+                    logViewLoader.item.openRtLogBrowser()
+                }
+            }
+
+            Button {
+                text: qsTr("Show in Files")
+                visible: fixedDir
+                Layout.fillWidth: true
+                focusPolicy: Qt.NoFocus
+
+                onClicked: {
+                    // The log folder is created when logging for the first time
+                    var dir = rtLogFileText.text
+                    if (Utility.listFilesInDir(dir).length === 0) {
+                        dir = dir.slice(0, dir.lastIndexOf("/"))
+                    }
+                    Qt.openUrlExternally(dir.replace("file://", "shareddocuments://"))
+                }
+            }
+
+            Button {
+                text: "Browse"
+                visible: !fixedDir
+                Layout.fillWidth: true
+                focusPolicy: Qt.NoFocus
+
+                onClicked: {
+                    if (Utility.requestFilePermission()) {
+                        folderDialog.close()
+                        folderDialog.open()
+                    } else {
+                        VescIf.emitMessageDialog(
+                                    "File Permissions",
+                                    "Unable to request file system permission.",
+                                    false, false)
+                    }
                 }
 
-                if (checked) {
-                    if (VescIf.openRtLogFile(rtLogFileText.text)) {
-                        VescIf.emitStatusMessage("Logging Started", true)
-                        Utility.requestNotificationPermission()
-                        Utility.startGnssForegroundService()
-                        VescIf.setWakeLock(true)
-
-                        VescIf.emitMessageDialog("Logging Started",
-                                                 "Motor data together with your location is now being logged to:\n\n" +
-                                                 VescIf.rtLogFilePath() + "\n\n" +
-                                                 "You can connect your device to a computer and transfer the file to it for " +
-                                                 "analysis in the desktop version of VESC Tool (under Data Analysis->Log Analysis).",
-                                                 true, false)
-                    } else {
-                        VescIf.emitStatusMessage("Logging Failed", false)
+                FolderDialog {
+                    id: folderDialog
+                    title: "Please choose a folder"
+                    onAccepted: {
+                        rtLogFileText.text = folderDialog.folder.toString()
+                        close()
+                        parent.forceActiveFocus()
                     }
-                } else {
-                    VescIf.closeRtLogFile()
-                    VescIf.emitStatusMessage("Log Saved", true)
-                    Utility.stopGnssForegroundService()
-
-                    if (!VescIf.useWakeLock()) {
-                        VescIf.setWakeLock(false)
+                    onRejected: {
+                        close()
+                        parent.forceActiveFocus()
                     }
                 }
             }
 
-            Timer {
-                repeat: true
-                running: true
-                interval: 500
+            Button {
+                text: "Reset"
+                visible: !fixedDir
+                Layout.fillWidth: true
+                focusPolicy: Qt.NoFocus
 
-                onTriggered: {
-                    if (rtLogEnBox.checked && !VescIf.isRtLogOpen()) {
-                        Utility.stopGnssForegroundService()
-
-                        if (!VescIf.useWakeLock()) {
-                            VescIf.setWakeLock(false)
-                        }
-                    }
-
-                    rtLogEnBox.checked = VescIf.isRtLogOpen()
+                onClicked: {
+                    rtLogFileText.text = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/logs"
                 }
             }
         }

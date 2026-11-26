@@ -32,6 +32,7 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
     property int confInd: 0
+    property ConfigParams conf: null
 
     ParamEditors {
         id: editors
@@ -42,7 +43,8 @@ Item {
     }
 
     function reloadConfig() {
-        if (VescIf.customConfig(confInd) === null) {
+        conf = VescIf.customConfig(confInd)
+        if (conf === null) {
             return
         }
 
@@ -67,6 +69,15 @@ Item {
         e.Layout.fillsWidth = true
     }
 
+    function review() {
+        writeButton.review()
+    }
+
+    function jumpTo(group, subgroup, name) {
+        tabBox.currentIndex = tabBox.model.indexOf(subgroup)
+        editors.showParam(scroll, scrollCol, name)
+    }
+
     function updateEditors() {
         if (tabBox.currentText === "") {
             return
@@ -89,15 +100,19 @@ Item {
         }
     }
 
-    ColumnLayout {
+    GridLayout {
         id: column
         anchors.fill: parent
-        spacing: 5
+        // Phone landscape: buttons stacked right of the parameters
+        columns: phoneLandscape ? 2 : 1
 
-        ComboBox {
+        SubgroupBar {
             id: tabBox
+            params: conf
+            group: "General"
+            Layout.columnSpan: column.columns
             Layout.fillWidth: true
-            Layout.topMargin: 5
+            Layout.topMargin: -1
 
             onCurrentTextChanged: {
                 updateEditors()
@@ -108,30 +123,32 @@ Item {
             id: scroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: column.width
+            contentWidth: scroll.width
             contentHeight: scrollCol.preferredHeight
             clip: true
 
             GridLayout {
                 id: scrollCol
-                width: column.width
+                width: scroll.width
                 columns: isHorizontal ? 2 : 1
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            Button {
+        GridLayout {
+            columns: phoneLandscape ? 1 : 3
+            Layout.fillWidth: !phoneLandscape
+            Layout.alignment: Qt.AlignTop
+            WriteButton {
+                id: writeButton
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
-                text: "Write"
+                params: conf
+                ackText: conf ? qsTr("%1 write OK").arg(conf.getLongName("hw_name")) : ""
 
-                onClicked: {
-                    if (VescIf.customConfig(confInd) === null) {
-                        return
+                onWriteRequested: {
+                    if (conf !== null) {
+                        mCommands.customConfigSet(confInd, conf)
                     }
-
-                    mCommands.customConfigSet(confInd, VescIf.customConfig(confInd))
                 }
             }
 
@@ -146,28 +163,25 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
+                Layout.fillWidth: phoneLandscape
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
-                    parent: appPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Read Default Settings"
+                        iconFile: "Restart-96.png"
                         onTriggered: {
                             mCommands.customConfigGet(confInd, true)
                         }
                     }
-                    MenuItem {
+                    MenuSeparator {}
+                    MenuEntry {
                         text: "Save XML"
+                        iconFile: "Save as-96.png"
                         // HERE save
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
@@ -208,8 +222,9 @@ Item {
                             }
                         }
                     }
-                    MenuItem {
+                    MenuEntry {
                         text: "Load XML"
+                        iconFile: "Open Folder-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogLoad.close()

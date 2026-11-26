@@ -18,15 +18,21 @@
     */
 
 #include "virtualvesc.h"
-#include "datatypes.h"
+#include "commands.h"
 #include "utility.h"
+#include "phoneimu.h"
 
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QDateTime>
+#include <QTextStream>
+#include <QDataStream>
+#include <QRandomGenerator>
 #include <QDebug>
+#include <cmath>
 
 namespace {
 const char *VIRTUAL_HW_NAME = "60";
@@ -35,22 +41,46 @@ const char VIRTUAL_UUID[12] = {'V', 'I', 'R', 'T', 'U', 'A', 'L', 'V', 'E', 'S',
 
 // Same limits as the firmware
 const int CODE_SLOT_MAX_SIZE = 1024 * 128;
+const int CODE_SLOT_MAX_SIZE_ESP32 = 1024 * 1024; // The partitions are larger, e.g. for the fonts of the Dash
 const int PACKET_MAX_PL_LEN = 512;
+const int SAMPLE_MAX_LEN = 1000;
+const int FAULT_LOG_LEN = 25;
 
-// Field sizes in bytes for COMM_GET_VALUES and COMM_GET_VALUES_SETUP, indexed
-// by mask bit. See commands_process_packet in the firmware.
-const int VALUES_FIELD_SIZES[] = {
-    2, 2, 4, 4, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4, 4, 1, 4, 1, 6, 4, 4, 1
-};
-const int VALUES_SETUP_FIELD_SIZES[] = {
-    2, 2, 4, 4, 2, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 4, 4, 4
-};
+// Detection results have a bit of measurement noise
+double measured(double value)
+{
+    return value * (1.0 + (QRandomGenerator::global()->generateDouble() - 0.5) * 0.02);
 }
 
-VirtualVesc::VirtualVesc(QObject *parent) : QObject(parent)
+// The Sim page, loaded like the QML UI of a hardware
+QByteArray simPage()
+{
+    QFile file(":/res/virtual_vesc/SimPage.qml");
+    return file.open(QIODevice::ReadOnly) ? qCompress(file.readAll(), 9) : QByteArray();
+}
+}
+
+VirtualVesc::VirtualVesc(QObject *parent) :
+    VirtualVesc(nullptr, -1, HW_TYPE_VESC, VIRTUAL_HW_NAME,
+                QByteArray(VIRTUAL_UUID, 12), parent)
+{
+}
+
+VirtualVesc::VirtualVesc(VirtualVesc *main, int canId, HW_TYPE hwType, const QString &hwName,
+                         const QByteArray &uuid, QObject *parent) :
+    QObject(parent), mMain(main), mCanId(canId), mHwType(hwType), mHwName(hwName), mUuid(uuid)
 {
     mPacket = new Packet(this);
     mLispRunning = false;
+    mLbm = nullptr;
+    mLbmThread = nullptr;
+    mButtons = 0;
+    mCanOn = true;
+    // The phone IMU when there is one, so that tilting the phone moves the IMU views
+    mPhoneImu = PhoneImu::available();
+    mSimTimer = nullptr;
+    mSimSteps = 0;
+    mDispPosMode = DISP_POS_MODE_NONE;
 
     auto fw = Utility::configLatestSupported();
     mFwMajor = fw.first;
@@ -62,30 +92,98 @@ VirtualVesc::VirtualVesc(QObject *parent) : QObject(parent)
     });
 
     // Code is written in many small chunks, so save shortly after the last change
-    mCodeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/virtual_vesc";
     mSaveTimer = new QTimer(this);
     mSaveTimer->setSingleShot(true);
     mSaveTimer->setInterval(1000);
     connect(mSaveTimer, &QTimer::timeout, this, &VirtualVesc::saveCode);
 
+    if (mMain) {
+        mPlant = mMain->mPlant;
+        if (mHwType == HW_TYPE_VESC) {
+            mMcConf = mMain->mMcConf;
+            mMcConfDefault = mMain->mMcConfDefault;
+            mAppConf = mMain->mAppConf;
+            mAppConfDefault = mMain->mAppConfDefault;
+            mAppConf.updateParamInt("controller_id", mCanId);
+        }
+
+        // Its own packages, so that their UI can be tested without the Sim page
+        mCodeDir = mMain->mCodeDir + "/can" + QString::number(mCanId);
+        loadCode();
+        return;
+    }
+
     loadMainConfigs();
+    mCodeDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/virtual_vesc";
     loadCode();
+
+    mPlant = new VirtualPlant(&mMcConf, &mAppConf);
+    mMcConf.updateParamDouble("foc_motor_r", mPlant->motorR);
+    mMcConf.updateParamDouble("foc_motor_l", mPlant->motorL);
+    mMcConf.updateParamDouble("foc_motor_ld_lq_diff", mPlant->motorLdLqDiff);
+    mMcConf.updateParamDouble("foc_motor_flux_linkage", mPlant->motorLambda);
+    mSimTimer = new QTimer(this);
+    mSimTimer->setInterval(10);
+    connect(mSimTimer, &QTimer::timeout, this, &VirtualVesc::simStep);
+
+    // The rest of the vehicle, on the CAN-bus
+    mCanNodes.append(new VirtualVesc(this, 1, HW_TYPE_VESC, VIRTUAL_HW_NAME, "VIRTUALVESC2", this));
+    mCanNodes.append(new VirtualVesc(this, 2, HW_TYPE_CUSTOM_MODULE, "Express", "VIRTUALEXPR1", this));
+#ifdef HAS_LISPBM
+    mCanNodes.append(new VirtualVesc(this, 4, HW_TYPE_CUSTOM_MODULE, "VDisp 900", "VIRTUALDASH1", this)); // Dash 35B
+#endif
+    mCanNodes.append(new VirtualVesc(this, BMS_CAN_ID, HW_TYPE_VESC_BMS, "BMS", "VIRTUALBMS01", this));
+    for (auto node: mCanNodes) {
+        connect(node, &VirtualVesc::dataToSend, this, &VirtualVesc::dataToSend);
+    }
 }
 
 VirtualVesc::~VirtualVesc()
 {
+    // The CAN devices and their evaluators use the plant and the lock of the main VESC
+    for (auto v: mMain ? QList<VirtualVesc*>({this}) : devices()) {
+        v->lispStop();
+    }
+    qDeleteAll(mCanNodes);
+    mCanNodes.clear();
+
     if (mSaveTimer->isActive()) {
         saveCode();
+    }
+
+    if (!mMain) {
+        delete mPlant;
     }
 }
 
 void VirtualVesc::processData(const QByteArray &data)
 {
+    // Connecting powers on the vehicle
+    if (mSimTimer && !mSimTimer->isActive()) {
+        mSimTimer->start();
+        PhoneImu::setActive(mPhoneImu);
+        for (auto v: devices()) {
+            v->mLispRunning = !v->codeSlotPayload(v->mLispSlot).isEmpty();
+            v->updateCustomConfig();
+            if (v->mLispRunning) {
+                v->lispStart(true);
+            }
+        }
+    }
+
     mPacket->processData(data);
 }
 
 void VirtualVesc::resetState()
 {
+    if (mSimTimer) {
+        mSimTimer->stop();
+        PhoneImu::setActive(false);
+        for (auto v: devices()) {
+            v->lispStop();
+        }
+    }
+
     mPacket->resetState();
 }
 
@@ -126,6 +224,42 @@ void VirtualVesc::processPacket(QByteArray &data)
     VByteArray reply;
     reply.vbAppendUint8(id);
 
+    if (id == COMM_FORWARD_CAN) {
+        int target = vb.vbPopFrontUint8();
+        for (auto node: mCanNodes) {
+            if (mCanOn && node->mCanId == target) {
+                node->processPacket(vb);
+            }
+        }
+        return;
+    }
+
+    VirtualPlant *p = mPlant;
+    int ownId = canId();
+    bool fileCmd = id >= COMM_FILE_LIST && id <= COMM_FILE_REMOVE;
+    bool codeCmd = (id >= COMM_LISP_READ_CODE && id <= COMM_LISP_STREAM_CODE &&
+                    id != COMM_BMS_SET_BATT_TYPE && id != COMM_BMS_GET_BATT_TYPE) ||
+            id == COMM_QMLUI_ERASE || id == COMM_QMLUI_WRITE || id == COMM_GET_QML_UI_APP ||
+            id == COMM_CUSTOM_APP_DATA;
+
+    // The BMS, the Express and the Dash only answer what they have
+    if ((mHwType == HW_TYPE_VESC_BMS && id != COMM_FW_VERSION && id != COMM_BMS_GET_VALUES && !codeCmd) ||
+            (mHwType == HW_TYPE_CUSTOM_MODULE && id != COMM_FW_VERSION && !fileCmd && !codeCmd)) {
+        return;
+    }
+
+    if (processLisp(id, vb)) {
+        return;
+    }
+
+    QMutexLocker locker(&root()->mLock);
+
+    if (fileCmd && (!mMain || mHwType == HW_TYPE_CUSTOM_MODULE)) {
+        processFileCmd(id, vb, reply);
+        sendReply(reply);
+        return;
+    }
+
     switch (id) {
     case COMM_FW_VERSION: {
         quint16 qmlFlags = 0;
@@ -136,14 +270,14 @@ void VirtualVesc::processPacket(QByteArray &data)
 
         reply.vbAppendInt8(mFwMajor);
         reply.vbAppendInt8(mFwMinor);
-        reply.vbAppendString(VIRTUAL_HW_NAME);
-        reply.append(VIRTUAL_UUID, 12);
+        reply.vbAppendString(mHwName);
+        reply.append(mUuid);
         reply.vbAppendUint8(0); // Pairing done
         reply.vbAppendUint8(0); // Test version
-        reply.vbAppendUint8(HW_TYPE_VESC);
+        reply.vbAppendUint8(mHwType);
         reply.vbAppendUint8((mLispRunning && !mCustomConfXml.isEmpty()) ? 1 : 0);
         reply.vbAppendUint8(0); // Phase filters
-        reply.vbAppendUint8(0); // QML HW
+        reply.vbAppendUint8(mMain ? 0 : 1); // QML HW, the Sim page on the main VESC
         reply.vbAppendUint8(qmlFlags); // QML APP
         reply.vbAppendUint8(0); // NRF flags
         reply.vbAppendString(VIRTUAL_FW_NAME);
@@ -167,6 +301,12 @@ void VirtualVesc::processPacket(QByteArray &data)
         }
         break;
 
+    case COMM_SET_MCCONF_TEMP:
+    case COMM_SET_MCCONF_TEMP_SETUP:
+        // The temporary limits are not applied, only acknowledged
+        sendReply(reply);
+        break;
+
     case COMM_GET_APPCONF:
         mAppConf.serialize(reply);
         sendReply(reply);
@@ -184,114 +324,502 @@ void VirtualVesc::processPacket(QByteArray &data)
         }
         break;
 
+    // Both motors share the state of the plant. The values are per controller
+    // and the setup values for the whole vehicle.
     case COMM_GET_VALUES:
-    case COMM_GET_VALUES_SELECTIVE:
-    case COMM_GET_VALUES_SETUP:
-    case COMM_GET_VALUES_SETUP_SELECTIVE: {
-        bool setup = id == COMM_GET_VALUES_SETUP || id == COMM_GET_VALUES_SETUP_SELECTIVE;
-        const int *sizes = setup ? VALUES_SETUP_FIELD_SIZES : VALUES_FIELD_SIZES;
-
+    case COMM_GET_VALUES_SELECTIVE: {
         quint32 mask = 0xFFFFFFFF;
-        if (id == COMM_GET_VALUES_SELECTIVE || id == COMM_GET_VALUES_SETUP_SELECTIVE) {
+        if (id == COMM_GET_VALUES_SELECTIVE) {
             mask = vb.vbPopFrontUint32();
             reply.vbAppendUint32(mask);
         }
 
-        // All values are 0, except for the controller ID
-        for (int i = 0;i < 22;i++) {
-            if (!(mask & (quint32(1) << i))) {
-                continue;
-            }
-
-            if (i == 17) {
-                reply.vbAppendUint8(mAppConf.getParamInt("controller_id"));
-            } else {
-                reply.append(QByteArray(sizes[i], '\0'));
+        auto has = [mask](int bit) { return mask & (quint32(1) << bit); };
+        if (has(0)) { reply.vbAppendDouble16(p->tempFet, 1e1); }
+        if (has(1)) { reply.vbAppendDouble16(p->tempMotor, 1e1); }
+        if (has(2)) { reply.vbAppendDouble32(p->iMotor(), 1e2); }
+        if (has(3)) { reply.vbAppendDouble32(p->iIn, 1e2); }
+        if (has(4)) { reply.vbAppendDouble32(0.0, 1e2); } // id
+        if (has(5)) { reply.vbAppendDouble32(p->iq, 1e2); }
+        if (has(6)) { reply.vbAppendDouble16(p->duty, 1e3); }
+        if (has(7)) { reply.vbAppendDouble32(p->erpm, 1e0); }
+        if (has(8)) { reply.vbAppendDouble16(p->vBus, 1e1); }
+        if (has(9)) { reply.vbAppendDouble32(p->ah, 1e4); }
+        if (has(10)) { reply.vbAppendDouble32(p->ahCharged, 1e4); }
+        if (has(11)) { reply.vbAppendDouble32(p->wh, 1e4); }
+        if (has(12)) { reply.vbAppendDouble32(p->whCharged, 1e4); }
+        if (has(13)) { reply.vbAppendInt32(qint32(p->tacho)); }
+        if (has(14)) { reply.vbAppendInt32(qint32(p->tachoAbs)); }
+        if (has(15)) { reply.vbAppendUint8(p->fault); }
+        if (has(16)) { reply.vbAppendDouble32(p->angleE * 180.0 / M_PI, 1e6); }
+        if (has(17)) { reply.vbAppendUint8(ownId); }
+        if (has(18)) {
+            for (int i = 0;i < 3;i++) {
+                reply.vbAppendDouble16(p->tempFet - 0.4 * i, 1e1);
             }
         }
-
+        if (has(19)) { reply.vbAppendDouble32(p->vd, 1e3); }
+        if (has(20)) { reply.vbAppendDouble32(p->vq, 1e3); }
+        if (has(21)) { reply.vbAppendUint8(0); } // No timeout or kill switch
         sendReply(reply);
     } break;
 
-    case COMM_GET_DECODED_PPM:
-    case COMM_GET_DECODED_ADC:
-    case COMM_GET_DECODED_CHUK: {
-        int fields = id == COMM_GET_DECODED_PPM ? 2 : (id == COMM_GET_DECODED_ADC ? 4 : 1);
-        reply.append(QByteArray(4 * fields, '\0'));
-        sendReply(reply);
-    } break;
-
-    case COMM_GET_IMU_DATA:
-    case COMM_GET_STATS: {
-        // Request has a 16 bit mask, the IMU reply echoes it as 16 bits and
-        // the stats reply as 32 bits.
-        quint16 mask = vb.vbPopFrontUint16();
-        int bits = id == COMM_GET_IMU_DATA ? 16 : 11;
-
-        if (id == COMM_GET_IMU_DATA) {
-            reply.vbAppendUint16(mask);
-        } else {
+    case COMM_GET_VALUES_SETUP:
+    case COMM_GET_VALUES_SETUP_SELECTIVE: {
+        quint32 mask = 0xFFFFFFFF;
+        if (id == COMM_GET_VALUES_SETUP_SELECTIVE) {
+            mask = vb.vbPopFrontUint32();
             reply.vbAppendUint32(mask);
         }
 
-        for (int i = 0;i < bits;i++) {
-            if (mask & (1 << i)) {
-                reply.vbAppendDouble32Auto(0.0);
-            }
-        }
+        const int n = root()->mCanOn ? VirtualPlant::motorCount : 1;
+        double whLeft = p->soc * mMcConf.getParamInt("si_battery_cells") * 3.7 * mMcConf.getParamDouble("si_battery_ah");
 
+        auto has = [mask](int bit) { return mask & (quint32(1) << bit); };
+        if (has(0)) { reply.vbAppendDouble16(p->tempFet, 1e1); }
+        if (has(1)) { reply.vbAppendDouble16(p->tempMotor, 1e1); }
+        if (has(2)) { reply.vbAppendDouble32(p->iMotor() * n, 1e2); }
+        if (has(3)) { reply.vbAppendDouble32(p->iIn * n, 1e2); }
+        if (has(4)) { reply.vbAppendDouble16(p->duty, 1e3); }
+        if (has(5)) { reply.vbAppendDouble32(p->erpm, 1e0); }
+        if (has(6)) { reply.vbAppendDouble32(p->speed, 1e3); }
+        if (has(7)) { reply.vbAppendDouble16(p->vBus, 1e1); }
+        if (has(8)) { reply.vbAppendDouble16(p->soc, 1e3); }
+        if (has(9)) { reply.vbAppendDouble32(p->ah * n, 1e4); }
+        if (has(10)) { reply.vbAppendDouble32(p->ahCharged * n, 1e4); }
+        if (has(11)) { reply.vbAppendDouble32(p->wh * n, 1e4); }
+        if (has(12)) { reply.vbAppendDouble32(p->whCharged * n, 1e4); }
+        if (has(13)) { reply.vbAppendDouble32(p->dist, 1e3); }
+        if (has(14)) { reply.vbAppendDouble32(p->distAbs, 1e3); }
+        if (has(15)) { reply.vbAppendDouble32(p->angleE * 180.0 / M_PI, 1e6); }
+        if (has(16)) { reply.vbAppendUint8(p->fault); }
+        if (has(17)) { reply.vbAppendUint8(ownId); }
+        if (has(18)) { reply.vbAppendUint8(n); }
+        if (has(19)) { reply.vbAppendDouble32(whLeft, 1e3); }
+        if (has(20)) { reply.vbAppendUint32(quint32(p->odometer)); }
+        if (has(21)) { reply.vbAppendUint32(quint32(p->timeS * 1000.0)); }
         sendReply(reply);
     } break;
 
-    // There is no motor, so all detections fail. Reply right away with the
-    // failure results of the firmware, so that VESC Tool does not wait for
-    // a timeout.
-    case COMM_DETECT_APPLY_ALL_FOC:
-        reply.vbAppendInt16(-100); // FAULT_CODE_NONE, failed for unknown reason
+    case COMM_ALIVE:
+        p->alive();
+        break;
+
+    case COMM_SET_DUTY:
+        p->setControl(VirtualPlant::CTRL_DUTY, vb.vbPopFrontInt32() / 1e5);
+        break;
+
+    case COMM_SET_CURRENT:
+        p->setControl(VirtualPlant::CTRL_CURRENT, vb.vbPopFrontInt32() / 1e3);
+        break;
+
+    case COMM_SET_CURRENT_BRAKE:
+        p->setControl(VirtualPlant::CTRL_BRAKE, vb.vbPopFrontInt32() / 1e3);
+        break;
+
+    case COMM_SET_RPM:
+        p->setControl(VirtualPlant::CTRL_RPM, vb.vbPopFrontInt32());
+        break;
+
+    case COMM_SET_HANDBRAKE:
+        p->setControl(VirtualPlant::CTRL_BRAKE, vb.vbPopFrontDouble32(1e3));
+        break;
+
+    case COMM_APP_DISABLE_OUTPUT: {
+        vb.vbPopFrontInt8(); // Forward to CAN, they share the plant
+        int time = vb.vbPopFrontInt32();
+        p->appDisabledS = time == -1 ? 1e9 : time / 1000.0;
+    } break;
+
+    case COMM_SET_DETECT:
+        root()->mDispPosMode = vb.vbPopFrontInt8();
+        break;
+
+    case COMM_GET_DECODED_PPM:
+        p->inputPolledS = p->timeS;
+        reply.vbAppendDouble32(p->decodedPpm, 1e6);
+        reply.vbAppendDouble32(p->ppmPulse, 1e6);
         sendReply(reply);
         break;
 
-    case COMM_DETECT_MOTOR_PARAM:
-        reply.append(QByteArray(4 + 4 + 8 + 1, '\0'));
+    case COMM_GET_DECODED_ADC:
+        p->inputPolledS = p->timeS;
+        reply.vbAppendDouble32(p->decodedAdc, 1e6);
+        reply.vbAppendDouble32(p->adc1, 1e6);
+        reply.vbAppendDouble32(p->decodedAdc2, 1e6);
+        reply.vbAppendDouble32(p->adc2, 1e6);
         sendReply(reply);
         break;
 
+    case COMM_GET_DECODED_CHUK:
+        p->inputPolledS = p->timeS;
+        reply.vbAppendDouble32(p->decodedChuk, 1e6);
+        sendReply(reply);
+        break;
+
+    case COMM_NRF_START_PAIRING: {
+        reply.vbAppendInt8(NRF_PAIR_STARTED);
+        sendReply(reply);
+
+        // The remote is switched on after a moment
+        VByteArray res;
+        res.vbAppendUint8(id);
+        res.vbAppendInt8(NRF_PAIR_OK);
+        sendLater(2000, res);
+    } break;
+
+    case COMM_GET_IMU_DATA: {
+        // Angles as in the firmware: roll positive with the left side down,
+        // pitch negative nose up and yaw clockwise. The model leans in the
+        // turn of the circle and pitches with slope and acceleration.
+        double latAcc = p->speed * p->speed / VirtualPlant::gnssRadius;
+        double roll = atan(latAcc / 9.81);
+        double pitch = -(p->slope + 0.02 * p->accel);
+        double yaw = -p->heading;
+        auto noise = []() { return (QRandomGenerator::global()->generateDouble() - 0.5) * 0.2; };
+        double acc[3] = {p->accel / 9.81, latAcc / 9.81, 1.0};
+        double gyro[3] = {noise(), noise(), p->speed / VirtualPlant::gnssRadius * 180.0 / M_PI + noise()};
+        double mag[3] = {cos(p->heading), -sin(p->heading), 0.4};
+        // Gravity as the IMU reads it, which gives roll and pitch below
+        double g[3] = {-sin(pitch), -sin(roll) * cos(pitch), cos(roll) * cos(pitch)};
+
+        // Or the IMU of the phone, with the top of the phone as forward
+        PhoneImu::Reading r;
+        if (root()->mPhoneImu && PhoneImu::read(r)) {
+            auto toVesc = [](const double *v, double *res) {
+                res[0] = v[1];
+                res[1] = -v[0];
+                res[2] = v[2];
+            };
+            toVesc(r.gravity, g);
+            toVesc(r.acc, acc);
+            toVesc(r.gyro, gyro);
+            toVesc(r.mag, mag);
+            yaw = -r.yaw;
+        }
+
+        // Mounting rotation (ZYX) and offsets from the app configuration, applied as in the firmware
+        auto rad = [this](const char *name) { return mAppConf.getParamDouble(QString("imu_conf.") + name) * M_PI / 180.0; };
+        double s1 = sin(rad("rot_yaw")), c1 = cos(rad("rot_yaw"));
+        double s2 = sin(rad("rot_pitch")), c2 = cos(rad("rot_pitch"));
+        double s3 = sin(rad("rot_roll")), c3 = cos(rad("rot_roll"));
+        auto rotate = [&](double *v) {
+            double x = v[0], y = v[1], z = v[2];
+            v[0] = x * c1 * c2 + y * (c1 * s2 * s3 - c3 * s1) + z * (s1 * s3 + c1 * c3 * s2);
+            v[1] = x * c2 * s1 + y * (c1 * c3 + s1 * s2 * s3) + z * (c3 * s1 * s2 - c1 * s3);
+            v[2] = -x * s2 + y * c2 * s3 + z * c2 * c3;
+        };
+        rotate(acc);
+        rotate(gyro);
+        rotate(mag);
+        rotate(g);
+        for (int i = 0;i < 3;i++) {
+            double accOffset = mAppConf.getParamDouble(QString("imu_conf.accel_offsets__%1").arg(i));
+            acc[i] -= accOffset;
+            g[i] -= accOffset;
+            gyro[i] -= mAppConf.getParamDouble(QString("imu_conf.gyro_offsets__%1").arg(i));
+        }
+        roll = -atan2(g[1], g[2]);
+        pitch = atan2(-g[0], sqrt(g[1] * g[1] + g[2] * g[2]));
+
+        // The quaternion uses the standard angles, the firmware negates roll and yaw
+        double cr = cos(-roll / 2), sr = sin(-roll / 2), cp = cos(pitch / 2);
+        double sp = sin(pitch / 2), cy = cos(-yaw / 2), sy = sin(-yaw / 2);
+        double values[16] = {
+            roll, pitch, yaw, acc[0], acc[1], acc[2], gyro[0], gyro[1], gyro[2], mag[0], mag[1], mag[2],
+            cr * cp * cy + sr * sp * sy, sr * cp * cy - cr * sp * sy,
+            cr * sp * cy + sr * cp * sy, cr * cp * sy - sr * sp * cy
+        };
+
+        quint16 mask = vb.vbPopFrontUint16();
+        reply.vbAppendUint16(mask);
+        for (int i = 0;i < 16;i++) {
+            if (mask & (1 << i)) {
+                reply.vbAppendDouble32Auto(values[i]);
+            }
+        }
+        reply.vbAppendUint8(ownId);
+        sendReply(reply);
+    } break;
+
+    case COMM_GET_IMU_CALIBRATION: {
+        double yaw = vb.vbPopFrontDouble32(1e3);
+        double cal[9] = {1.2, -0.8, yaw, 0.01, -0.02, 0.0, 0.31, -0.24, 0.12};
+        for (double c: cal) {
+            reply.vbAppendDouble32(c, 1e6);
+        }
+        sendLater(1000, reply);
+    } break;
+
+    case COMM_GET_STATS: {
+        quint16 mask = vb.vbPopFrontUint16();
+        double t = qMax(p->statTime, 1e-3);
+        double values[11] = {
+            p->statSpeedSum / t, p->statSpeedMax, p->statPowerSum / t, p->statPowerMax,
+            p->statCurrSum / t, p->statCurrMax, p->statFetSum / t, p->statFetMax,
+            p->statMotorSum / t, p->statMotorMax, p->statTime
+        };
+
+        reply.vbAppendUint32(mask);
+        for (int i = 0;i < 11;i++) {
+            if (mask & (1 << i)) {
+                reply.vbAppendDouble32Auto(values[i]);
+            }
+        }
+        sendReply(reply);
+    } break;
+
+    case COMM_RESET_STATS:
+        p->resetStats();
+        if (!vb.isEmpty() && vb.vbPopFrontUint8()) {
+            sendReply(reply);
+        }
+        break;
+
+    case COMM_GET_GNSS: {
+        QDateTime now = QDateTime::currentDateTime();
+        quint16 mask = vb.vbPopFrontUint16();
+        reply.vbAppendUint32(mask);
+        if (mask & (1 << 0)) { reply.vbAppendDouble64(p->lat, 1e16); }
+        if (mask & (1 << 1)) { reply.vbAppendDouble64(p->lon, 1e16); }
+        if (mask & (1 << 2)) { reply.vbAppendDouble32Auto(12.0); } // Height
+        if (mask & (1 << 3)) { reply.vbAppendDouble32Auto(fabs(p->speed)); }
+        if (mask & (1 << 4)) { reply.vbAppendDouble32Auto(0.9); } // HDOP
+        if (mask & (1 << 5)) { reply.vbAppendInt32(now.time().msecsSinceStartOfDay()); }
+        if (mask & (1 << 6)) { reply.vbAppendInt16(now.date().year() - 2000); }
+        if (mask & (1 << 7)) { reply.vbAppendUint8(now.date().month()); }
+        if (mask & (1 << 8)) { reply.vbAppendUint8(now.date().day()); }
+        if (mask & (1 << 9)) { reply.vbAppendDouble32Auto(0.1); } // Age
+        sendReply(reply);
+    } break;
+
+    case COMM_BMS_GET_VALUES: {
+        const int n = root()->mCanOn ? VirtualPlant::motorCount : 1;
+        const int cells = int(p->packCells);
+
+        reply.vbAppendDouble32(p->vBus, 1e6);
+        reply.vbAppendDouble32(0.0, 1e6); // Charge input
+        reply.vbAppendDouble32(p->iIn * n, 1e6);
+        reply.vbAppendDouble32(p->iIn * n, 1e6);
+        reply.vbAppendDouble32(p->ah * n, 1e3);
+        reply.vbAppendDouble32(p->wh * n, 1e3);
+
+        reply.vbAppendUint8(cells);
+        for (int i = 0;i < cells;i++) {
+            reply.vbAppendDouble16(p->cellVoltage(i), 1e3);
+        }
+        for (int i = 0;i < cells;i++) {
+            reply.vbAppendUint8(p->cellBalancing(i));
+        }
+
+        double tempPack = p->packTempNow();
+        reply.vbAppendUint8(4);
+        for (int i = 0;i < 4;i++) {
+            reply.vbAppendDouble16(tempPack + 0.4 * i, 1e2);
+        }
+
+        reply.vbAppendDouble16(tempPack + 4.0, 1e2); // IC
+        reply.vbAppendDouble16(24.0, 1e2); // Humidity sensor temperature
+        reply.vbAppendDouble16(41.0, 1e2); // Humidity
+        reply.vbAppendDouble16(tempPack + 1.2, 1e2); // Hottest cell
+        reply.vbAppendDouble16(p->soc, 1e3);
+        reply.vbAppendDouble16(p->soh, 1e3);
+        reply.vbAppendUint8(BMS_CAN_ID);
+        reply.vbAppendDouble32Auto(52.3); // Totals
+        reply.vbAppendDouble32Auto(2010.0);
+        reply.vbAppendDouble32Auto(61.7 + p->ah * n);
+        reply.vbAppendDouble32Auto(2370.0 + p->wh * n);
+        sendReply(reply);
+    } break;
+
+    case COMM_PING_CAN:
+        if (root()->mCanOn) {
+            for (auto node: root()->mCanNodes) {
+                reply.vbAppendUint8(node->mCanId);
+            }
+        }
+        sendReply(reply);
+        break;
+
+    // Detection measures the true motor of the plant. It takes a few seconds,
+    // like on real hardware.
     case COMM_DETECT_MOTOR_R_L:
-        reply.append(QByteArray(4 + 4 + 4, '\0'));
-        sendReply(reply);
+        reply.vbAppendDouble32(measured(p->motorR), 1e6);
+        reply.vbAppendDouble32(measured(p->motorL * 1e6), 1e3);
+        reply.vbAppendDouble32(measured(p->motorLdLqDiff * 1e6), 1e3);
+        sendLater(2000, reply);
         break;
 
     case COMM_DETECT_MOTOR_FLUX_LINKAGE:
+        reply.vbAppendDouble32(measured(p->motorLambda), 1e7);
+        sendLater(4000, reply);
+        break;
+
     case COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP:
-        reply.append(QByteArray(4, '\0'));
-        sendReply(reply);
-        break;
+    case COMM_DETECT_ENCODER: {
+        // The encoder is found when the sensor port is set to one. Without
+        // encoder the firmware sends -1 after open loop and 1001 otherwise.
+        bool encoder = mMcConf.getParamEnum("m_sensor_port_mode") != 0;
+        bool openLoop = id == COMM_DETECT_MOTOR_FLUX_LINKAGE_OPENLOOP;
+        double ratio = mMcConf.getParamInt("si_motor_poles") / 2.0;
 
-    case COMM_DETECT_ENCODER:
-        reply.vbAppendDouble32(1001.0, 1e6); // Encoder not enabled
-        reply.vbAppendDouble32(0.0, 1e6);
+        if (openLoop) {
+            reply.vbAppendDouble32(measured(p->motorLambda), 1e7);
+        }
+        reply.vbAppendDouble32(encoder ? p->encOffset : (openLoop ? -1.0 : 1001.0), 1e6);
+        reply.vbAppendDouble32(encoder ? ratio : (openLoop ? -1.0 : 0.0), 1e6);
         reply.vbAppendInt8(0);
-        sendReply(reply);
-        break;
+        sendLater(4000, reply);
+    } break;
 
-    case COMM_DETECT_HALL_FOC:
-        reply.append(QByteArray(8, '\0'));
-        reply.vbAppendUint8(1); // Failed
-        sendReply(reply);
-        break;
+    case COMM_DETECT_HALL_FOC: {
+        bool hall = mMcConf.getParamEnum("m_sensor_port_mode") == 0;
+        for (int i = 0;i < 8;i++) {
+            reply.vbAppendUint8(hall ? p->hallAngle(i) : 255);
+        }
+        reply.vbAppendUint8(hall ? 0 : 1);
+        sendLater(3000, reply);
+    } break;
 
-    case COMM_PING_CAN:
-        // No other devices on the CAN bus
-        sendReply(reply);
-        break;
+    case COMM_DETECT_MOTOR_PARAM: {
+        // BLDC: commutation step for each hall state
+        const int bldcTable[8] = {-1, 1, 3, 2, 5, 6, 4, -1};
+        reply.vbAppendDouble32(measured(62.4), 1e3); // Cycle integrator limit
+        reply.vbAppendDouble32(measured(615.0), 1e3); // BEMF coupling
+        for (int i = 0;i < 8;i++) {
+            reply.vbAppendInt8(bldcTable[i]);
+        }
+        reply.vbAppendUint8(0);
+        sendLater(4000, reply);
+    } break;
+
+    case COMM_DETECT_APPLY_ALL_FOC: {
+        bool detectCan = vb.vbPopFrontInt8();
+        double maxLoss = vb.vbPopFrontDouble32(1e3);
+        double minCurrIn = vb.vbPopFrontDouble32(1e3);
+        double maxCurrIn = vb.vbPopFrontDouble32(1e3);
+        double openloopRpm = vb.vbPopFrontDouble32(1e3);
+        double slErpm = vb.vbPopFrontDouble32(1e3);
+        double iMax = qMin(sqrt(maxLoss / p->motorR), 150.0);
+
+        // Applied like the firmware, the plant has hall sensors. The current
+        // controller and observer gains are calculated for 1000 us.
+        auto apply = [&](ConfigParams &mc) {
+            double r = measured(p->motorR);
+            double l = measured(p->motorL);
+            double lambda = measured(p->motorLambda);
+            mc.updateParamEnum("motor_type", 2);
+            mc.updateParamDouble("foc_motor_r", r);
+            mc.updateParamDouble("foc_motor_l", l);
+            mc.updateParamDouble("foc_motor_ld_lq_diff", measured(p->motorLdLqDiff));
+            mc.updateParamDouble("foc_motor_flux_linkage", lambda);
+            mc.updateParamDouble("foc_current_kp", l * 1e3);
+            mc.updateParamDouble("foc_current_ki", r * 1e3);
+            mc.updateParamDouble("foc_observer_gain", 1e-3 / (lambda * lambda) * 1e6);
+            mc.updateParamDouble("l_current_max", iMax);
+            mc.updateParamDouble("l_current_min", -iMax);
+            mc.updateParamDouble("l_abs_current_max", iMax * 1.5);
+            mc.updateParamEnum("m_sensor_port_mode", 0);
+            mc.updateParamEnum("foc_sensor_mode", 2);
+            for (int i = 0;i < 8;i++) {
+                mc.updateParamInt(QString("foc_hall_table__%1").arg(i), p->hallAngle(i));
+            }
+            if (fabs(minCurrIn) > 0.001) {
+                mc.updateParamDouble("l_in_current_min", minCurrIn);
+            }
+            if (fabs(maxCurrIn) > 0.001) {
+                mc.updateParamDouble("l_in_current_max", maxCurrIn);
+            }
+            if (fabs(openloopRpm) > 0.001) {
+                mc.updateParamDouble("foc_openloop_rpm", openloopRpm);
+            }
+            if (fabs(slErpm) > 0.001) {
+                mc.updateParamDouble("foc_sl_erpm", slErpm);
+            }
+        };
+
+        int time = 6000;
+        apply(mMcConf);
+        if (detectCan && mCanOn) {
+            for (auto node: mCanNodes) {
+                if (node->mHwType == HW_TYPE_VESC) {
+                    apply(node->mMcConf);
+                    time += 4000;
+                }
+            }
+        }
+
+        // The firmware sends the new configuration before the result
+        reply.vbAppendInt16(1); // Hall sensors found
+        QTimer::singleShot(time, this, [this, reply]() {
+            VByteArray conf;
+            conf.vbAppendUint8(COMM_GET_MCCONF);
+            mMcConf.serialize(conf);
+            sendReply(conf);
+            sendReply(reply);
+        });
+    } break;
+
+    case COMM_SAMPLE_PRINT: {
+        int mode = vb.vbPopFrontInt8();
+        int len = vb.vbPopFrontUint16();
+        int dec = qMax(1, int(vb.vbPopFrontUint8()));
+
+        if (mode == DEBUG_SAMPLING_SEND_SINGLE_SAMPLE) {
+            if (len < mSamples.size()) {
+                sendReply(mSamples.at(len));
+            }
+            break;
+        }
+
+        if (mode == DEBUG_SAMPLING_OFF) {
+            break;
+        }
+
+        // Phase currents and voltages from the current state of the motor
+        if (mode != DEBUG_SAMPLING_SEND_LAST_SAMPLES) {
+            double fSw = mMcConf.getParamDouble("foc_f_zv");
+            double dt = dec / fSw;
+            double omega = p->erpm / 60.0 * 2.0 * M_PI;
+            double vAmp = hypot(p->vd, p->vq);
+            double vAngle = atan2(p->vd, p->vq);
+
+            mSamples.clear();
+            for (int i = 0;i < SAMPLE_MAX_LEN;i++) {
+                double th = p->angleE + omega * dt * i;
+                VByteArray s;
+                s.vbAppendUint8(COMM_SAMPLE_PRINT);
+                s.vbAppendInt16(i);
+                for (int ph = 0;ph < 3;ph++) {
+                    s.vbAppendDouble32Auto(p->iq * cos(th - ph * 2.0 * M_PI / 3.0));
+                }
+                for (int ph = 0;ph < 3;ph++) {
+                    s.vbAppendDouble32Auto(p->vBus / 2.0 + vAmp * cos(th + vAngle - ph * 2.0 * M_PI / 3.0));
+                }
+                s.vbAppendDouble32Auto(p->vBus);
+                s.vbAppendDouble32Auto(p->iq);
+                s.vbAppendDouble32Auto(fSw);
+                s.vbAppendInt8(0); // Status
+                s.vbAppendInt8(0); // Phase
+                s.vbAppendInt32(i);
+                mSamples.append(s);
+            }
+        }
+
+        // Like the firmware, the trigger modes send the whole buffer
+        if (mode != DEBUG_SAMPLING_TRIGGER_START_NOSEND && mode != DEBUG_SAMPLING_TRIGGER_FAULT_NOSEND) {
+            bool now = mode == DEBUG_SAMPLING_NOW || mode == DEBUG_SAMPLING_START;
+            int count = now ? qMin(len, SAMPLE_MAX_LEN) : mSamples.size();
+            for (int i = 0;i < count;i++) {
+                sendReply(mSamples.at(i));
+            }
+        }
+    } break;
 
     case COMM_TERMINAL_CMD:
-    case COMM_TERMINAL_CMD_SYNC: {
-        VByteArray print;
-        print.vbAppendUint8(COMM_PRINT);
-        print.append("Virtual ESC: the terminal is not available");
-        sendReply(print);
-    } break;
+    case COMM_TERMINAL_CMD_SYNC:
+        terminalCmd(QString::fromLatin1(vb));
+        break;
 
     case COMM_ERASE_NEW_APP:
     case COMM_WRITE_NEW_APP_DATA:
@@ -325,11 +853,13 @@ void VirtualVesc::processPacket(QByteArray &data)
         sendReply(reply);
     } break;
 
+    case COMM_GET_QML_UI_HW:
     case COMM_GET_QML_UI_APP:
     case COMM_LISP_READ_CODE: {
         qint32 len = vb.vbPopFrontInt32();
         qint32 offset = vb.vbPopFrontInt32();
-        QByteArray code = codeSlotPayload(id == COMM_GET_QML_UI_APP ? mQmlSlot : mLispSlot);
+        QByteArray code = id == COMM_GET_QML_UI_HW ? (mMain ? QByteArray() : simPage()) :
+                codeSlotPayload(id == COMM_GET_QML_UI_APP ? mQmlSlot : mLispSlot);
 
         if (code.isEmpty()) {
             reply.vbAppendInt32(0);
@@ -348,22 +878,6 @@ void VirtualVesc::processPacket(QByteArray &data)
         reply.append(code.mid(offset, len));
         sendReply(reply);
     } break;
-
-    case COMM_LISP_SET_RUNNING:
-        mLispRunning = vb.vbPopFrontUint8();
-        updateCustomConfig();
-        reply.vbAppendUint8(1);
-        sendReply(reply);
-        break;
-
-    case COMM_LISP_GET_STATS:
-        reply.vbAppendDouble16(0.0, 1e2); // CPU
-        reply.vbAppendDouble16(0.0, 1e2); // Heap
-        reply.vbAppendDouble16(0.0, 1e2); // Memory
-        reply.vbAppendDouble16(0.0, 1e2); // Stack
-        reply.vbAppendString(""); // Result
-        sendReply(reply);
-        break;
 
     case COMM_GET_CUSTOM_CONFIG:
     case COMM_GET_CUSTOM_CONFIG_DEFAULT: {
@@ -411,7 +925,313 @@ void VirtualVesc::processPacket(QByteArray &data)
 
 void VirtualVesc::sendReply(const VByteArray &vb)
 {
+    // Delayed replies are dropped after disconnecting, and the CAN devices cannot reply without the bus
+    if (!root()->mSimTimer->isActive() || (mMain && !root()->mCanOn)) {
+        return;
+    }
+
     mPacket->sendPacket(vb);
+}
+
+void VirtualVesc::sendLater(int ms, const VByteArray &vb)
+{
+    QTimer::singleShot(ms, this, [this, vb]() {
+        sendReply(vb);
+    });
+}
+
+void VirtualVesc::print(const QString &str, COMM_PACKET_ID id)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(id);
+    vb.append(str.toLatin1());
+    sendReply(vb);
+}
+
+void VirtualVesc::simStep()
+{
+    QMutexLocker locker(&mLock);
+    int faultLast = mPlant->fault;
+    double currentLast = mPlant->iMotor();
+    mPlant->step(mSimTimer->interval() / 1000.0);
+    lispMock();
+
+    if (mPlant->fault != faultLast && mPlant->fault != FAULT_CODE_NONE) {
+        mFaultLog.append(QString("Fault            : %1\n"
+                                 "Current          : %2\n"
+                                 "Voltage          : %3\n"
+                                 "Duty             : %4\n"
+                                 "RPM              : %5").
+                         arg(Commands::faultToStr(mc_fault_code(mPlant->fault))).
+                         arg(currentLast, 0, 'f', 1).arg(mPlant->vBus, 0, 'f', 2).
+                         arg(mPlant->duty, 0, 'f', 3).arg(mPlant->erpm, 0, 'f', 1));
+        if (mFaultLog.size() > FAULT_LOG_LEN) {
+            mFaultLog.removeFirst();
+        }
+    }
+
+    // The firmware streams the rotor position while a display mode is set
+    if (mDispPosMode != DISP_POS_MODE_NONE && (++mSimSteps % 5) == 0) {
+        VByteArray vb;
+        vb.vbAppendUint8(COMM_ROTOR_POSITION);
+        vb.vbAppendDouble32(mPlant->angleE * 180.0 / M_PI, 1e5);
+        sendReply(vb);
+    }
+}
+
+void VirtualVesc::terminalCmd(const QString &cmd)
+{
+    VirtualVesc *root = this->root();
+    VirtualPlant *p = mPlant;
+    QStringList args = cmd.split(" ", Qt::SkipEmptyParts);
+    QString sub = args.value(1);
+    QString val = args.value(2);
+    const QStringList scenarios = {"cruise", "hill", "stopgo", "idle"};
+
+    print(QString("-> %1 \n").arg(cmd));
+
+    if (args.isEmpty()) {
+        print("No command received\n");
+        return;
+    }
+
+    args[0] = args.at(0).toLower();
+
+    if (args.at(0) == "help") {
+        print("Valid commands are:\n"
+              "help\n  Show this help\n"
+              "fault\n  Prints the current fault code\n"
+              "faults\n  Prints all stored fault codes and conditions when they arrived\n"
+              "imu_type_internal\n  Prints the type of the internal IMU\n"
+              "sim\n  Show the state of the simulation\n"
+              "sim throttle [-1.0 - 1.0 | auto]\n  Hold the throttle of the remote, or let the rider ride\n"
+              "sim scenario [cruise | hill | stopgo | idle]\n  What the rider does\n"
+              "sim fault [code]\n  Set a fault code, 0 clears it\n"
+              "sim cell [cell] [voltage | off]\n  Override the voltage of a cell, starting at 1\n"
+              "sim can [on | off]\n  Connect or disconnect the CAN-bus\n"
+              "sim imu [phone | model]\n  Report the IMU of the phone (mobile only) or of the model\n"
+              "sim button [0 - 3] [on | off]\n  Press or release a button of the Dash 35B\n"
+              "sim set [name] [value]\n  Change the motor, battery or vehicle, see sim get\n"
+              "sim get\n  Print name, value, unit, min, max and decimals of all values\n"
+              "sim reset\n  Restore all values");
+    } else if (args.at(0) == "fault") {
+        print(Commands::faultToStr(mc_fault_code(p->fault)) + "\n");
+    } else if (args.at(0) == "faults") {
+        if (root->mFaultLog.isEmpty()) {
+            print("No faults registered since startup\n");
+        } else {
+            print("Active fault: " + Commands::faultToStr(mc_fault_code(p->fault)) + "\n");
+            print("The following faults were registered since start:\n");
+            for (const auto &f: root->mFaultLog) {
+                print(f + "\n");
+            }
+        }
+    } else if (args.at(0) == "imu_type_internal") {
+        print("BMI160");
+    } else if (args.at(0) == "sim") {
+        const VirtualPlant::Param *param = nullptr;
+        for (const auto &par: VirtualPlant::params) {
+            if (val == par.name) {
+                param = &par;
+            }
+        }
+        bool valOk = false;
+        double valNumber = val.toDouble(&valOk);
+        valOk = valOk && std::isfinite(valNumber);
+        bool ok = false;
+        double number = args.value(3).toDouble(&ok);
+        ok = ok && std::isfinite(number);
+        auto throttle = [p]() {
+            return std::isfinite(p->throttleOverride) ? QString::number(p->throttleOverride) : QString("auto");
+        };
+
+        if (sub == "throttle" && (val == "auto" || valOk)) {
+            p->throttleOverride = val == "auto" ? NAN : qBound(-1.0, valNumber, 1.0);
+        } else if (sub == "scenario" && scenarios.contains(val)) {
+            p->scenario = VirtualPlant::Scenario(scenarios.indexOf(val));
+        } else if (sub == "fault" && valOk && valNumber >= 0 && valNumber <= 255) {
+            p->faultForced = int(valNumber);
+        } else if (sub == "cell" && args.size() == 4 && val.toInt() >= 1 &&
+                   val.toInt() <= p->cellOverride.size() &&
+                   (args.at(3) == "off" || (ok && number >= 0.0 && number <= 5.0))) {
+            p->cellOverride[val.toInt() - 1] = args.at(3) == "off" ? NAN : number;
+        } else if (sub == "button" && args.size() == 4 && valOk && valNumber >= 0 && valNumber <= 3 &&
+                   (args.at(3) == "on" || args.at(3) == "off")) {
+            int bit = 1 << int(valNumber);
+            root->mButtons = args.at(3) == "on" ? (root->mButtons | bit) : (root->mButtons & ~bit);
+            return;
+        } else if (sub == "can" && (val == "on" || val == "off")) {
+            root->mCanOn = val == "on";
+        } else if (sub == "imu" && ((val == "phone" && PhoneImu::available()) || val == "model")) {
+            root->mPhoneImu = val == "phone";
+            PhoneImu::setActive(root->mPhoneImu);
+        } else if (sub == "set" && param && ok) {
+            double scale = pow(10.0, param->decimals);
+            p->*param->value = round(qBound(param->min, number, param->max) * scale) / scale * param->scale;
+        } else if (sub == "reset") {
+            p->resetParams();
+            root->mCanOn = true;
+            root->mPhoneImu = PhoneImu::available();
+            PhoneImu::setActive(root->mPhoneImu);
+        } else if (sub == "get") {
+            // One line per value, also read by the Sim page
+            for (const auto &par: VirtualPlant::params) {
+                print(QString("%1 %2 %3 %4 %5 %6").arg(par.name).
+                      arg(p->*par.value / par.scale, 0, 'f', par.decimals).
+                      arg(par.unit).arg(par.min).arg(par.max).arg(par.decimals));
+            }
+            print(QString("scenario %1").arg(scenarios.at(p->scenario)));
+            print("throttle " + throttle());
+            print(QString("fault %1").arg(p->faultForced));
+            print(QString("can %1").arg(root->mCanOn ? "on" : "off"));
+            print(QString("imu %1").arg(!PhoneImu::available() ? "none" : (root->mPhoneImu ? "phone" : "model")));
+#ifdef HAS_LISPBM
+            print("dash on");
+#endif
+            return;
+        } else if (!sub.isEmpty()) {
+            print("Invalid argument, type help to list all available commands");
+            return;
+        }
+
+        print(QString("Scenario: %1, throttle: %2").arg(scenarios.at(p->scenario)).
+              arg(throttle()));
+        print(QString("Speed: %1 km/h, motor current: %2 A, battery: %3 V, %4 %").
+              arg(p->speed * 3.6, 0, 'f', 1).arg(p->iMotor(), 0, 'f', 1).
+              arg(p->vBus, 0, 'f', 1).arg(p->soc * 100.0, 0, 'f', 0));
+        print(QString("Fault: %1, CAN-bus: %2").
+              arg(Commands::faultToStr(mc_fault_code(p->fault))).arg(root->mCanOn ? "on" : "off"));
+    } else {
+        print("Invalid command: " + args.at(0) + "\n"
+              "type help to list all available commands");
+    }
+}
+
+void VirtualVesc::processFileCmd(COMM_PACKET_ID id, VByteArray &vb, VByteArray &reply)
+{
+    QString path = sdPath(vb.vbPopFrontString());
+
+    switch (id) {
+    case COMM_FILE_LIST: {
+        QString from = vb.vbPopFrontString();
+        generateLog();
+
+        reply.vbAppendUint8(0); // Has more
+        if (path.isEmpty()) {
+            break;
+        }
+
+        bool fromFound = from.isEmpty();
+        auto entries = QDir(path).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name);
+        for (const auto &fi: entries) {
+            if (!fromFound) {
+                fromFound = fi.fileName() == from;
+                continue;
+            }
+
+            // Same packet size as the Express
+            if ((reply.size() + fi.fileName().toLocal8Bit().size()) >= 400) {
+                reply[1] = 1;
+                break;
+            }
+
+            reply.vbAppendInt8(fi.isDir());
+            reply.vbAppendInt32(fi.isDir() ? QDir(fi.filePath()).count() : fi.size());
+            reply.vbAppendString(fi.fileName());
+        }
+    } break;
+
+    case COMM_FILE_READ: {
+        qint32 offset = vb.vbPopFrontInt32();
+        QFile file(path);
+        reply.vbAppendInt32(offset);
+        if (!path.isEmpty() && file.open(QIODevice::ReadOnly) && file.seek(offset)) {
+            reply.vbAppendInt32(file.size());
+            reply.append(file.read(400));
+        } else {
+            reply.vbAppendInt32(0);
+        }
+    } break;
+
+    case COMM_FILE_WRITE: {
+        qint32 offset = vb.vbPopFrontInt32();
+        vb.vbPopFrontInt32(); // Total size
+        QFile file(path);
+        bool ok = !path.isEmpty() &&
+                file.open(offset == 0 ? QIODevice::WriteOnly : QIODevice::ReadWrite) &&
+                file.seek(offset) && file.write(vb) == vb.size();
+        reply.vbAppendInt32(offset);
+        reply.vbAppendInt8(ok);
+    } break;
+
+    case COMM_FILE_MKDIR:
+        reply.vbAppendInt8(!path.isEmpty() && QDir().mkpath(path));
+        break;
+
+    case COMM_FILE_REMOVE:
+        reply.vbAppendInt8(!path.isEmpty() &&
+                           (QFileInfo(path).isDir() ? QDir(path).removeRecursively() : QFile::remove(path)));
+        break;
+
+    default:
+        break;
+    }
+}
+
+QString VirtualVesc::sdPath(const QString &path) const
+{
+    // Only inside the SD card folder
+    QString root = (mMain ? mMain : this)->mCodeDir + "/sd";
+    QString res = QDir::cleanPath(root + "/" + path);
+    return (res == root || res.startsWith(root + "/")) ? res : QString();
+}
+
+void VirtualVesc::generateLog()
+{
+    // A ride for the log browser, like an Express that logs to SD, again when it was deleted
+    QString dir = sdPath("log_can");
+    if (dir.isEmpty() || !QDir(dir).entryList({"*.csv"}).isEmpty() || !QDir().mkpath(dir)) {
+        return;
+    }
+
+    QDateTime start = QDateTime::currentDateTime().addSecs(-3600);
+    QFile file(dir + "/log_001_" + start.toString("yyyy-MM-dd_HH-mm-ss") + ".csv");
+    if (!file.open(QIODevice::WriteOnly)) {
+        return;
+    }
+
+    QTextStream out(&file);
+    out << "t_day:Time:s:3:0:1;kmh_vesc:Speed VESC:km/h:2:0:0;v_in:Input Voltage:V:2:0:0;"
+           "setup_curr_motor:Current Motors:A:2:0:0;setup_curr_battery:Current Battery:A:2:0:0;"
+           "setup_power:Power:W:0:0:0;erpm:ERPM::0:0:0;duty:Duty:%:1:0:0;"
+           "soc:Battery Level:%:1:0:0;t_mosfet:Temp MOSFET:°C:1:0:0;t_motor:Temp Motor:°C:1:0:0;"
+           "fault:Fault Code::0:0:0;"
+           "cnt_ah:Ah Used:Ah:3:0:0;cnt_wh:Wh Used:Wh:3:0:0;trip_vesc_abs:Trip VESC ABS:m:3:1:0;"
+           "t_day_pos:Time GNSS:s:3:0:1;gnss_lat:Latitude:deg:7:0:0;gnss_lon:Longitude:deg:7:0:0\n";
+
+    // Five minutes at 10 Hz, from the same model with the current configuration
+    VirtualPlant p(&root()->mMcConf, &root()->mAppConf);
+    const int n = VirtualPlant::motorCount;
+    double t0 = start.time().msecsSinceStartOfDay() / 1000.0;
+
+    for (int i = 0;i < 3000;i++) {
+        // A few faults for the log viewer, held as long as the firmware would
+        p.faultForced = (i >= 900 && i < 905) ? FAULT_CODE_ABS_OVER_CURRENT :
+                        (i >= 1800 && i < 1830) ? FAULT_CODE_OVER_TEMP_FET :
+                        i == 2500 ? FAULT_CODE_DRV : FAULT_CODE_NONE;
+
+        for (int j = 0;j < 5;j++) {
+            p.step(0.02);
+        }
+
+        double t = fmod(t0 + p.timeS, 86400.0);
+        out << QString::asprintf("%.3f;%.2f;%.2f;%.2f;%.2f;%.0f;%.0f;%.1f;%.1f;%.1f;%.1f;%d;"
+                                 "%.3f;%.3f;%.3f;%.3f;%.7f;%.7f\n",
+                                 t, p.speed * 3.6, p.vBus, p.iMotor() * n, p.iIn * n,
+                                 p.iIn * n * p.vBus, p.erpm, p.duty * 100.0, p.soc * 100.0,
+                                 p.tempFet, p.tempMotor, p.fault, p.ah * n, p.wh * n, p.distAbs,
+                                 t, p.lat, p.lon);
+    }
 }
 
 void VirtualVesc::loadMainConfigs()
@@ -437,6 +1257,12 @@ void VirtualVesc::loadMainConfigs()
                 mMcConfDefault.loadParamsXml(mcPath);
                 mAppConf.loadParamsXml(appPath);
                 mAppConfDefault.loadParamsXml(appPath);
+
+                // A set up 12S skateboard, the defaults stay as in the firmware
+                mMcConf.updateParamInt("si_battery_cells", 12);
+                mMcConf.updateParamDouble("si_battery_ah", 10.0);
+                mMcConf.updateParamDouble("l_battery_cut_start", 37.2);
+                mMcConf.updateParamDouble("l_battery_cut_end", 36.0);
                 return;
             }
         }
@@ -481,6 +1307,12 @@ void VirtualVesc::loadCode()
         mQmlSlot = qmlFile.readAll();
     }
 
+    QFile eepromFile(mCodeDir + "/eeprom.bin");
+    if (eepromFile.open(QIODevice::ReadOnly)) {
+        QDataStream in(&eepromFile);
+        in >> mEeprom;
+    }
+
     // Like the firmware, start valid Lisp code on boot
     mLispRunning = !codeSlotPayload(mLispSlot).isEmpty();
     updateCustomConfig();
@@ -505,6 +1337,18 @@ void VirtualVesc::saveCode()
 
     save("lisp.bin", mLispSlot);
     save("qml.bin", mQmlSlot);
+
+    QMutexLocker locker(&root()->mLock);
+    QFile eepromFile(mCodeDir + "/eeprom.bin");
+    if (!mEeprom.isEmpty() && eepromFile.open(QIODevice::WriteOnly)) {
+        QDataStream out(&eepromFile);
+        out << mEeprom;
+    }
+}
+
+int VirtualVesc::codeSlotMaxSize() const
+{
+    return mHwType == HW_TYPE_CUSTOM_MODULE ? CODE_SLOT_MAX_SIZE_ESP32 : CODE_SLOT_MAX_SIZE;
 }
 
 QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const
@@ -517,7 +1361,7 @@ QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const
     quint32 len = header.vbPopFrontUint32();
     quint16 crc = header.vbPopFrontUint16();
 
-    if (len > quint32(CODE_SLOT_MAX_SIZE) || int(len) + 8 > slot.size()) {
+    if (len > quint32(codeSlotMaxSize()) || int(len) + 8 > slot.size()) {
         return QByteArray();
     }
 
@@ -531,7 +1375,7 @@ QByteArray VirtualVesc::codeSlotPayload(const QByteArray &slot) const
 
 bool VirtualVesc::writeCodeSlot(QByteArray &slot, quint32 offset, const QByteArray &data)
 {
-    if (offset + quint32(data.size()) > quint32(CODE_SLOT_MAX_SIZE)) {
+    if (offset + quint32(data.size()) > quint32(codeSlotMaxSize())) {
         return false;
     }
 

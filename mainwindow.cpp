@@ -35,6 +35,7 @@
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
+#include "widgets/paramtable.h"
 
 namespace {
 void stepTowards(double &value, double goal, double step) {
@@ -307,14 +308,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
     reloadPages();
 
+    connect(mVesc->mcConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
+    connect(mVesc->appConfig(), &ConfigParams::changedParamsChanged, this, &MainWindow::updateConfigChanges);
+    connect(mVesc, &VescInterface::portConnectedChanged, this, &MainWindow::updateConfigChanges);
+    connect(mVesc, &VescInterface::fwRxChanged, this, &MainWindow::updateConfigChanges);
+
     mMcConfRead = false;
     mAppConfRead = false;
+    mConfReadCanId = -1;
+    mConfReadRequested = false;
+    mConfReadFailed = false;
 
+    // Only once requested from the device, so that a late reply from the device selected before does not count
     connect(mVesc->mcConfig(), &ConfigParams::updated, [this]() {
-        mMcConfRead = true;
+        mMcConfRead = mMcConfRead || mConfReadRequested;
     });
     connect(mVesc->appConfig(), &ConfigParams::updated, [this]() {
-        mAppConfRead = true;
+        mAppConfRead = mAppConfRead || mConfReadRequested;
+    });
+
+    // The configurations of the device do not match this VESC Tool. They are not tried again until
+    // the device is connected or selected again, the other devices on the CAN-bus are still read.
+    connect(mVesc->commands(), &Commands::deserializeConfigFailed, [this]() {
+        mConfReadFailed = mConfReadFailed || (mConfReadRequested && !mVesc->isIgnoringCanChanges());
     });
 
     auto updateMotortype = [this]() {
@@ -350,6 +366,16 @@ MainWindow::MainWindow(QWidget *parent) :
         if (!rx) {
             return;
         }
+
+        // Read the configurations of the device on every connect and CAN switch. The cached ones are
+        // loaded before this, they are shown until the timer has read the ones on the device.
+        mMcConfRead = false;
+        mAppConfRead = false;
+        mConfReadRequested = false;
+        mConfReadFailed = false;
+        // Not known while another CAN device is selected for a moment, it is taken when that ends
+        mConfReadCanId = mVesc->isIgnoringCanChanges() ? -2 :
+                         mVesc->commands()->getSendCan() ? mVesc->commands()->getCanSendId() : -1;
 
         FW_RX_PARAMS params = mVesc->getLastFwRxParams();
 
@@ -408,6 +434,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         mMcConfRead = false;
         mAppConfRead = false;
+        mConfReadFailed = false;
 
         mPageMotorSettings->reloadParams();
         mPageMotor->reloadParams();
@@ -476,6 +503,12 @@ MainWindow::MainWindow(QWidget *parent) :
             PageListItem *widget = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(item));
             widget->setName(mVesc->customConfig(2)->getParam("hw_name")->longName);
         }
+
+        for (int i = 0;i < mVesc->customConfigNum();i++) {
+            connect(mVesc->customConfig(i), &ConfigParams::changedParamsChanged,
+                    this, &MainWindow::updateConfigChanges, Qt::UniqueConnection);
+        }
+        updateConfigChanges();
     });
 
     qApp->installEventFilter(this);
@@ -879,7 +912,8 @@ void MainWindow::timerSlot()
     static int disconected_cnt = 0;
     disconected_cnt++;
 
-    // Read configurations if they haven't been read since starting VESC Tool
+    // Read the configurations if they haven't been read since connecting to or selecting the device. Not while
+    // another CAN device is selected for a moment, e.g. for a scan or before its firmware version is received.
     if (mVesc->isPortConnected()) {
         static int conf_cnt = 0;
         disconected_cnt = 0;
@@ -887,14 +921,21 @@ void MainWindow::timerSlot()
         if (conf_cnt >= 20) {
             conf_cnt = 0;
 
-            if (!mVesc->deserializeFailedSinceConnected() && mVesc->fwRx() &&
-                    mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
+            int canId = mVesc->commands()->getSendCan() ? mVesc->commands()->getCanSendId() : -1;
+            if (mConfReadCanId == -2 && !mVesc->isIgnoringCanChanges()) {
+                mConfReadCanId = canId;
+            }
+
+            if (!mConfReadFailed && !mVesc->isIgnoringCanChanges() && canId == mConfReadCanId &&
+                    mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
                 if (!mMcConfRead) {
                     mVesc->commands()->getMcconf();
+                    mConfReadRequested = true;
                 }
 
                 if (!mAppConfRead) {
                     mVesc->commands()->getAppConf();
+                    mConfReadRequested = true;
                 }
             }
         }
@@ -1421,6 +1462,45 @@ void MainWindow::saveParamFileDialog(QString conf, bool wrapIfdef)
         showMessageDialog(tr("Save header"),
                           tr("Could not save header"),
                           false, false);
+    }
+}
+
+// Marks the write buttons and the pages that have parameters not written to the device, while connected
+// to one. The motor and app configurations only on a motor controller, the other devices do not have them.
+void MainWindow::updateConfigChanges()
+{
+    bool connected = mVesc->isPortConnected();
+    bool motorConfs = connected && mVesc->getFwSupportsConfiguration();
+    int mcChanges = motorConfs ? mVesc->mcConfig()->getChangedParams().size() : 0;
+    int appChanges = motorConfs ? mVesc->appConfig()->getChangedParams().size() : 0;
+
+    ui->actionWriteMcconf->setIcon(mcChanges > 0 ? Utility::getIconWithDot("icons/motor_down.png") :
+                                                   Utility::getIcon("icons/motor_down.png"));
+    ui->actionWriteMcconf->setToolTip(mcChanges > 0 ? tr("Write motor configuration (%n unwritten change(s))", "", mcChanges) :
+                                                      tr("Write motor configuration"));
+    ui->actionWriteAppconf->setIcon(appChanges > 0 ? Utility::getIconWithDot("icons/app_down.png") :
+                                                     Utility::getIcon("icons/app_down.png"));
+    ui->actionWriteAppconf->setToolTip(appChanges > 0 ? tr("Write app configuration (%n unwritten change(s))", "", appChanges) :
+                                                        tr("Write app configuration"));
+
+    for (int i = 0;i < ui->pageList->count();i++) {
+        PageListItem *item = dynamic_cast<PageListItem*>(ui->pageList->itemWidget(ui->pageList->item(i)));
+        QWidget *page = ui->pageWidget->widget(i);
+        if (!item || !page) {
+            continue;
+        }
+
+        bool custom = false;
+        for (int c = 0;c < 3;c++) {
+            custom = custom || i == mPageNameIdList.value(QString("app_custom_config_%1").arg(c), -1);
+        }
+
+        bool changed = (i == mPageNameIdList.value("motor", -1) && mcChanges > 0) ||
+                       (i == mPageNameIdList.value("app", -1) && appChanges > 0);
+        for (ParamTable *t: page->findChildren<ParamTable*>()) {
+            changed = changed || t->hasChanges();
+        }
+        item->setChanged((custom ? connected : motorConfs) && changed);
     }
 }
 
@@ -2214,12 +2294,6 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
         if (currentRow == 0) {
             if (mVesc->commands()->getSendCan()) {
                 mVesc->commands()->setSendCan(false);
-                QTimer::singleShot(1500, [this]() {
-                    if (mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
-                        mVesc->commands()->getMcconf();
-                        mVesc->commands()->getAppConf();
-                    }
-                });
             }
         } else {
             QWidget *current = ui->canList->itemWidget(ui->canList->currentItem());
@@ -2228,12 +2302,6 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
             if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
                     mVesc->commands()->setSendCan(true, quint32(id));
-                    QTimer::singleShot(1500, [this]() {
-                        if (mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
-                            mVesc->commands()->getMcconf();
-                            mVesc->commands()->getAppConf();
-                        }
-                    });
                 }
             }
         }

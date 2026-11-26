@@ -27,6 +27,8 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDir>
+#include <QCoreApplication>
+#include <QPermissions>
 #include <QQmlComponent>
 #include <QQmlEngine>
 #include <cmath>
@@ -198,6 +200,16 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         mSettings.endArray();
     }
 
+    connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
+    connect(mBleUart, &BleUart::connected, [this]{
+        setLastConnectionType(CONN_BLE);
+        mSettings.setValue("ble_addr", mLastBleAddr);
+    });
+    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
+#else
+    mBleUart = new BleUartDummy(this);
+#endif
+
     {
         int size = mSettings.beginReadArray("blePreferred");
         for (int i = 0; i < size; ++i) {
@@ -208,16 +220,6 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         mSettings.endArray();
     }
-
-    connect(mBleUart, SIGNAL(dataRx(QByteArray)), this, SLOT(bleDataRx(QByteArray)));
-    connect(mBleUart, &BleUart::connected, [this]{
-        setLastConnectionType(CONN_BLE);
-        mSettings.setValue("ble_addr", mLastBleAddr);
-    });
-    connect(mBleUart, SIGNAL(unintentionalDisconnect()), this, SLOT(bleUnintentionalDisconnect()));
-#else
-    mBleUart = new BleUartDummy(this);
-#endif
 
     mTcpServer = new TcpServerSimple(this);
     mTcpServer->setUsePacket(true);
@@ -583,13 +585,13 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
-    connect(mCommands, SIGNAL(customConfigRx(int,QByteArray)),
-            this, SLOT(customConfigRx(int,QByteArray)));
+    connect(mCommands, &Commands::customConfigRx, this, &VescInterface::customConfigRx);
 
     connect(mCommands, &Commands::customConfigAckReceived, [this](int confId) {
         ConfigParams *custConf = customConfig(confId);
         QString name;
         if (custConf) {
+            custConf->confirmWrite();
             name = custConf->getLongName("hw_name");
         } else {
             name = tr("Custom config %1").arg(confId);
@@ -1910,7 +1912,15 @@ bool VescInterface::openRtLogFile(QString outDirectory)
                 mLastPosTime = QDateTime::currentDateTimeUtc();
             });
             mPosSource->setUpdateInterval(5);
-            mPosSource->startUpdates();
+
+            // The position source does not ask for the permission itself
+            QLocationPermission location;
+            location.setAccuracy(QLocationPermission::Precise);
+            qApp->requestPermission(location, mPosSource, [this](const QPermission &permission) {
+                if (permission.status() == Qt::PermissionStatus::Granted) {
+                    mPosSource->startUpdates();
+                }
+            });
         } else {
             emitMessageDialog("Postioning",
                               "Could not get Positioning Working.",
@@ -1927,6 +1937,12 @@ void VescInterface::closeRtLogFile()
     if (mRtLogFile.isOpen()) {
         mRtLogFile.close();
     }
+
+#ifdef HAS_POS
+    if (mPosSource) {
+        mPosSource->stopUpdates();
+    }
+#endif
 }
 
 bool VescInterface::isRtLogOpen()
@@ -2246,6 +2262,7 @@ QString VescInterface::getLastBleAddr() const
 {
     return mLastBleAddr;
 }
+#endif
 
 void VescInterface::storeBlePreferred(QString address, bool preferred)
 {
@@ -2260,7 +2277,6 @@ bool VescInterface::getBlePreferred(QString address)
     }
     return res;
 }
-#endif
 
 bool VescInterface::isPortConnected()
 {
@@ -2813,6 +2829,11 @@ void VescInterface::connectVirtual()
     mVirtualConnected = true;
     setLastConnectionType(CONN_VIRTUAL);
     updateFwRx(false);
+}
+
+bool VescInterface::isVirtualConnected() const
+{
+    return mVirtualConnected;
 }
 
 void VescInterface::connectBle(QString address)
@@ -3574,7 +3595,8 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
         auto pair = mLastFwUuids[mUuidStrLocal];
 
-        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone && !mBlockFwSwap) {
+        // The Virtual ESC opens on the main VESC, which has the Sim page
+        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone && !mBlockFwSwap && !mVirtualConnected) {
             FW_RX_PARAMS pRx;
             bool ok = Utility::getFwVersionBlockingCan(this, &pRx, pair.second, 1500);
             if (ok && Utility::uuid2Str(pRx.uuid, false) == pair.first) {
@@ -4333,12 +4355,16 @@ void VescInterface::ackReceived(QString ackType)
     emit statusMessage(ackType, true);
 }
 
-void VescInterface::customConfigRx(int confId, QByteArray data)
+void VescInterface::customConfigRx(int confId, QByteArray data, bool isDefault)
 {
     ConfigParams *params = customConfig(confId);
     if (params) {
         auto vb = VByteArray(data);
         if (params->deSerialize(vb)) {
+            if (!isDefault) {
+                params->storeReference();
+            }
+
             params->updateDone();
             emitStatusMessage(tr("%1 updated").arg(params->getLongName("hw_name")), true);
         } else {

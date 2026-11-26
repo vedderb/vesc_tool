@@ -17,11 +17,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.0
+import QtQuick
 import QtQuick.Layouts 1.3
+import QtQuick.Shapes
 import Qt5Compat.GraphicalEffects
 import QtQuick.Controls.Material 2.2
 import Vedder.vesc.utility 1.0
+import "GaugeStyle.js" as Style
 
 Item {
     property double value: 0
@@ -29,8 +31,8 @@ Item {
     height: width
     property double labelStep: 10
     property double labelInset: outerRadius * 0.28 + outerRadius*0.06
-    property double tickmarkInset: outerRadius*0.07
-    property double minorTickmarkInset: outerRadius*0.07
+    property double tickmarkInset: outerRadius * 0.125
+    property double minorTickmarkInset: outerRadius * 0.125
     property double minAngle: -140
     property double maxAngle: 140
     property int isInverted: maxAngle > minAngle ? 1 : -1
@@ -45,15 +47,21 @@ Item {
     property string typeText: ""
     property string tickmarkSuffix: ""
     property double tickmarkScale: 1
-    property color nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
-    property color traceColor: Qt.lighter(nibColor,1.5)
+    property color nibColor: {nibColor = Utility.getAppHexColor("lightAccent")}
+    property color traceColor: nibColor
     property double precision: 0
 
-    property color coveredColor: {coveredColor = Utility.getAppHexColor("lightText")}
+    property color coveredColor: {coveredColor = Utility.getAppHexColor("titleText")}
     property color uncoveredColor: {uncoveredColor = Utility.getAppHexColor("disabledText")}
 
     property bool tickmarksVisible: true
     property bool centerTextVisible: true
+
+    // Housing colours, inner edge of the bezel and the channel the lit bar runs in
+    property var style: Style.palette(Utility.isDarkMode())
+    property real bezelInner: outerRadius * 0.95
+    property real channelWidth: outerRadius * 0.052
+    property real channelRadius: bezelInner - outerRadius * 0.004 - channelWidth / 2
 
     onTickmarkCountChanged: valueTextModel.update()
 
@@ -81,30 +89,186 @@ Item {
         return false
     }
 
-    Rectangle {
+    Item {
         id: gauge
         x: outerRadius - width/2
         y: outerRadius - height/2
         width: outerRadius*2
         height: outerRadius*2
-        z:0
-        radius:outerRadius
-        color: {color = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")}
         property double value: parent.value
+        property real zeroAngle: valueToAngle(0)
+        property real sweep: needleTransform.angle - zeroAngle
         Behavior on value {
             NumberAnimation {
                 easing.type: Easing.OutCirc
                 duration: 100
             }
         }
+
+        // Shadow, bezel, face and channel. Painted again only when the size or range changes
+        Canvas {
+            property real m: outerRadius * 0.12
+            property string range: minAngle + " " + maxAngle
+            anchors.fill: parent
+            anchors.margins: -m
+            onRangeChanged: requestPaint()
+            // Canvas does not repaint on resizes while hidden, such as in a page that is still loading
+            onVisibleChanged: requestPaint()
+            onPaint: {
+                var ctx = getContext("2d")
+                var R = outerRadius
+                ctx.reset()
+                ctx.translate(m, m)
+                Style.shadow(ctx, 0, 0, 2 * R, 2 * R, R, R * 0.07, style)
+                ctx.beginPath()
+                ctx.fillStyle = Style.metal(ctx, R, R, d2r(135), style)
+                ctx.arc(R, R, R, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.beginPath()
+                ctx.fillStyle = Style.metal(ctx, R, R, d2r(315), style)
+                ctx.arc(R, R, bezelInner + R * 0.016, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.strokeStyle = style.line
+                ctx.lineWidth = Math.max(1, R * 0.005)
+                ctx.stroke()
+                var face = ctx.createRadialGradient(R, R, R * 0.2, R, R, bezelInner)
+                face.addColorStop(0, style.face0)
+                face.addColorStop(1, style.face1)
+                ctx.beginPath()
+                ctx.fillStyle = face
+                ctx.arc(R, R, bezelInner, 0, 2 * Math.PI)
+                ctx.fill()
+                ctx.clip()
+                ctx.beginPath()
+                ctx.lineCap = "round"
+                ctx.strokeStyle = style.groove
+                ctx.lineWidth = channelWidth
+                ctx.arc(R, R, channelRadius, d2r(minAngle - 90), d2r(maxAngle - 90), isInverted < 0)
+                ctx.stroke()
+                // Shadow of the bezel lip on the face
+                ctx.strokeStyle = Qt.rgba(0, 0, 0, style.shadow / 12)
+                for (var i = 1; i <= 5; i++) {
+                    ctx.beginPath()
+                    ctx.lineWidth = R * 0.016 * i
+                    ctx.arc(R, R + R * 0.008 * i, bezelInner + R * 0.008 * i, 0, 2 * Math.PI)
+                    ctx.stroke()
+                }
+            }
+        }
+
+        // Unlit channel, in a faint tint of the trace colour
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Qt.rgba(traceColor.r, traceColor.g, traceColor.b, Utility.isDarkMode() ? 0.13 : 0.22)
+                strokeWidth: channelWidth * 0.6
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: outerRadius
+                    centerY: outerRadius
+                    radiusX: channelRadius
+                    radiusY: channelRadius
+                    startAngle: minAngle - 90
+                    sweepAngle: angleRange
+                }
+            }
+        }
+
+        // Glow of the lit bar over the full range, as an alpha mask. Painted once; the
+        // gradient below colours it and shows only the part between zero and the value.
+        Canvas {
+            id: channelGlow
+            property string range: minAngle + " " + maxAngle
+            anchors.fill: parent
+            visible: false
+            onRangeChanged: requestPaint()
+            onPaint: {
+                var ctx = getContext("2d")
+                var R = outerRadius
+                var a0 = d2r(minAngle - 90)
+                var a1 = d2r(maxAngle - 90)
+                ctx.reset()
+                ctx.lineCap = "round"
+                // Light on the bezel wall
+                ctx.beginPath()
+                ctx.strokeStyle = Qt.rgba(1, 1, 1, Utility.isDarkMode() ? 0.3 : 0.2)
+                ctx.lineWidth = R * 0.016
+                ctx.arc(R, R, bezelInner + R * 0.008, a0, a1, isInverted < 0)
+                ctx.stroke()
+                ctx.beginPath()
+                ctx.arc(R, R, bezelInner, 0, 2 * Math.PI)
+                ctx.clip()
+                ctx.strokeStyle = Qt.rgba(1, 1, 1, Utility.isDarkMode() ? 0.016 : 0.009)
+                for (var i = 28; i >= 1; i--) {
+                    ctx.beginPath()
+                    ctx.lineWidth = channelWidth + R * 0.34 * Math.pow(i / 28, 1.5)
+                    ctx.arc(R, R, channelRadius, a0, a1, isInverted < 0)
+                    ctx.stroke()
+                }
+            }
+        }
+
+        ConicalGradient {
+            id: glowMask
+            property real span: Math.abs(gauge.sweep) / 360
+            anchors.fill: parent
+            source: channelGlow
+            visible: gauge.sweep !== 0
+            angle: Math.min(gauge.zeroAngle, needleTransform.angle) - 4
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.rgba(traceColor.r, traceColor.g, traceColor.b, 0) }
+                GradientStop { position: 4 / 360; color: traceColor }
+                GradientStop { position: Math.min(glowMask.span + 4 / 360, 1); color: traceColor }
+                GradientStop { position: Math.min(glowMask.span + 10 / 360, 1); color: Qt.rgba(traceColor.r, traceColor.g, traceColor.b, 0) }
+            }
+        }
+
+        // Lit bar with a bright core, from zero to the value
+        Shape {
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+            visible: gauge.sweep !== 0
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: traceColor
+                strokeWidth: channelWidth * 0.72
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: outerRadius
+                    centerY: outerRadius
+                    radiusX: channelRadius
+                    radiusY: channelRadius
+                    startAngle: gauge.zeroAngle - 90
+                    sweepAngle: gauge.sweep
+                }
+            }
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: Utility.isDarkMode() ? "#99ffffff" : "#55ffffff"
+                strokeWidth: channelWidth * 0.22
+                capStyle: ShapePath.RoundCap
+                PathAngleArc {
+                    centerX: outerRadius
+                    centerY: outerRadius
+                    radiusX: channelRadius
+                    radiusY: channelRadius
+                    startAngle: gauge.zeroAngle - 90
+                    sweepAngle: gauge.sweep
+                }
+            }
+        }
+
         Text {
             id: speedLabel
             anchors.centerIn: parent
             visible: centerTextVisible
             text: gauge.value.toFixed(precision)
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: outerRadius * 0.3
-            color: {color = Utility.getAppHexColor("lightText") }
+            font.pixelSize: outerRadius * 0.34
+            font.weight: Font.Medium
+            color: {color = Utility.getAppHexColor("titleText") }
             antialiasing: true
             font.family: "Roboto"
         }
@@ -115,8 +279,9 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: speedLabel.bottom
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: outerRadius * 0.12
-            color: {color = Utility.getAppHexColor("lightText")}
+            font.pixelSize: outerRadius * 0.105
+            font.letterSpacing: outerRadius * 0.008
+            color: {color = Utility.getAppHexColor("normalText")}
             antialiasing: true
             font.family: "Roboto"
             font.capitalization: Font.AllUppercase
@@ -131,181 +296,100 @@ Item {
             anchors.bottom: speedLabel.top
             //anchors.bottomMargin: outerRadius * 0.1
             horizontalAlignment: Text.AlignHCenter
-            font.pixelSize: outerRadius * 0.12
-            color: {color = Utility.getAppHexColor("lightText")}
+            font.pixelSize: outerRadius * 0.105
+            font.letterSpacing: outerRadius * 0.008
+            color: {color = Utility.getAppHexColor("normalText")}
             antialiasing: true
             font.family: "Roboto"
             font.capitalization: Font.AllUppercase
         }
 
+        // Needle, rotated about the gauge centre
         Item {
+            id: needle
             x: outerRadius - width/2
-            y: outerRadius * 0.05
             z:2
-            height: outerRadius * 0.22
-            width: outerRadius * 0.12
+            height: outerRadius * 0.5
+            width: outerRadius * 0.4
             transform: Rotation {
                 id:needleTransform
-                origin.x: outerRadius * 0.12/2
-                origin.y: outerRadius*(1-0.05)
+                origin.x: needle.width/2
+                origin.y: outerRadius
                 angle: valueToAngle(gauge.value)
             }
             Canvas {
-                id: pointerNib
-                property double value: gauge.value
-                property double gAngle: needleTransform.angle
-                Component.onCompleted: requestPaint()
-                onGAngleChanged: requestPaint()
+                property color glow: traceColor
                 anchors.fill:parent
+                onGlowChanged: requestPaint()
+                onVisibleChanged: requestPaint()
                 onPaint:{
-                    var ctx = getContext("2d");
-                    if(nibColor != null) {
-                        // the triangle
-                        ctx.beginPath();
-                        ctx.moveTo(parent.width/2, 0);
-                        ctx.lineTo(parent.width, parent.height*0.015);
-                        ctx.quadraticCurveTo(parent.width*0.7, parent.height/4, 0.6*parent.width , 0.9*parent.height);
-                        ctx.quadraticCurveTo(parent.width*0.6, parent.height, parent.width/2, parent.height);
-                        ctx.closePath();
-
-                        var gradient = ctx.createLinearGradient(parent.width,parent.height*0.02,parent.width/2,0);
-                        gradient.addColorStop(0, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle - 36))));
-                        gradient.addColorStop(0.80, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle))));
-                        gradient.addColorStop(0.92, '#ffffff');
-                        gradient.addColorStop(1, '#ffffff');
-
-                        // the fill color
-                        ctx.fillStyle = gradient;
-                        ctx.fill();
-
-                        // the triangle
-                        ctx.beginPath();
-                        ctx.moveTo(parent.width/2, 0);
-                        ctx.lineTo(0, parent.height*0.015);
-                        ctx.quadraticCurveTo(parent.width*0.3, parent.height/4, 0.4*parent.width, 0.9*parent.height);
-                        ctx.quadraticCurveTo(parent.width*0.4, parent.height, parent.width/2, parent.height);
-                        ctx.closePath();
-
-                        var gradient2 = ctx.createLinearGradient(0,parent.height*0.02,parent.width/2,0);
-                        gradient2.addColorStop(0, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle + 144))));
-                        gradient2.addColorStop(0.80, Qt.darker(nibColor,1.0 + 0.5* Math.sin(d2r(gAngle + 180))));
-                        gradient2.addColorStop(0.92, '#ffffff');
-                        gradient2.addColorStop(1, '#ffffff');
-                        // the fill color
-                        ctx.fillStyle = gradient2;
-                        ctx.fill();
+                    var ctx = getContext("2d")
+                    var R = outerRadius
+                    var cx = width / 2, y0 = R - bezelInner, a = R * 0.056, h = R * 0.29, c = glow, dark = Utility.isDarkMode()
+                    function half(s) {
+                        ctx.beginPath()
+                        ctx.moveTo(cx, y0)
+                        ctx.lineTo(cx + s * a, y0 + h * 0.015)
+                        ctx.quadraticCurveTo(cx + s * a * 0.4, y0 + h / 4, cx + s * a * 0.2, y0 + 0.9 * h)
+                        ctx.quadraticCurveTo(cx + s * a * 0.2, y0 + h, cx, y0 + h)
+                        ctx.closePath()
                     }
-                }
-            }
-        }
-        Canvas {
-            id:foregroundpaint
-            anchors.fill: parent
-            z:3
-            property double angle: needleTransform.angle
-            onAngleChanged: requestPaint()
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.reset();
-                //create radial glow around outside of gauge
-                var gradient1 = ctx.createRadialGradient(outerRadius, outerRadius, outerRadius - outerRadius * 0.13, outerRadius, outerRadius, outerRadius- outerRadius * 0.05);
-                gradient1.addColorStop(0, '#00000000');
-                gradient1.addColorStop(1, traceColor);
-                ctx.beginPath();
-                ctx.strokeStyle = gradient1
-                ctx.lineWidth = outerRadius * 0.2
-                ctx.arc(outerRadius,
-                        outerRadius,
-                        outerRadius - outerRadius * 0.12,
-                        d2r(valueToAngle(0.0) - 90),
-                        d2r(needleTransform.angle - 90),
-                        (gauge.value*isInverted) < 0);
-                ctx.stroke();
-            }
-            Canvas {
-                anchors.fill: parent
-                property color lightBG: {lightBG = Utility.getAppHexColor("lightestBackground")}
-                property color darkBG: {darkBG = Utility.getAppHexColor("darkBackground")}
-                property real borderWidth: outerRadius*0.035;
-                Component.onCompleted: requestPaint()
-                onPaint: {
-                    var ctx = getContext("2d");
-                    //create outer gauge metal bezel effect
-                    ctx.beginPath();
-                    var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                    // Add three color stops
-                    gradient2.addColorStop(1, lightBG);
-                    gradient2.addColorStop(0.7, darkBG);
-                    gradient2.addColorStop(0.1, lightBG);
-                    ctx.strokeStyle = gradient2;
-                    ctx.lineWidth = borderWidth
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius - borderWidth/2,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                    // Add three color stops
-                    gradient3.addColorStop(1, darkBG);
-                    gradient3.addColorStop(0.8, lightBG);
-                    gradient3.addColorStop(0, darkBG);
-                    ctx.strokeStyle = gradient3;
-                    ctx.lineWidth = borderWidth
-                    ctx.arc(outerRadius,
-                            outerRadius,
-                            outerRadius - borderWidth*3/2 + 1,
-                            0, 2 * Math.PI);
-                    ctx.stroke();
+
+                    ctx.reset()
+                    // Keep the glow on the face
+                    ctx.beginPath()
+                    ctx.arc(cx, R, bezelInner, 0, 2 * Math.PI)
+                    ctx.clip()
+
+                    ctx.shadowColor = dark ? "#c0000000" : "#50000000"
+                    ctx.shadowBlur = a * 0.8
+                    ctx.fillStyle = "#000000"
+                    half(-1); ctx.fill(); half(1); ctx.fill()
+                    ctx.shadowColor = "transparent"
+
+                    // Most layers sit close to the blade, so the light falls off quickly
+                    ctx.lineCap = "round"
+                    ctx.strokeStyle = Qt.rgba(c.r, c.g, c.b, dark ? 0.026 : 0.016)
+                    for (var i = 26; i >= 1; i--) {
+                        ctx.beginPath()
+                        ctx.lineWidth = a * (1.1 + 3.4 * Math.pow(i / 26, 2.4))
+                        ctx.moveTo(cx, y0 + h * 0.1)
+                        ctx.lineTo(cx, y0 + h * 0.72)
+                        ctx.stroke()
+                    }
+
+                    half(-1); ctx.fillStyle = dark ? "#ffffff" : "#3c3c42"; ctx.fill()
+                    half(1); ctx.fillStyle = dark ? Qt.rgba(c.r + (1 - c.r) * 0.72, c.g + (1 - c.g) * 0.72, c.b + (1 - c.b) * 0.72, 1) : "#18181b"; ctx.fill()
                 }
             }
         }
 
-        //white circle to overlay glass
-        RadialGradient {
-            id: glassEffect1
-            x: outerRadius - width/2
-            y: outerRadius - height/2
-            height: 2*outerRadius*0.96
-            width: height
-            visible: false
-            gradient: Gradient {
-                GradientStop { position: 1.0; color: "transparent" }
-                GradientStop { position: 0.5; color: "transparent" }
-                GradientStop { position: 0.495; color: "white" } // Just a part of the canvas
+        // Glass
+        Canvas {
+            z: 3
+            visible: Utility.isDarkMode()
+            anchors.fill: parent
+            onVisibleChanged: requestPaint()
+            onPaint: {
+                var ctx = getContext("2d")
+                var R = outerRadius
+                ctx.reset()
+                ctx.beginPath()
+                ctx.arc(R, R, bezelInner, 0, 2 * Math.PI)
+                ctx.clip()
+                var g = ctx.createLinearGradient(0, R * 0.08, 0, R * 1.1)
+                g.addColorStop(0, "#16ffffff")
+                g.addColorStop(1, "#03ffffff")
+                ctx.fillStyle = g
+                ctx.arc(R * 0.85, R * 2.42, R * 1.9, 0, 2 * Math.PI, true)
+                ctx.fill()
             }
         }
-        //Cutout circle for part where glare isn't
-        RadialGradient{
-            id: glassEffect2
-            horizontalOffset: outerRadius*0.8 - width/2
-            horizontalRadius: outerRadius*1.9
-            verticalOffset: outerRadius*2.3 - height/2
-            verticalRadius: outerRadius*1.9
-            anchors.fill: glassEffect1
-            visible:  false
-            z: glassEffect1.z + 1
-            gradient: Gradient {
-                GradientStop { position: 1.2; color: "#22000000" }
-                GradientStop { position: 1.1; color: "#33000000" }
-                GradientStop { position: 1.05; color: "#22000000" }
-                GradientStop { position: 1; color: "#11000000" }
-                GradientStop { position: 0.98; color: "transparent" } // Just a part of the canvas
-            }
-        }
-        //Subtract both
-        OpacityMask {
-            id: glassEffect3
-            anchors.fill: glassEffect1
-            source: glassEffect1
-            maskSource: glassEffect2
-            invert: false
-            visible: true
-        }
+
         Component {
             id: tickmarkLabel
             Text {
-                font.pixelSize: outerRadius * 0.12
+                font.pixelSize: outerRadius * 0.11
                 text: parseFloat(value * tickmarkScale).toFixed(0) + tickmarkSuffix
                 color: isCovered(value) ? coveredColor : uncoveredColor
                 antialiasing: true
@@ -316,7 +400,7 @@ Item {
             id: tickmark
             Rectangle {
                 implicitWidth: outerRadius * 0.02
-                implicitHeight: outerRadius * 0.1
+                implicitHeight: outerRadius * 0.08
                 antialiasing: true
                 smooth: true
                 color: isCovered(value) ? coveredColor : uncoveredColor
@@ -325,11 +409,12 @@ Item {
         Component {
             id: minorTickmark
             Rectangle {
-                implicitWidth: outerRadius * 0.015
-                implicitHeight: outerRadius * 0.07
+                implicitWidth: outerRadius * 0.013
+                implicitHeight: outerRadius * 0.042
                 antialiasing: true
                 smooth: true
                 color: isCovered(value) ? coveredColor : uncoveredColor
+                opacity: isCovered(value) ? 1 : 0.55
             }
         }
         function rangeUsed(count, stepSize) {

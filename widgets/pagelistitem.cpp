@@ -18,6 +18,7 @@
     */
 
 #include "pagelistitem.h"
+#include "utility.h"
 #include <QHBoxLayout>
 
 PageListItem::PageListItem(QString name,
@@ -28,7 +29,13 @@ PageListItem::PageListItem(QString name,
     mIconLabel = new QLabel;
     mNameLabel = new QLabel;
     mGroupLabel = new QLabel;
+    mChangedDot = new QLabel;
     mSpaceStart = new QSpacerItem(6, 0);
+
+    // Marks pages with parameters that are not written to the VESC
+    mChangedDot->setPixmap(Utility::getChangedDot());
+    mChangedDot->setToolTip(tr("Changes not written to the VESC"));
+    mChangedDot->hide();
 
     mIconLabel->setScaledContents(true);
     mGroupLabel->setScaledContents(true);
@@ -43,6 +50,7 @@ PageListItem::PageListItem(QString name,
     layout->addSpacerItem(mSpaceStart);
     layout->addWidget(mIconLabel);
     layout->addWidget(mNameLabel);
+    layout->addWidget(mChangedDot);
     layout->addStretch();
     layout->addWidget(mGroupLabel);
     layout->addSpacing(2);
@@ -100,4 +108,9 @@ void PageListItem::setBold(bool bold)
 void PageListItem::setIndented(bool indented)
 {
     mSpaceStart->changeSize(indented ? 15 : 2, 0);
+}
+
+void PageListItem::setChanged(bool changed)
+{
+    mChangedDot->setVisible(changed);
 }

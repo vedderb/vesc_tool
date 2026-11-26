@@ -20,6 +20,12 @@
         <file>ParamEditSeparator.qml</file>
         <file>DetectFocParam.qml</file>
         <file>DetectFocHall.qml</file>
+        <file>HallPlot.qml</file>
+        <file>GyroDriftPlot.qml</file>
+        <file>AccelLevel.qml</file>
+        <file>LevelTrace.qml</file>
+        <file>LevelExamples.qml</file>
+        <file>YawLiftView.qml</file>
         <file>DetectFocEncoder.qml</file>
         <file>DetectBldc.qml</file>
         <file>PpmMap.qml</file>
@@ -32,6 +38,8 @@
         <file>ProfileDisplay.qml</file>
         <file>RtDataSetup.qml</file>
         <file>CustomGauge.qml</file>
+        <file>BatteryGauge.qml</file>
+        <file>GaugeStyle.js</file>
         <file>SetupWizardFoc.qml</file>
         <file>SetupWizardInput.qml</file>
         <file>ParamList.qml</file>
@@ -51,6 +59,7 @@
         <file>MultiSettings.qml</file>
         <file>CanScreen.qml</file>
         <file>StatPage.qml</file>
+        <file>WheelPager.qml</file>
         <file>BleSetupDialog.qml</file>
         <file>ParamEditBitfield.qml</file>
         <file>ConfigPageCustom.qml</file>
@@ -59,5 +68,29 @@
         <file>SetupWizardIMU.qml</file>
         <file>Lisp.qml</file>
         <file>LogAnalysis.qml</file>
+        <file>ParamEditFrame.qml</file>
+        <file>SheetDialog.qml</file>
+        <file>SectionHeader.qml</file>
+        <file>Chip.qml</file>
+        <file>SegmentedBar.qml</file>
+        <file>ValueTile.qml</file>
+        <file>WarningBanner.qml</file>
+        <file>SubgroupBar.qml</file>
+        <file>ParamGroupList.qml</file>
+        <file>WriteButton.qml</file>
+        <file>ParamFormat.js</file>
+        <file>ParamSearch.qml</file>
+        <file>DeviceCard.qml</file>
+        <file>WizardHeader.qml</file>
+        <file>StepHint.qml</file>
+        <file>BottomMenu.qml</file>
+        <file>PopupMenu.qml</file>
+        <file>MenuEntry.qml</file>
+        <file>LabeledSpinBox.qml</file>
+        <file>PageHeader.qml</file>
+        <file>BusyDialog.qml</file>
+        <file>InputBackground.qml</file>
+        <file>InputField.qml</file>
+        <file>HistoryInputField.qml</file>
     </qresource>
 </RCC>

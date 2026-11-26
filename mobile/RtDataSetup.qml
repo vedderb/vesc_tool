@@ -28,6 +28,7 @@ import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
 import Vedder.vesc.commands 1.0
 import Vedder.vesc.configparams 1.0
+import "GaugeStyle.js" as Style
 
 Item {
     id: rtData
@@ -41,7 +42,7 @@ Item {
     property double efficiency_lpf: 0
     property bool isHorizontal: rtData.width > rtData.height
 
-    property int gaugeSize: (isHorizontal ? Math.min((height)/1.25, width / 2.5 - 20) :
+    property int gaugeSize: (isHorizontal ? Math.min((height)/1.25, width / 2.6 - 20) :
                                             Math.min(width / 1.37, (height) / 2.4 - 10 ))
     property int gaugeSize2: gaugeSize * 0.55
     Component.onCompleted: {
@@ -77,7 +78,7 @@ Item {
                 maximumValue: 60
                 value: 0
                 labelStep: maximumValue > 60 ? 20 : 10
-                nibColor: {nibColor = Utility.getAppHexColor("tertiary1")}
+                nibColor: {nibColor = Utility.getAppHexColor("warning")}
                 unitText: "A"
                 typeText: "Current"
                 minAngle: -210
@@ -96,7 +97,7 @@ Item {
                     value: 0
                     unitText: "%"
                     typeText: "Duty"
-                    nibColor: {nibColor = Utility.getAppHexColor("tertiary3")}
+                    nibColor: {nibColor = Utility.getAppHexColor("blue")}
                     CustomGauge {
                         id: powerGauge
                         width: gaugeSize2*1.05
@@ -112,7 +113,7 @@ Item {
                         value: 0
                         unitText: "W"
                         typeText: "Power"
-                        nibColor: {nibColor = Utility.getAppHexColor("tertiary2")}
+                        nibColor: {nibColor = Utility.getAppHexColor("lightAccent")}
                     }
                 }
             }
@@ -162,22 +163,9 @@ Item {
                         settingsDialog.open()
                     }
 
-                    Dialog {
+                    SheetDialog {
                         id: settingsDialog
-                        modal: true
-                        focus: true
-                        width: parent.width - 20
-                        height: Math.min(implicitHeight, parent.height - 60)
-                        closePolicy: Popup.CloseOnEscape
-
-                        Overlay.modal: Rectangle {
-                            color: "#AA000000"
-                        }
-
-                        x: 10
-                        y: Math.max((parent.height - height) / 2, 10)
-                        parent: dialogParent
-                        standardButtons: Dialog.Ok | Dialog.Cancel
+                        acceptText: qsTr("Apply")
 
                         onOpened: {
                             negSpeedBox.checked = VescIf.speedGaugeUseNegativeValues()
@@ -244,7 +232,7 @@ Item {
                         }
                     }
                     background: Rectangle {
-                        color: {color = Utility.isDarkMode() ? Utility.getAppHexColor("darkBackground") : Utility.getAppHexColor("normalBackground")}
+                        color: speedGauge.style.face0
                         opacity: button.down ? 0 : 1
                         implicitWidth: gaugeSize2*0.28
                         implicitHeight: gaugeSize2*0.28
@@ -259,105 +247,30 @@ Item {
                         }
                         Canvas {
                             anchors.fill: parent
-                            Component.onCompleted: requestPaint()
-                            property real outerRadius: parent.width/2.0;
-                            property real borderWidth: outerRadius*0.1;
-                            property color lightBG: {lightBG = Utility.getAppHexColor("lightestBackground")}
-                            property color darkBG: {darkBG = Utility.getAppHexColor("darkBackground")}
+                            onVisibleChanged: requestPaint()
                             onPaint: {
-                                var ctx = getContext("2d");
-                                //create outer gauge metal bezel effect
-                                ctx.beginPath();
-                                var gradient2 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                                // Add three color stops
-                                gradient2.addColorStop(1, lightBG);
-                                gradient2.addColorStop(0.7, darkBG);
-                                gradient2.addColorStop(0.1, lightBG);
-                                ctx.strokeStyle = gradient2;
-                                ctx.lineWidth = borderWidth;
-                                ctx.arc(outerRadius,
-                                        outerRadius,
-                                        outerRadius - borderWidth/2,
-                                        0, 2 * Math.PI);
-                                ctx.stroke();
-                                ctx.beginPath();
-                                var gradient3 = ctx.createLinearGradient(parent.width,0,0 ,parent.height);
-                                // Add three color stops
-                                gradient3.addColorStop(1, darkBG);
-                                gradient3.addColorStop(0.8, lightBG);
-                                gradient3.addColorStop(0, darkBG);
-                                ctx.strokeStyle = gradient3;
-                                ctx.lineWidth = borderWidth;
-                                ctx.arc(outerRadius,
-                                        outerRadius,
-                                        outerRadius - 3*borderWidth/2,
-                                        0, 2 * Math.PI);
-                                ctx.stroke();
+                                var ctx = getContext("2d")
+                                var r = width / 2
+                                ctx.reset()
+                                ctx.strokeStyle = Style.metal(ctx, r, r, Math.PI * 0.75, speedGauge.style)
+                                ctx.lineWidth = r * 0.12
+                                ctx.arc(r, r, r * 0.94, 0, 2 * Math.PI)
+                                ctx.stroke()
                             }
                         }
                     }
                 }
-                CustomGauge {
+                BatteryGauge {
                     id: batteryGauge
-                    width: gaugeSize2
-                    height: gaugeSize2
-                    anchors.centerIn: parent
-                    anchors.horizontalCenterOffset: parent.width/4 + width/2
-                    minAngle: -225
-                    maxAngle: 45
-                    minimumValue: 0
-                    maximumValue: 100
-                    value: 0
-                    centerTextVisible: false
-                    property color greenColor: {greenColor = "green"}
-                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                    property color redColor: {redColor = "red"}
+                    z: -1
+                    x: parent.width - width * 0.18
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: gaugeSize2 * 0.44
+                    height: gaugeSize * 0.7
+                    property color greenColor: {greenColor = Utility.getAppHexColor("positive")}
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                    property color redColor: {redColor = Utility.getAppHexColor("danger")}
                     nibColor: value > 50 ? greenColor : value > 20 ? orangeColor : redColor
-                    Text {
-                        id: batteryLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: "BATTERY"
-                        font.pixelSize: gaugeSize2/18.0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: - gaugeSize2*0.12
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
-                    Text {
-                        id: rangeValLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: "∞"
-                        font.pixelSize: text === "∞"? gaugeSize2/6.3 : gaugeSize2/8.0
-                        anchors.verticalCenterOffset: text === "∞"? -0.015*gaugeSize2 : 0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
-                    Text {
-                        id: rangeLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: "KM RANGE"
-                        font.pixelSize: gaugeSize2/20.0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.horizontalCenterOffset: gaugeSize2*0.3
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
-                    Text {
-                        id: battValLabel
-                        color: {color = Utility.getAppHexColor("lightText")}
-                        text: parseFloat(batteryGauge.value).toFixed(0) +"%"
-                        font.pixelSize: gaugeSize2/12.0
-                        verticalAlignment: Text.AlignVCenter
-                        anchors.centerIn: parent
-                        anchors.verticalCenterOffset: gaugeSize2*0.15
-                        //anchors.horizontalCenterOffset: (width -parent.width)/2
-                        anchors.margins: 10
-                        font.family:  "Roboto"
-                    }
                     Behavior on nibColor {
                         ColorAnimation {
                             duration: 1000;
@@ -442,9 +355,9 @@ Item {
                 value: 0
                 labelStep: 20
                 property real throttleStartValue: 70
-                property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                property color redColor: {redColor = "red"}
+                property color blueColor: {blueColor = Utility.getAppHexColor("lightAccent")}
+                property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                property color redColor: {redColor = Utility.getAppHexColor("danger")}
                 nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                 Behavior on nibColor {
                     ColorAnimation {
@@ -472,9 +385,9 @@ Item {
                     unitText: "°C"
                     typeText: "TEMP\nMOTOR"
                     property real throttleStartValue: 70
-                    property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                    property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                    property color redColor: {redColor = "red"}
+                    property color blueColor: {blueColor = Utility.getAppHexColor("lightAccent")}
+                    property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                    property color redColor: {redColor = Utility.getAppHexColor("danger")}
                     nibColor: value > throttleStartValue ? redColor : (value > 40 ? orangeColor: blueColor)
                     Behavior on nibColor {
                         ColorAnimation {
@@ -498,9 +411,9 @@ Item {
                         value: 0
                         unitText: VescIf.useImperialUnits() ? "Wh/mi" : "Wh/km"
                         typeText: "Consump."
-                        property color blueColor: {blueColor = Utility.getAppHexColor("tertiary2")}
-                        property color orangeColor: {orangeColor = Utility.getAppHexColor("orange")}
-                        property color redColor: {redColor = "red"}
+                        property color blueColor: {blueColor = Utility.getAppHexColor("lightAccent")}
+                        property color orangeColor: {orangeColor = Utility.getAppHexColor("warning")}
+                        property color redColor: {redColor = Utility.getAppHexColor("danger")}
                         nibColor: value > 45.0 ? redColor : (value > 25.0 ? orangeColor: blueColor)
                         Text {
                             id: consumValLabel
@@ -539,10 +452,25 @@ Item {
             id: textRect
             color: "transparent"
             Layout.fillWidth: true
-            Layout.preferredHeight:  gaugeSize2*0.26
+            Layout.preferredHeight:  gaugeSize2*0.32
             Layout.alignment: Qt.AlignBottom
             Layout.rowSpan: 1
             //Layout.columnSpan: isHorizontal ? 2 : 1
+            // Housing around the labels and the readouts
+            Canvas {
+                property real m: 16
+                width: gaugeSize2*2.3 + 2*m
+                height: gaugeSize2*0.3 + 2*m
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -gaugeSize2*0.045
+                onVisibleChanged: requestPaint()
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.reset()
+                    ctx.translate(m, m)
+                    Style.frame(ctx, width - 2*m, height - 2*m, gaugeSize2*0.08, gaugeSize2*0.02, speedGauge.style)
+                }
+            }
             Text {
                 id: odoLabel
                 color: {color = Utility.getAppHexColor("lightText")}
@@ -584,11 +512,8 @@ Item {
                 width:2*gaugeSize2
                 height: rideTime.implicitHeight + gaugeSize2*0.025
                 anchors.centerIn: parent
-                color: {color = Utility.getAppHexColor("darkBackground")}
+                color: "transparent"
                 anchors.verticalCenterOffset: gaugeSize2*0.005
-                border.color: {border.color = Utility.getAppHexColor("lightestBackground")}
-                border.width: 1
-                radius: gaugeSize2*0.03
                 Text{
                     id: rideTime
                     color: {color = Utility.getAppHexColor("lightText")}
@@ -664,12 +589,13 @@ Item {
             var currentMaxRound = Math.ceil(mMcConf.getParamDouble("l_current_max") / 5) * 5 * values.num_vescs
             var currentMinRound = Math.floor(mMcConf.getParamDouble("l_current_min") / 5) * 5 * values.num_vescs
 
-            if (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7)) {
+            if (currentMaxRound > currentMinRound &&
+                    (currentMaxRound > currentGauge.maximumValue || currentMaxRound < (currentGauge.maximumValue * 0.7))) {
                 currentGauge.maximumValue = currentMaxRound
                 currentGauge.minimumValue = currentMinRound
+                currentGauge.labelStep = Math.ceil((currentMaxRound - currentMinRound) / 40) * 5
             }
 
-            currentGauge.labelStep = Math.ceil((currentMaxRound - currentMinRound) / 40) * 5
             currentGauge.value = values.current_motor
             dutyGauge.value = values.duty_now * 100.0
             batteryGauge.value = values.battery_level * 100.0
@@ -695,8 +621,8 @@ Item {
             var wh_consume = values.watt_hours - values.watt_hours_charged
             var wh_km_total = wh_consume / Math.max(dist , 1e-10)
 
-            if (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
-                    useNegativeSpeedValues !== speedGauge.minimumValue < 0) {
+            if (speedMaxRound > 0 && (speedMaxRound > speedGauge.maximumValue || speedMaxRound < (speedGauge.maximumValue * 0.6) ||
+                    useNegativeSpeedValues !== speedGauge.minimumValue < 0)) {
                 var labelStep = Math.ceil(speedMaxRound / 100) * 10
 
                 if ((speedMaxRound / labelStep) > 30) {
@@ -722,13 +648,14 @@ Item {
             var powerMaxRound = (Math.ceil(powerMax / 1000.0) * 1000.0)
             var powerMinRound = (Math.floor(powerMin / 1000.0) * 1000.0)
 
-            if (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6)) {
+            if (powerMaxRound > powerMinRound &&
+                    (powerMaxRound > powerGauge.maximumValue || powerMaxRound < (powerGauge.maximumValue * 0.6))) {
                 powerGauge.maximumValue = powerMaxRound
                 powerGauge.minimumValue = powerMinRound
+                powerGauge.labelStep = Math.ceil((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             }
 
             powerGauge.value = (values.current_in * values.v_in)
-            powerGauge.labelStep = Math.ceil((powerMaxRound - powerMinRound)/5000.0) * 1000.0
             var alpha = 0.05
             var efficiencyNow = Math.max( Math.min(values.current_in * values.v_in/Math.max(Math.abs(values.speed * 3.6 * impFact), 1e-6) , 60) , -60)
             efficiency_lpf = (1.0 - alpha) * efficiency_lpf + alpha *  efficiencyNow
@@ -741,12 +668,11 @@ Item {
             }
 
             odometerValue = values.odometer
-            batteryGauge.unitText = parseFloat(wh_km_total / impFact).toFixed(1) + "%"
-            rangeLabel.text = useImperial ? "MI\nRANGE" : "KM\nRANGE"
+            batteryGauge.rangeUnit = useImperial ? "mi" : "km"
             if( values.battery_wh / (wh_km_total / impFact) < 999.0) {
-                rangeValLabel.text = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)
+                batteryGauge.rangeText = parseFloat(values.battery_wh / (wh_km_total / impFact)).toFixed(1)
             } else {
-                rangeValLabel.text = "∞"
+                batteryGauge.rangeText = "∞"
             }
             rideTime.text = new Date(values.uptime_ms).toISOString().substr(11, 8)
             odometer.text = parseFloat((values.odometer * impFact) / 1000.0).toFixed(1)

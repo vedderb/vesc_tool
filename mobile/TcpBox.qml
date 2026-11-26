@@ -62,6 +62,7 @@ Item {
 
         SpinBox {
             id: tcpServerPortBox
+            background: InputBackground {}
             from: 0
             to: 65535
             value: 65102

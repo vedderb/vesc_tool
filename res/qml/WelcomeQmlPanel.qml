@@ -37,6 +37,29 @@ Item {
     property int notchBot: 0
     property int notchTop: 0
 
+    // Globals that the mobile components expect from mobile/main.qml
+    property bool mainIsHorizontal: container.width > container.height
+    property bool mainIsTablet: container.width >= 700 && Math.min(Screen.width, Screen.height) >= 600
+    readonly property bool phoneLandscape: mainIsHorizontal && !mainIsTablet
+    readonly property var rideSession: null
+    property real rtVin: 0
+    property string lastDeviceAddr: ""
+    property string lastDeviceName: ""
+    property string lastDeviceIcon: "icons/Connected-96.png"
+    property real lastDeviceTime: 0
+
+    function timeAgo(time) {
+        return ""
+    }
+
+    function displayPath(path) {
+        return path
+    }
+
+    function showToast(text, detail) {
+        VescIf.emitStatusMessage(text + ": " + detail, true)
+    }
+
     function setupMotors() {
         if (!VescIf.isPortConnected()) {
             VescIf.emitMessageDialog("Setup motors FOC",
@@ -174,7 +197,7 @@ Item {
 
             Repeater {
                 id: rep
-                model: ["RT Data", "Profiles"]
+                model: ["RT Data", "Profiles", "LogView"]
 
                 TabButton {
                     text: modelData
@@ -226,40 +249,16 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            interactive: false
 
             Component.onCompleted: {
-                contentItem.interactive = false
                 contentItem.highlightMoveDuration = 200
+                swipeThroughScrollViews(swipeView)
+                wheelPager.attach(swipeView)
             }
 
             onCurrentIndexChanged: {
                 if (tabBar.currentIndex !== currentIndex) {
                     tabBar.setCurrentIndex(currentIndex)
-                }
-            }
-
-            DragHandler {
-                id: horizDrag
-                enabled: !connScreen.opened
-                target: null
-                xAxis.enabled: true
-                yAxis.enabled: false
-                dragThreshold: 12
-                grabPermissions: PointerHandler.CanTakeOverFromItems
-
-                property real startX: 0
-                onActiveChanged: {
-                    if (active) {
-                        startX = centroid.position.x
-                    } else {
-                        var dx = centroid.position.x - startX
-                        if (dx < -40 && swipeView.currentIndex < swipeView.count - 1) {
-                            swipeView.incrementCurrentIndex()
-                        } else if (dx > 40 && swipeView.currentIndex > 0) {
-                            swipeView.decrementCurrentIndex()
-                        }
-                    }
                 }
             }
 
@@ -287,47 +286,8 @@ Item {
                     currentIndex: 0
                     anchors.fill: parent
                     orientation: Qt.Vertical
-                    interactive: false
 
-                    Component.onCompleted: {
-                        contentItem.interactive = false
-                        contentItem.highlightMoveDuration = 200
-                    }
-
-                    DragHandler {
-                        id: vertDrag
-                        enabled: !connScreen.opened
-                        target: null
-                        xAxis.enabled: false
-                        yAxis.enabled: true
-                        dragThreshold: 12
-                        grabPermissions: PointerHandler.CanTakeOverFromItems
-
-                        property real startY: 0
-                        onActiveChanged: {
-                            if (active) {
-                                startY = centroid.position.y
-                            } else {
-                                var dy = centroid.position.y - startY
-                                if (dy < -40 && rtSwipeView.currentIndex < rtSwipeView.count - 1) {
-                                    rtSwipeView.incrementCurrentIndex()
-                                } else if (dy > 40 && rtSwipeView.currentIndex > 0) {
-                                    rtSwipeView.decrementCurrentIndex()
-                                }
-                            }
-                        }
-                    }
-
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse
-                        onWheel: (event) => {
-                                     if (event.angleDelta.y < 0 && rtSwipeView.currentIndex < rtSwipeView.count - 1) {
-                                         rtSwipeView.incrementCurrentIndex()
-                                     } else if (event.angleDelta.y > 0 && rtSwipeView.currentIndex > 0) {
-                                         rtSwipeView.decrementCurrentIndex()
-                                     }
-                                 }
-                    }
+                    Component.onCompleted: contentItem.highlightMoveDuration = 200
 
                     Page {
                         RtDataSetup {
@@ -351,6 +311,17 @@ Item {
                     anchors.leftMargin: 10
                     anchors.rightMargin: 10
                     dialogParent: container
+                }
+            }
+
+            Page {
+                id: logViewPage
+                // Loaded on the first visit, as the map takes a while. By url, so that the
+                // rest of the panel does not wait for the map modules or depend on them.
+                Loader {
+                    anchors.fill: parent
+                    active: logViewPage.SwipeView.isCurrentItem || status != Loader.Null
+                    source: "qrc:/mobile/LogAnalysis.qml"
                 }
             }
         }
@@ -386,6 +357,12 @@ Item {
         anchors.fill: parent
         color: "black"
 
+        // The pages under it do not swipe while it is open
+        MouseArea {
+            anchors.fill: parent
+            enabled: connScreen.opened
+        }
+
         ConnectScreen {
             id: connScreen
             x: 0
@@ -410,6 +387,22 @@ Item {
         function onPortConnectedChanged() {
             connScreen.opened = VescIf.isPortConnected() ? false : true
             connectButton.visible = !VescIf.isPortConnected()
+        }
+    }
+
+    WheelPager {
+        id: wheelPager
+    }
+
+    // A ScrollView takes a mouse drag that starts on one of its controls and then does not move, as it only
+    // scrolls with the wheel and scroll bars on the desktop, so the pages would not swipe. Touch is not affected.
+    function swipeThroughScrollViews(item) {
+        if (item instanceof ScrollView) {
+            item.contentItem.acceptedButtons = Qt.NoButton
+        }
+
+        for (var i = 0; i < item.children.length; i++) {
+            swipeThroughScrollViews(item.children[i])
         }
     }
 
@@ -439,6 +432,8 @@ Item {
             }
 
             hwUiObj = Qt.createQmlObject(VescIf.qmlHw(), uiHw, "HwUi")
+            swipeThroughScrollViews(hwUiObj)
+            wheelPager.attach(hwUiObj)
 
             uiHwButton.text = "HwUi"
             if (hwUiObj.tabTitle) {
@@ -465,6 +460,8 @@ Item {
             }
 
             appUiObj = Qt.createQmlObject(VescIf.qmlApp(), uiApp, "AppUi")
+            swipeThroughScrollViews(appUiObj)
+            wheelPager.attach(appUiObj)
 
             uiAppButton.text = "AppUi"
             if (appUiObj.tabTitle) {
@@ -492,7 +489,8 @@ Item {
         }
 
         function onQmlLoadDone() {
-            if (VescIf.askQmlLoad()) {
+            // The QML on the Virtual ESC is from VESC Tool or uploaded by the user
+            if (VescIf.askQmlLoad() && !VescIf.isVirtualConnected()) {
                 qmlLoadDialog.open()
             } else {
                 updateHwAppUi()

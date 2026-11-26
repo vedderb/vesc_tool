@@ -66,21 +66,28 @@ Item {
 
     Dialog {
         id: dialog
-        parent: dialogParent
+        // Covers the app bars on landscape phones
+        readonly property bool fullWindow: mainIsHorizontal && !mainIsTablet
+        parent: fullWindow ? Overlay.overlay : dialogParent
         modal: true
         focus: true
         width: parent.width - 40 - notchLeft - notchRight
-        height: parent.height - 40
+        height: parent.height - (fullWindow ? 10 + notchTop + notchBot : 40)
         closePolicy: Popup.CloseOnEscape
-        x: 20 + (notchLeft + notchRight) / 2
-        y: 10
+        x: 20 + notchLeft
+        y: fullWindow ? 5 + notchTop : 10
         topPadding: 5
         bottomPadding: 0
         leftMargin: 5
         rightMargin: 5
 
+        background: Rectangle {
+            color: Utility.getAppHexColor("darkBackground")
+            radius: 20
+        }
+
         Overlay.modal: Rectangle {
-            color: "#AA000000"
+            color: Utility.getAppHexColor("overlay")
         }
 
         Component.onCompleted: {
@@ -137,7 +144,7 @@ Item {
             anchors.fill: parent
             spacing: 0
             anchors.margins: 10
-            anchors.topMargin: tabBar.height + 10
+            anchors.topMargin: dialog.header.height + 10
             anchors.bottomMargin: 5
 
             SwipeView {
@@ -401,33 +408,46 @@ Item {
             }
         }
 
-        header: Rectangle {
-            color: {color = Utility.getAppHexColor("lightText")}
-            height: tabBar.height
+        // Title and tabs share one row on landscape phones
+        header: GridLayout {
+            columns: dialog.fullWindow ? 2 : 1
+            rowSpacing: 10
 
-            TabBar {
+            RowLayout {
+                Layout.fillWidth: !dialog.fullWindow
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                spacing: 10
+
+                Label {
+                    text: qsTr("Multi Settings")
+                    font.pointSize: 15
+                    font.weight: Font.Medium
+                    color: Utility.getAppHexColor("titleText")
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    visible: mainIsTablet
+                    text: canDevs.length > 0 ? qsTr("Writes to this controller and CAN ID %1").arg(canDevs.join(", ")) :
+                                               qsTr("Writes to this controller only")
+                    font.pointSize: 10
+                    color: Utility.getAppHexColor("normalText")
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideRight
+                }
+            }
+
+            SegmentedBar {
                 id: tabBar
+                Layout.fillWidth: true
+                Layout.topMargin: dialog.fullWindow ? 16 : 0
+                Layout.leftMargin: dialog.fullWindow ? 0 : 16
+                Layout.rightMargin: 16
                 currentIndex: swipeView.currentIndex
-                anchors.fill: parent
-                implicitWidth: 0
-                clip: true
-
-                background: Rectangle {
-                    opacity: 1
-                    color: { color = Utility.getAppHexColor("lightestBackground") }
-                }
-
-                property int buttonWidth: Math.max(120, tabBar.width / (rep.model.length))
-
-                Repeater {
-                    id: rep
-                    model: ["General", "Limits", "FOC", "BMS"]
-
-                    TabButton {
-                        text: modelData
-                        width: tabBar.buttonWidth
-                    }
-                }
+                model: ["General", "Limits", "FOC", "BMS"]
+                onActivated: function(index) { swipeView.currentIndex = index }
             }
         }
     }
@@ -443,25 +463,8 @@ Item {
         dialog.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Communicating..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        x: 10 + (notchLeft + notchRight)/2
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
-
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 }

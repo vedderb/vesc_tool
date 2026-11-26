@@ -31,9 +31,11 @@
 #include "utility.h"
 #include "heatshrink/heatshrinkif.h"
 #include "minimp3/qminimp3.h"
+#include "virtualvesc.h"
 
 #include <QApplication>
 #include <QStyleFactory>
+#include <QStyleHints>
 #include <QSettings>
 #include <QFontDatabase>
 #include <QPixmapCache>
@@ -46,6 +48,10 @@
 
 #ifdef Q_OS_IOS
 #include "ios/src/setIosParameters.h"
+#endif
+
+#ifdef Q_OS_WIN
+#include "wintouchpad.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -151,7 +157,7 @@ static void addFonts() {
 
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Regular.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Medium.ttf");
-    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bolf.ttf");
+    QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Bold.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-BoldItalic.ttf");
     QFontDatabase::addApplicationFont("://res/fonts/Roboto/Roboto-Italic.ttf");
     QFontDatabase::addApplicationFont(":/res/fonts/Roboto/RobotoMono-VariableFont_wght.ttf");
@@ -206,6 +212,19 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("vescGreenMedium", QColor(35,104,61));
         Utility::setAppQColor("vescBlue", QColor(0,160,227));
         Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
+        Utility::setAppQColor("cardBackground", QColor(43,42,46));
+        Utility::setAppQColor("raisedBackground", QColor(56,55,59));
+        Utility::setAppQColor("titleText", QColor(242,242,242));
+        Utility::setAppQColor("accentText", QColor(255,138,92));
+        Utility::setAppQColor("positive", QColor(13,177,75));
+        Utility::setAppQColor("positiveText", QColor(91,217,138));
+        Utility::setAppQColor("cellBar", QColor(47,165,98));
+        Utility::setAppQColor("infoText", QColor(92,200,240));
+        Utility::setAppQColor("warning", QColor(224,160,48));
+        Utility::setAppQColor("warningText", QColor(242,181,74));
+        Utility::setAppQColor("danger", QColor(224,72,72));
+        Utility::setAppQColor("dangerText", QColor(255,122,122));
+        Utility::setAppQColor("overlay", QColor(0,0,0,170));
     } else {
         qputenv("QT_QUICK_CONTROLS_CONF", ":/qtquickcontrols2.conf");
 
@@ -214,7 +233,7 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("normalBackground", QColor(240,240,240));
         Utility::setAppQColor("darkBackground", QColor(255,255,255));
         Utility::setAppQColor("plotBackground", QColor(250,250,250));
-        Utility::setAppQColor("normalText", QColor(60,20,60));
+        Utility::setAppQColor("normalText", QColor(97,97,97));
         Utility::setAppQColor("lightText", QColor(33,33,33));
         Utility::setAppQColor("disabledText", QColor(110,110,110));
         Utility::setAppQColor("lightAccent", QColor(0,114,178));
@@ -239,6 +258,19 @@ int main(int argc, char *argv[])
         Utility::setAppQColor("vescGreenMedium", QColor(24,166,77));
         Utility::setAppQColor("vescBlue", QColor(0,160,227));
         Utility::setAppQColor("vescBlueDark", QColor(0,106,150));
+        Utility::setAppQColor("cardBackground", QColor(245,245,245));
+        Utility::setAppQColor("raisedBackground", QColor(228,228,228));
+        Utility::setAppQColor("titleText", QColor(17,17,17));
+        Utility::setAppQColor("accentText", QColor(178,58,10));
+        Utility::setAppQColor("positive", QColor(13,150,65));
+        Utility::setAppQColor("positiveText", QColor(10,125,55));
+        Utility::setAppQColor("cellBar", QColor(60,170,100));
+        Utility::setAppQColor("infoText", QColor(0,105,160));
+        Utility::setAppQColor("warning", QColor(205,135,20));
+        Utility::setAppQColor("warningText", QColor(138,83,0));
+        Utility::setAppQColor("danger", QColor(200,52,52));
+        Utility::setAppQColor("dangerText", QColor(185,35,35));
+        Utility::setAppQColor("overlay", QColor(0,0,0,85));
     }
 
     // DPI settings
@@ -261,6 +293,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<TcpHub>("Vedder.vesc.tcphub", 1, 0, "TcpHub");
     qmlRegisterType<CodeLoader>("Vedder.vesc.codeloader", 1, 0, "CodeLoader");
     qmlRegisterType<QMiniMp3>("Vedder.vesc.qminimp3", 1, 0, "QMiniMp3");
+    qmlRegisterType<VirtualDisplay>("Vedder.vesc.virtualdisplay", 1, 0, "VirtualDisplay");
 #ifdef Q_OS_LINUX
     qmlRegisterType<SystemCommandExecutor>("Vedder.vesc.syscmd", 1, 0, "SysCmd");
 #endif
@@ -1592,6 +1625,10 @@ int main(int argc, char *argv[])
         QApplication *a = new QApplication(argc, argv);
         app = a;
 
+#ifdef Q_OS_WIN
+        WinTouchpad::install();
+#endif
+
         addFonts();
 
         // Style
@@ -1601,6 +1638,8 @@ int main(int argc, char *argv[])
                             " border: none;} ");
         QStyle *myStyle = new Style_tweaks("Fusion");
         a->setStyle(myStyle);
+        // Otherwise the standard palette and the window frame follow the system appearance
+        a->styleHints()->setColorScheme(isDark ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light);
 
         if (isDark) {
             QPalette darkPalette;

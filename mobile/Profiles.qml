@@ -19,7 +19,7 @@
 
 import QtQuick 2.7
 import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.utility 1.0
@@ -42,10 +42,6 @@ Item {
             disp.deleteRequested.connect(handleProfileDelete)
             disp.checkActive()
         }
-
-        Qt.createQmlObject(
-                    'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',
-                    scrollCol, "spacer1")
     }
 
     function handleProfileEdit(index) {
@@ -88,23 +84,12 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: deleteDialog
         property int indexNow: 0
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10
-        leftMargin: 10
-        closePolicy: Popup.CloseOnEscape
         title: "Remove profile"
-        y: 10 + parent.height / 2 - height / 2
+        acceptText: qsTr("Remove")
         parent: topItem.dialogParent
-        width: parent.width - (rightMargin + leftMargin)
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
 
         Text {
             color:{color = Utility.getAppHexColor("lightText")}
@@ -125,25 +110,68 @@ Item {
         anchors.fill: parent
         spacing: 0
 
-        ScrollView {
+        // A Flickable rather than a ScrollView, which rounds the scroll position to whole pixels, so that scrolling
+        // glides smoothly, and which does not scroll with a mouse drag on the desktop
+        Flickable {
             id: scroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            contentWidth: column.width
+            contentWidth: width
+            contentHeight: scrollContent.height
             clip: true
+            ScrollBar.vertical: ScrollBar {
+                // Only an indicator on phones, as from a ScrollView after a touch
+                interactive: Qt.platform.os !== "ios" && Qt.platform.os !== "android"
+            }
 
             ColumnLayout {
-                id: scrollCol
-                anchors.fill: parent
-                anchors.topMargin: 5
+                id: scrollContent
+                width: scroll.width
+                spacing: 8
+
+                GridLayout {
+                    id: scrollCol
+                    Layout.fillWidth: true
+                    Layout.topMargin: 10
+                    columns: mainIsTablet || scroll.width >= 700 ? 2 : 1
+                    uniformCellWidths: true
+                    columnSpacing: 8
+                    rowSpacing: 8
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: 10
+                    implicitHeight: hintText.implicitHeight + 32
+                    radius: 12
+                    color: "transparent"
+                    border.color: Utility.getAppHexColor("lightestBackground")
+                    border.width: 1.5
+
+                    Text {
+                        id: hintText
+                        anchors.centerIn: parent
+                        width: parent.width - 32
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        font.pointSize: 10
+                        color: Utility.getAppHexColor("normalText")
+                        text: qsTr("Profiles switch speed, current and power limits in one tap. " +
+                                   "New profiles start from the current motor configuration.")
+                    }
+                }
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.bottomMargin: 8
+
             Button {
                 Layout.preferredWidth: 100
                 Layout.fillWidth: true
+                highlighted: true
                 text: "Add Profile"
 
                 onClicked: {
@@ -154,22 +182,16 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    bottomPadding: notchBot
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
-                    parent: topItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Remove All Profiles"
+                        iconFile: "Delete-96.png"
                         onTriggered: {
                             clearDialog.open()
                         }
@@ -179,21 +201,10 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: clearDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        rightMargin: 10
-        leftMargin: 10
-        closePolicy: Popup.CloseOnEscape
         title: "Remove all profiles"
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        y: column.y + column.height / 2 - height / 2
+        acceptText: qsTr("Remove all")
 
         Text {
             color: {color = Utility.getAppHexColor("lightText")}

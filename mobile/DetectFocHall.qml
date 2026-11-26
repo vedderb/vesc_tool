@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -27,6 +27,7 @@ import Vedder.vesc.configparams 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: hallDetect
     property var table: []
 
     property Commands mCommands: VescIf.commands()
@@ -36,20 +37,6 @@ Item {
 
     function openDialog() {
         dialog.open()
-    }
-
-    function updateDisplay() {
-        var txt = "Hall Table:\n"
-
-        for (var i = 0;i < table.length;i++) {
-            txt += "" + table[i]
-
-            if (i != table.length - 1) {
-                txt += ", "
-            }
-        }
-
-        resultArea.text = txt
     }
 
     function testConnected() {
@@ -64,134 +51,131 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        updateDisplay()
-    }
-
-    Dialog {
+    SheetDialog {
         id: dialog
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        width: parent.width - 20
-        height: column.height - 40
-        closePolicy: Popup.CloseOnEscape
+        fullHeight: true
+        title: qsTr("Hall Sensor Detection")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Hall Sensors-96.png"
+        acceptText: qsTr("Apply")
+        acceptEnabled: table.length == 8
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
+        onAccepted: {
+            for(var i = 0;i < 7;i++) {
+                mMcConf.updateParamInt("foc_hall_table__" + i, table[i])
+            }
+
+            VescIf.emitStatusMessage("Hall Sensor Parameters Applied", true)
         }
 
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
         ScrollView {
+            id: scroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width
+            contentWidth: availableWidth
 
             ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
+                width: scroll.availableWidth
+                spacing: 12
 
-                DoubleSpinBox {
+                SectionHeader {
+                    Layout.topMargin: 0
+                    text: qsTr("Measurement")
+                }
+
+                LabeledSpinBox {
                     id: currentBox
-                    Layout.fillWidth: true
+                    // As wide as a cell of the two column grids in the other detection sheets
+                    Layout.preferredWidth: (scroll.availableWidth - 10) / 2
+                    label: qsTr("Current")
                     decimals: 2
                     realValue: 10.0
                     realFrom: 0.0
                     realTo: 200.0
-                    prefix: "I: "
                     suffix: " A"
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Button {
-                        text: "Help"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            VescIf.emitMessageDialog(
-                                        mInfoConf.getLongName("help_foc_hall_detect"),
-                                        mInfoConf.getDescription("help_foc_hall_detect"),
-                                        true, true)
-                        }
+                Button {
+                    Layout.alignment: Qt.AlignLeft
+                    text: qsTr("How detection works")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                    flat: true
+                    onClicked: {
+                        VescIf.emitMessageDialog(
+                                    mInfoConf.getLongName("help_foc_hall_detect"),
+                                    mInfoConf.getDescription("help_foc_hall_detect"),
+                                    true, true)
                     }
+                }
 
-                    Button {
-                        text: "Detect"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            if (!testConnected()) {
-                                return
-                            }
+                SectionHeader {
+                    text: qsTr("Detect")
+                }
 
+                Button {
+                    Layout.fillWidth: true
+                    text: qsTr("Run detection")
+                    highlighted: table.length != 8
+                    onClicked: {
+                        if (testConnected()) {
                             detectDialog.open()
                         }
                     }
                 }
 
-                TextArea {
-                    id: resultArea
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 200
-                    readOnly: true
-                    wrapMode: TextEdit.WordWrap
-                    font.family: "DejaVuSansMono"
+                SectionHeader {
+                    text: qsTr("Results")
                 }
 
-                Button {
-                    text: "Apply & Close"
+                RowLayout {
                     Layout.fillWidth: true
-                    onClicked: {
-                        if (table.length != 8) {
-                            VescIf.emitMessageDialog("Apply Error",
-                                                     "Hall table is empty.",
-                                                     false, false)
-                            return
-                        }
+                    spacing: 10
 
-                        for(var i = 0;i < 7;i++) {
-                            mMcConf.updateParamInt("foc_hall_table__" + i, table[i])
-                        }
-
-                        VescIf.emitStatusMessage("Hall Sensor Parameters Applied", true)
-
-                        dialog.close()
+                    HallPlot {
+                        Layout.minimumWidth: 170
+                        Layout.preferredWidth: 170
+                        Layout.preferredHeight: 170
+                        table: hallDetect.table
                     }
+
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: 8
+                        rowSpacing: 8
+                        uniformCellWidths: true
+
+                        Repeater {
+                            model: 8
+
+                            ValueTile {
+                                Layout.fillWidth: true
+                                title: qsTr("Hall %1").arg(index)
+                                value: table.length == 8 ? "" + table[index] : "\u2013"
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("normalText")
+                    font.pointSize: 11
+                    text: qsTr("Apply puts the table in the motor configuration. Write it to save it on the VESC.")
                 }
             }
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Detect FOC Hall Sensor Parameters"
+        acceptText: qsTr("Start")
+        title: qsTr("Detect Hall Sensors")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Hall Sensors-96.png"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Text {
-            id: detectLambdaLabel
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
-            wrapMode: Text.WordWrap
-            text:
-                "This is going to turn the motor slowly. Make " +
-                "sure that nothing is in the way."
+        WarningBanner {
+            width: parent.width
+            text: qsTr("This turns the motor slowly. Make sure that nothing is in the way.")
         }
 
         onAccepted: {
@@ -211,7 +195,6 @@ Item {
                                          false, false)
             } else {
                 table = hall_table
-                updateDisplay()
             }
         }
     }

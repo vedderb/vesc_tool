@@ -26,48 +26,100 @@ import Vedder.vesc.commands 1.0
 import Vedder.vesc.utility 1.0
 
 Item {
+    id: page
     property Commands mCommands: VescIf.commands()
-    property bool isHorizontal: width > height
+    // The two sections side by side where they fit, the tiles are too narrow to read otherwise
+    property bool isHorizontal: width > height && width >= 600
+    // Smaller tiles in three columns where the page is short, like in the narrow panel of the desktop welcome page
+    readonly property bool compact: !isHorizontal && height < 600
+    property var startValues: []
+    property var tripValues: []
+    property string tripTime: ""
 
     Component.onCompleted: {
         mCommands.emitEmptyStats()
         mCommands.emitEmptySetupValues()
     }
 
-    GridLayout {
-        anchors.fill: parent
-        columns: isHorizontal ? 2 : 1
+    component TileGrid: GridLayout {
+        id: tileGrid
+        property var titles: []
+        property var values: []
+        property bool compact: false
 
-        GroupBox {
-            id: statBox
-            title: "Since Start"
-            Layout.fillWidth: true
-            Layout.preferredHeight: isHorizontal ? tripBox.height : implicitHeight
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignTop
+        columns: compact ? 3 : 2
+        rowSpacing: 6
+        columnSpacing: 6
 
-            Text {
-                id: statText
-                anchors.fill: parent
-                color: Utility.getAppHexColor("lightText")
-                text: ""
-                font.family: "DejaVu Sans Mono"
+        Repeater {
+            model: tileGrid.titles
+
+            ValueTile {
+                Layout.fillWidth: true
+                implicitHeight: tileGrid.compact ? 40 : 48
+                titleFont.pointSize: tileGrid.compact ? 7.5 : 9
+                valueFont.pointSize: tileGrid.compact ? 12 : 15
+                title: modelData
+                value: tileGrid.values[index] ? tileGrid.values[index][0] : ""
+                unit: tileGrid.values[index] ? tileGrid.values[index][1] : ""
             }
         }
+    }
 
-        GroupBox {
-            id: tripBox
-            title: "Trip"
-            Layout.fillWidth: true
+    // A Flickable rather than a ScrollView, which rounds the scroll position to whole pixels, so that scrolling
+    // glides smoothly, and which does not scroll with a mouse drag on the desktop
+    Flickable {
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: grid.height + 20
+        clip: true
+        ScrollBar.vertical: ScrollBar {
+            // Only an indicator on phones, as from a ScrollView after a touch
+            interactive: Qt.platform.os !== "ios" && Qt.platform.os !== "android"
+        }
+
+        GridLayout {
+            id: grid
+            x: 10
+            width: parent.width - 20
+            columns: isHorizontal ? 2 : 1
+            columnSpacing: 16
 
             ColumnLayout {
-                anchors.fill: parent
+                Layout.alignment: Qt.AlignTop
 
-                Text {
-                    id: tripText
-                    color: Utility.getAppHexColor("lightText")
-                    text: ""
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    font.family: "DejaVu Sans Mono"
+                SectionHeader {
+                    text: "Since Start"
+                }
+
+                TileGrid {
+                    titles: ["Ah Drawn", "Ah Charged", "Wh Drawn", "Wh Charged", "Dist", "Dist Abs"]
+                    values: startValues
+                    compact: page.compact
+                }
+            }
+
+            ColumnLayout {
+                Layout.alignment: Qt.AlignTop
+
+                SectionHeader {
+                    text: "Trip"
+
+                    Text {
+                        text: tripTime
+                        color: Utility.getAppHexColor("lightText")
+                    }
+                }
+
+                TileGrid {
+                    titles: ["Distance", "Efficiency", "Energy", "Ah", "Speed Avg / Max",
+                        "Power Avg / Max", "T Mot Avg / Max", "T FET Avg / Max", "I Avg / Max"]
+                    values: tripValues
+                    compact: page.compact
+                    // Three rows like Since Start on landscape phones, which are short
+                    columns: phoneLandscape || compact ? 3 : 2
                 }
 
                 Button {
@@ -79,24 +131,28 @@ Item {
                 }
             }
         }
-
-        Item {
-            Layout.fillHeight: true
-            Layout.columnSpan: isHorizontal ? 2 : 1
-        }
     }
 
     Connections {
         target: mCommands
 
         function onValuesSetupReceived(values, mask) {
-            statText.text =
-                    "Ah Drawn   : " + parseFloat(values.amp_hours * 1000).toFixed(1) + " mAh\n" +
-                    "Ah Charged : " + parseFloat(values.amp_hours_charged * 1000).toFixed(1) + " mAh\n" +
-                    "Wh Drawn   : " + parseFloat(values.watt_hours).toFixed(3) + " Wh\n" +
-                    "Wh Charged : " + parseFloat(values.watt_hours_charged).toFixed(3) + " Wh\n" +
-                    "Dist       : " + parseFloat(values.tachometer).toFixed(2) + " m\n" +
-                    "Dist Abs   : " + parseFloat(values.tachometer_abs).toFixed(2) + " m\n"
+            if ((mask & 0x7E00) === 0) {
+                return
+            }
+
+            var useImperial = VescIf.useImperialUnits()
+            var impFact = useImperial ? 0.621371192 : 1.0
+            var distUnit = useImperial ? "mi" : "km"
+
+            startValues = [
+                        [parseFloat(values.amp_hours * 1000).toFixed(1), "mAh"],
+                        [parseFloat(values.amp_hours_charged * 1000).toFixed(1), "mAh"],
+                        [parseFloat(values.watt_hours).toFixed(3), "Wh"],
+                        [parseFloat(values.watt_hours_charged).toFixed(3), "Wh"],
+                        [parseFloat(values.tachometer / 1000 * impFact).toFixed(2), distUnit],
+                        [parseFloat(values.tachometer_abs / 1000 * impFact).toFixed(2), distUnit]
+                    ]
         }
 
         function onStatsRx(val, mask) {
@@ -104,23 +160,21 @@ Item {
             var impFact = useImperial ? 0.621371192 : 1.0
             var speedUnit = useImperial ? "mph" : "km/h"
             var efficiencyUnit = useImperial ? "Wh/mi" : "Wh/km"
+            var distUnit = useImperial ? "mi" : "km"
 
-            tripText.text =
-                    "Time       : " + new Date(val.count_time * 1000).toISOString().substr(11, 8) + "\n" +
-                    "Distance   : " + parseFloat(val.distance()).toFixed(2) + " m\n" +
-                    "Efficiency : " + parseFloat(val.efficiency() / impFact).toFixed(3) + " " + efficiencyUnit + "\n" +
-                    "Energy     : " + parseFloat(val.energy()).toFixed(3) + " Wh\n" +
-                    "Ah         : " + parseFloat(val.ah()).toFixed(3) + " Ah\n" +
-                    "Speed Avg  : " + parseFloat(val.speed_avg * 3.6 * impFact).toFixed(1) + " " + speedUnit + "\n" +
-                    "Speed Max  : " + parseFloat(val.speed_max * 3.6 * impFact).toFixed(1) + " " + speedUnit + "\n" +
-                    "Power Avg  : " + parseFloat(val.power_avg).toFixed(1) + " W\n" +
-                    "Power Max  : " + parseFloat(val.power_max).toFixed(1) + " W\n" +
-                    "T Mot Avg  : " + parseFloat(val.temp_motor_avg).toFixed(1) + " \u00B0C\n" +
-                    "T Mot Max  : " + parseFloat(val.temp_motor_max).toFixed(1) + " \u00B0C\n" +
-                    "T FET Avg  : " + parseFloat(val.temp_mos_avg).toFixed(1) + " \u00B0C\n" +
-                    "T FET Max  : " + parseFloat(val.temp_mos_max).toFixed(1) + " \u00B0C\n" +
-                    "I Avg      : " + parseFloat(val.current_avg).toFixed(1) + " A\n" +
-                    "I Max      : " + parseFloat(val.current_max).toFixed(1) + " A\n"
+            tripTime = new Date(val.count_time * 1000).toISOString().substr(11, 8)
+            tripValues = [
+                        [parseFloat(val.distance() / 1000 * impFact).toFixed(2), distUnit],
+                        [parseFloat(val.efficiency() / impFact).toFixed(1), efficiencyUnit],
+                        [parseFloat(val.energy()).toFixed(1), "Wh"],
+                        [parseFloat(val.ah()).toFixed(2), "Ah"],
+                        [parseFloat(val.speed_avg * 3.6 * impFact).toFixed(1) + " / " +
+                         parseFloat(val.speed_max * 3.6 * impFact).toFixed(1), speedUnit],
+                        [parseFloat(val.power_avg).toFixed(0) + " / " + parseFloat(val.power_max).toFixed(0), "W"],
+                        [parseFloat(val.temp_motor_avg).toFixed(1) + " / " + parseFloat(val.temp_motor_max).toFixed(1), "\u00B0C"],
+                        [parseFloat(val.temp_mos_avg).toFixed(1) + " / " + parseFloat(val.temp_mos_max).toFixed(1), "\u00B0C"],
+                        [parseFloat(val.current_avg).toFixed(1) + " / " + parseFloat(val.current_max).toFixed(1), "A"]
+                    ]
         }
     }
 }

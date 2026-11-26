@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     */
 
-import QtQuick 2.7
-import QtQuick.Controls 2.10
-import QtQuick.Layouts 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.commands 1.0
@@ -43,16 +43,6 @@ Item {
         dialog.open()
     }
 
-    function updateDisplay() {
-        resultArea.text =
-                "R      : " + parseFloat(res * 1e3).toFixed(2) + " m\u03A9\n" +
-                "L      : " + parseFloat(ind * 1e6).toFixed(2) + " µH\n" +
-                "\u03BB      : " + parseFloat(lambda * 1e3).toFixed(3) + " mWb\n" +
-                "KP     : " + parseFloat(kp).toFixed(4) + "\n" +
-                "KI     : " + parseFloat(ki).toFixed(2) + "\n" +
-                "Gain   : " + parseFloat(gain).toFixed(2)
-    }
-
     function calcKpKi() {
         if (res < 1e-10) {
             VescIf.emitMessageDialog("Calculate Error",
@@ -73,8 +63,6 @@ Item {
         var bw = 1.0 / tc
         kp = ind * bw;
         ki = res * bw;
-
-        updateDisplay()
     }
 
     function calcGain() {
@@ -93,8 +81,6 @@ Item {
         }
 
         gain = 1.0e-3 / (lambda * lambda)
-
-        updateDisplay()
     }
 
     function testConnected() {
@@ -109,85 +95,100 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        updateDisplay()
-    }
-
-    Dialog {
+    SheetDialog {
         id: dialog
-        standardButtons: Dialog.Close
-        modal: true
-        focus: true
-        width: parent.width - 20
-        height: column.height - 40
-        closePolicy: Popup.CloseOnEscape
+        fullHeight: true
+        title: qsTr("FOC Detection")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect FOC-96.png"
+        acceptText: qsTr("Apply")
+        acceptEnabled: res > 0 && ind > 0 && lambda > 0
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
+        onAccepted: {
+            calcKpKi()
+            calcGain()
+
+            mMcConf.updateParamDouble("foc_motor_r", res)
+            mMcConf.updateParamDouble("foc_motor_l", ind)
+            mMcConf.updateParamDouble("foc_motor_flux_linkage", lambda)
+            mMcConf.updateParamDouble("foc_current_kp", kp)
+            mMcConf.updateParamDouble("foc_current_ki", ki)
+            mMcConf.updateParamDouble("foc_observer_gain", gain * 1e6)
         }
 
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
         ScrollView {
+            id: scroll
             anchors.fill: parent
             clip: true
-            contentWidth: parent.width
+            contentWidth: availableWidth
 
             ColumnLayout {
-                anchors.fill: parent
-                spacing: 0
+                width: scroll.availableWidth
+                spacing: 12
 
-                DoubleSpinBox {
-                    id: currentBox
-                    Layout.fillWidth: true
-                    decimals: 2
-                    realValue: mMcConf.getParamDouble("l_current_max") / 3.0
-                    realFrom: 0.0
-                    realTo: 200.0
-                    prefix: "I: "
-                    suffix: " A"
+                SectionHeader {
+                    Layout.topMargin: 0
+                    text: qsTr("Measurement")
                 }
 
-                DoubleSpinBox {
-                    id: dutyBox
+                GridLayout {
                     Layout.fillWidth: true
-                    decimals: 2
-                    realValue: 0.3
-                    realFrom: 0.0
-                    realTo: 1.0
-                    realStepSize: 0.1
-                    prefix: "D: "
-                }
+                    columns: 2
+                    columnSpacing: 10
+                    rowSpacing: 10
+                    uniformCellWidths: true
 
-                DoubleSpinBox {
-                    id: erpmBox
-                    Layout.fillWidth: true
-                    decimals: 1
-                    realValue: 2000.0
-                    realFrom: 0.0
-                    realTo: 20000.0
-                    realStepSize: 10.0
-                    prefix: "\u03C9: "
-                    suffix: " ERPM/s"
-                }
+                    LabeledSpinBox {
+                        id: currentBox
+                        Layout.fillWidth: true
+                        label: qsTr("Current")
+                        decimals: 2
+                        realValue: mMcConf.getParamDouble("l_current_max") / 3.0
+                        realFrom: 0.0
+                        realTo: 200.0
+                        suffix: " A"
+                    }
 
-                DoubleSpinBox {
-                    id: tcBox
-                    Layout.fillWidth: true
-                    decimals: 1
-                    realValue: 1000.0
-                    realFrom: 0.0
-                    realTo: 1000000.0
-                    realStepSize: 100.0
-                    prefix: "T: "
-                    suffix: " µS"
+                    LabeledSpinBox {
+                        id: dutyBox
+                        Layout.fillWidth: true
+                        label: qsTr("Duty cycle")
+                        decimals: 2
+                        realValue: 0.3
+                        realFrom: 0.0
+                        realTo: 1.0
+                        realStepSize: 0.1
+                    }
+
+                    LabeledSpinBox {
+                        id: erpmBox
+                        Layout.fillWidth: true
+                        label: qsTr("Ramp rate (ERPM/s)")
+                        decimals: 1
+                        realValue: 2000.0
+                        realFrom: 0.0
+                        realTo: 20000.0
+                        realStepSize: 10.0
+                    }
+
+                    LabeledSpinBox {
+                        id: tcBox
+                        Layout.fillWidth: true
+                        label: qsTr("Time constant")
+                        decimals: 1
+                        realValue: 1000.0
+                        realFrom: 0.0
+                        realTo: 1000000.0
+                        realStepSize: 100.0
+                        suffix: " µs"
+                        onRealValueChanged: if (res > 0 && ind > 0) calcKpKi()
+                    }
                 }
 
                 Button {
-                    text: "Help"
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignLeft
+                    text: qsTr("How detection works")
+                    icon.source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                    flat: true
                     onClicked: {
                         VescIf.emitMessageDialog(
                                     mInfoConf.getLongName("help_foc_detect"),
@@ -196,129 +197,113 @@ Item {
                     }
                 }
 
+                SectionHeader {
+                    text: qsTr("Detect")
+                }
+
                 RowLayout {
                     Layout.fillWidth: true
-                    Button {
-                        text: "Detect R&L"
-                        Layout.preferredWidth: 50
-                        Layout.fillWidth: true
-                        onClicked: {
-                            if (!testConnected()) {
-                                return
-                            }
+                    spacing: 10
 
-                            detectRlDialog.open()
+                    Button {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        text: qsTr("Measure R && L")
+                        highlighted: res === 0
+                        onClicked: {
+                            if (testConnected()) {
+                                detectRlDialog.open()
+                            }
                         }
                     }
 
                     Button {
-                        text: "DETECT \u03BB"
-                        font.capitalization: Font.MixedCase
-                        Layout.preferredWidth: 50
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        text: qsTr("Measure \u03BB")
+                        enabled: res > 0
+                        highlighted: res > 0 && lambda === 0
                         onClicked: {
-                            if (!testConnected()) {
-                                return
-                            }
-
-                            if (res < 1e-9) {
-                                VescIf.emitMessageDialog("Detect",
-                                                         "R is 0. Please measure it first.",
-                                                         false, false)
-                            } else {
+                            if (testConnected()) {
                                 detectLambdaDialog.open()
                             }
                         }
                     }
                 }
 
-                Button {
-                    text: "CALCULATE KP, KI AND \u03BB"
-                    font.capitalization: Font.MixedCase
+                SectionHeader {
+                    text: qsTr("Results")
+                }
+
+                GridLayout {
                     Layout.fillWidth: true
-                    onClicked: {
-                        calcKpKi()
-                        calcGain()
+                    columns: 3
+                    columnSpacing: 8
+                    rowSpacing: 8
+                    uniformCellWidths: true
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Resistance")
+                        value: res > 0 ? (res * 1e3).toFixed(2) : "\u2013"
+                        unit: "m\u03A9"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Inductance")
+                        value: ind > 0 ? (ind * 1e6).toFixed(2) : "\u2013"
+                        unit: "µH"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Flux linkage")
+                        value: lambda > 0 ? (lambda * 1e3).toFixed(3) : "\u2013"
+                        unit: "mWb"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Current KP")
+                        value: kp > 0 ? kp.toFixed(4) : "\u2013"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Current KI")
+                        value: ki > 0 ? ki.toFixed(2) : "\u2013"
+                    }
+
+                    ValueTile {
+                        Layout.fillWidth: true
+                        title: qsTr("Observer gain")
+                        value: gain > 0 ? gain.toFixed(2) : "\u2013"
                     }
                 }
 
-                TextArea {
-                    id: resultArea
+                Text {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 200
-                    readOnly: true
-                    font.family: "DejaVu Sans Mono"
-                }
-
-                Button {
-                    text: "Apply & Close"
-                    Layout.fillWidth: true
-                    onClicked: {
-                        if (res < 1e-10) {
-                            VescIf.emitMessageDialog("Apply Error",
-                                                     "R is 0. Please measure it first.",
-                                                     false, false)
-                            return
-                        }
-
-                        if (ind < 1e-10) {
-                            VescIf.emitMessageDialog("Apply Error",
-                                                     "L is 0. Please measure it first.",
-                                                     false, false)
-                            return
-                        }
-
-                        if (lambda < 1e-10) {
-                            VescIf.emitMessageDialog("Apply Error",
-                                                     "\u03BB is 0. Please measure it first.",
-                                                     false, false)
-                            return
-                        }
-
-                        calcKpKi()
-                        calcGain()
-
-                        mMcConf.updateParamDouble("foc_motor_r", res)
-                        mMcConf.updateParamDouble("foc_motor_l", ind)
-                        mMcConf.updateParamDouble("foc_motor_flux_linkage", lambda)
-                        mMcConf.updateParamDouble("foc_current_kp", kp)
-                        mMcConf.updateParamDouble("foc_current_ki", ki)
-                        mMcConf.updateParamDouble("foc_observer_gain", gain * 1e6)
-
-                        dialog.close()
-                    }
+                    wrapMode: Text.WordWrap
+                    color: Utility.getAppHexColor("normalText")
+                    font.pointSize: 11
+                    text: qsTr("Apply puts the results in the motor configuration. Write it to save them on the VESC.")
                 }
             }
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectRlDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Measure R & L"
-
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        acceptText: qsTr("Measure")
+        title: qsTr("Measure R & L")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect FOC-96.png"
 
         Text {
-            id: detectRlLabel
+            width: parent.width
             color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            anchors.fill: parent
             wrapMode: Text.WordWrap
-            text:
-                "When measuring R & L the motor is going to make some noises, but " +
-                "not rotate. These noises are completely normal, so don't unplug " +
-                "anything unless you see smoke."
+            text: qsTr("The motor will make some noise but not rotate. This is normal, so don't unplug anything unless you see smoke.")
         }
 
         onAccepted: {
@@ -326,33 +311,15 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: detectLambdaDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
-        width: parent.width - 20
-        closePolicy: Popup.CloseOnEscape
-        title: "Warning"
+        acceptText: qsTr("Measure")
+        title: qsTr("Measure \u03BB")
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Detect FOC-96.png"
 
-        x: 10
-        y: Math.max((parent.height - height) / 2, 10)
-        parent: dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        Text {
-            anchors.fill: parent
-            id: detectLambdaLabel
-            color: Utility.getAppHexColor("lightText")
-            verticalAlignment: Text.AlignVCenter
-            wrapMode: Text.WordWrap
-            text:
-                "<font color=\"red\">Warning: </font>" +
-                "This is going to spin up the motor. Make " +
-                "sure that nothing is in the way."
+        WarningBanner {
+            width: parent.width
+            text: qsTr("This spins up the motor. Make sure that nothing is in the way.")
         }
 
         onAccepted: {

@@ -315,6 +315,10 @@ void Commands::processPacket(QByteArray data)
         mTimeoutMcconf = 0;
         if (mMcConfig) {
             if (mMcConfig->deSerialize(vb)) {
+                if (id == COMM_GET_MCCONF) {
+                    mMcConfig->storeReference();
+                }
+
                 mMcConfig->updateDone();
 
                 if (mCheckNextMcConfig) {
@@ -351,6 +355,10 @@ void Commands::processPacket(QByteArray data)
         mTimeoutAppconf = 0;
         if (mAppConfig) {
             if (mAppConfig->deSerialize(vb)) {
+                if (id == COMM_GET_APPCONF) {
+                    mAppConfig->storeReference();
+                }
+
                 mAppConfig->updateDone();
             } else {
                 emit deserializeConfigFailed(false, true);
@@ -423,10 +431,16 @@ void Commands::processPacket(QByteArray data)
         break;
 
     case COMM_SET_MCCONF:
+        if (mMcConfig) {
+            mMcConfig->confirmWrite();
+        }
         emit ackReceived("Motor config write OK");
         break;
 
     case COMM_SET_APPCONF:
+        if (mAppConfig) {
+            mAppConfig->confirmWrite();
+        }
         emit ackReceived("App config write OK");
         break;
 
@@ -784,7 +798,7 @@ void Commands::processPacket(QByteArray data)
             mTimeoutCustomConf[confInd] = 0;
         }
 
-        emit customConfigRx(confInd, vb);
+        emit customConfigRx(confInd, vb, id == COMM_GET_CUSTOM_CONFIG_DEFAULT);
     } break;
 
     case COMM_GET_CUSTOM_CONFIG_XML: {
@@ -1424,6 +1438,7 @@ void Commands::setMcconf(bool check)
 {
     if (mMcConfig) {
         mMcConfigLast = *mMcConfig;
+        mMcConfig->recordWrite();
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_MCCONF);
         mMcConfig->serialize(vb);
@@ -1471,6 +1486,7 @@ void Commands::setAppConf()
         VByteArray vb;
         vb.vbAppendInt8(COMM_SET_APPCONF);
 
+        mAppConfig->recordWrite();
         mAppConfig->serialize(vb);
         emitData(vb);
         emitData(vb);
@@ -2086,6 +2102,7 @@ void Commands::customConfigSet(int confInd, ConfigParams *conf)
     VByteArray vb;
     vb.vbAppendUint8(COMM_SET_CUSTOM_CONFIG);
     vb.vbAppendInt8(int8_t(confInd));
+    conf->recordWrite();
     conf->serialize(vb);
     emitData(vb);
 }
@@ -2887,7 +2904,7 @@ void Commands::emitEmptyValues()
     values.fault_code = FAULT_CODE_NONE;
     values.fault_str = faultToStr(values.fault_code);
     values.position = 0.0;
-    values.vesc_id = 0;
+    values.vesc_id = 255; // No device sent these
 
     emit valuesReceived(values, 0xFFFFFFFF);
 }
@@ -2913,7 +2930,7 @@ void Commands::emitEmptySetupValues()
     values.position = 0.0;
     values.fault_code = FAULT_CODE_NONE;
     values.fault_str = faultToStr(values.fault_code);
-    values.vesc_id = 0;
+    values.vesc_id = 255; // No device sent these
     values.num_vescs = 1;
     values.battery_wh = 0.0;
 

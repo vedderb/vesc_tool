@@ -19,6 +19,7 @@
 
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import Vedder.vesc.vescinterface 1.0
 import Vedder.vesc.bleuart 1.0
@@ -36,6 +37,10 @@ Item {
     property bool scanning: false
     property bool fullLogo: true
     property var dialogParent: rootItem.parent
+    property int filterType: -1
+    property var typeCounts: [0, 0, 0, 0]
+    property var foundAddrs: []
+    readonly property int deviceCount: typeCounts.reduce((a, b) => a + b)
 
     onOpenedChanged: {
         if(opened){
@@ -69,7 +74,6 @@ Item {
     function startBleScan() {
         if (Utility.hasLocationPermission()) {
             scanning = true
-            scanDotTimer.running = true
             bleModel.clear()
             vescsUdp = []
             mBle.startScan()
@@ -91,8 +95,8 @@ Item {
         id: column
         anchors.fill: parent
         anchors.margins: 10
-        anchors.leftMargin: notchLeft
-        anchors.rightMargin: notchRight
+        anchors.leftMargin: 14 + notchLeft
+        anchors.rightMargin: 14 + notchRight
 
         Rectangle {
             Layout.preferredHeight: notchTop
@@ -102,11 +106,12 @@ Item {
 
         Image {
             id: image
-            Layout.preferredWidth: Math.min(column.width, column.height*0.8) * 0.8
+            Layout.preferredWidth: Math.min(column.width, column.height*0.8) * 0.5
             Layout.preferredHeight: (sourceSize.height * Layout.preferredWidth) / sourceSize.width
             Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
             Layout.topMargin: Math.min(rootItem.width, rootItem.height) * 0.025
-            Layout.bottomMargin: 0
+            // Between the buttons of the row below on landscape phones
+            Layout.bottomMargin: phoneLandscape ? -(Layout.preferredHeight + buttonRow.implicitHeight) / 2 - column.spacing : 0
             source: fullLogo
                     ? "qrc" + Utility.getThemePath() + "/logo.png"
                     : "qrc" + Utility.getThemePath() + "/symbol_v_wide.png"
@@ -136,50 +141,50 @@ Item {
         }
 
         RowLayout {
+            id: buttonRow
             Layout.fillWidth: true
+
             Button {
                 text: qsTr("Hide")
-                Layout.preferredWidth: 120
                 flat: true
                 onClicked: {
                     rootItem.opened = false
                 }
             }
 
-            Text {
-                id: text
+            Item {
                 Layout.fillWidth: true
-                color: Utility.getAppHexColor("lightText")
-                text: qsTr("Devices Found")
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
             }
 
-            Button {
-                id: scanButton
-                text: qsTr("Scan...")
-                enabled: true
-                flat: true
-                Layout.preferredWidth: 120
+            ToolButton {
+                icon.source: "qrc" + Utility.getThemePath() + "icons/Refresh-96.png"
+                enabled: !scanning
+                Accessible.name: qsTr("Scan BLE")
+                onClicked: startBleScan()
+            }
 
+            ToolButton {
+                icon.source: "qrc" + Utility.getThemePath() + "icons_textedit/Menu 2-96.png"
+                Accessible.name: qsTr("Scan options")
                 onClicked: {
                     scanMenu.open()
                 }
 
-                Menu {
+                PopupMenu {
                     id: scanMenu
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Scan BLE"
+                        iconFile: "bluetooth.png"
                         enabled: !scanning
                         onTriggered: {
                             startBleScan()
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Ping TCP hub"
+                        iconFile: "Globe-96.png"
                         onTriggered: {
                             bleModel.clear()
                             pingTcpHub = true
@@ -187,24 +192,16 @@ Item {
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Connect TCP Hub..."
+                        iconFile: "LAN-96.png"
                         onTriggered: {
                             tcpHubConnDialog.open()
                         }
 
-                        Dialog {
+                        SheetDialog {
                             id: tcpHubConnDialog
-                            standardButtons: Dialog.Ok | Dialog.Cancel
-                            modal: true
-                            focus: true
-                            closePolicy: Popup.CloseOnEscape
-                            anchors.centerIn: parent
-                            width: parent.width - 20
-                            parent: rootItem.parent
-                            Overlay.modal: Rectangle {
-                                color: "#AA000000"
-                            }
+                            acceptText: qsTr("Connect")
 
                             onAccepted: {
                                 hubBox.connectToHub()
@@ -220,29 +217,18 @@ Item {
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Clear TCP hub devs"
+                        iconFile: "Delete-96.png"
                         onTriggered: {
                             tcpHubClearDialog.open()
                         }
 
-                        Dialog {
+                        SheetDialog {
                             id: tcpHubClearDialog
-                            standardButtons: Dialog.Ok | Dialog.Cancel
-                            modal: true
-                            focus: true
-                            closePolicy: Popup.CloseOnEscape
-                            anchors.centerIn: parent
-                            parent: rootItem.parent
-                            Overlay.modal: Rectangle {
-                                color: "#AA000000"
-                            }
-
-                            onAccepted: {
-                                VescIf.clearTcpHubDevs()
-                            }
-
                             title: "Clear TCP Hub Devices"
+                            acceptText: qsTr("Clear")
+                            onAccepted: VescIf.clearTcpHubDevs()
 
                             Text {
                                 color: Utility.getAppHexColor("lightText")
@@ -255,34 +241,64 @@ Item {
                         }
                     }
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Connect Virtual ESC"
+                        iconFile: "Electronics-96.png"
                         onTriggered: {
                             VescIf.connectVirtual()
                         }
                     }
                 }
             }
+        }
 
-            Timer {
-                id: scanDotTimer
-                interval: 500
-                running: false
-                repeat: true
+        ProgressBar {
+            Layout.fillWidth: true
+            Material.accent: Utility.getAppHexColor("lightAccent")
+            indeterminate: scanning
+            opacity: scanning ? 1 : 0
+        }
 
-                property int dots: 0
-                onTriggered: {
-                    var text = "Scanning"
-                    for (var i = 0;i < dots;i++) {
-                        text = "-" + text + "-"
-                    }
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.leftMargin: 4
+            Layout.rightMargin: 4
 
-                    dots++;
-                    if (dots > 3) {
-                        dots = 0;
-                    }
+            Text {
+                Layout.fillWidth: true
+                color: Utility.getAppHexColor("normalText")
+                text: scanning ? qsTr("Scanning Bluetooth, USB and Wi-Fi…") : qsTr("Devices")
+                font.pointSize: 10
+            }
 
-                    scanButton.text = text
+            Text {
+                color: Utility.getAppHexColor("normalText")
+                text: qsTr("%1 found").arg(deviceCount)
+                font.pointSize: 10
+            }
+        }
+
+        ListView {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 44
+            Layout.topMargin: -6
+            Layout.bottomMargin: -4
+            orientation: ListView.Horizontal
+            spacing: 6
+            clip: true
+            model: [[qsTr("All"), -1, "", deviceCount],
+                    ["BLE", 0, "icons/bluetooth.png", typeCounts[0]],
+                    ["USB", 1, "icons/USB-96.png", typeCounts[1]],
+                    ["Wi-Fi", 2, "icons/LAN-96.png", typeCounts[2]],
+                    ["Hub", 3, "icons/Globe-96.png", typeCounts[3]]]
+
+            delegate: Chip {
+                text: modelData[0] + " " + modelData[3]
+                iconSource: modelData[2] !== "" ? "qrc" + Utility.getThemePath() + modelData[2] : ""
+                checked: filterType === modelData[1]
+                onClicked: {
+                    filterType = modelData[1]
+                    mBle.emitScanDone()
                 }
             }
         }
@@ -300,175 +316,274 @@ Item {
             spacing: 5
             z:2
 
-            Component {
-                id: bleDelegate
+            model: bleModel
+            section.property: "group"
+            section.delegate: SectionHeader {
+                width: bleList.width
+                height: implicitHeight + 8
+                text: section === "1" ? qsTr("TCP Hub") : qsTr("Nearby")
+            }
+
+            header: ColumnLayout {
+                width: bleList.width
+                // Only when the last device is in range
+                visible: lastDeviceAddr !== "" && foundAddrs.indexOf(lastDeviceAddr) >= 0
+                height: visible ? implicitHeight + 4 : 0
+
+                SectionHeader {
+                    text: qsTr("Last connected")
+                }
 
                 Rectangle {
-                    width: bleList.width
-                    height: 120
-                    color: Utility.getAppHexColor("normalBackground")
-                    radius: 10
+                    Layout.fillWidth: true
+                    implicitHeight: 70
+                    radius: 12
+                    color: Utility.getAppHexColor("cardBackground")
+                    border.color: Utility.getAppHexColor("raisedBackground")
 
                     RowLayout {
                         anchors.fill: parent
-                        spacing: 10
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 12
 
                         Rectangle {
-                            Layout.leftMargin: 10
-                            Layout.fillWidth: true
-                            opacity: 1.0
-                            color: preferred ? (Utility.getAppHexColor("vescGreenMedium")) : (Utility.getAppHexColor("vescGreenDark") )
-                            height: column.height + 10
-                            radius: height / 2
+                            width: 46
+                            height: 46
+                            radius: 23
+                            color: Utility.isDarkMode() ? Utility.getAppHexColor("vescGreenMedium") :
+                                                          Qt.alpha(Utility.getAppHexColor("positive"), 0.15)
 
-                            ColumnLayout {
-                                id: column
+                            Image {
                                 anchors.centerIn: parent
-                                Image {
-                                    id: image
-                                    fillMode: Image.PreserveAspectFit
-                                    Layout.preferredWidth: 40
-                                    Layout.preferredHeight: 40
-                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    source: "qrc" + Utility.getThemePath() +  ({
-                                       0: "icons/bluetooth.png",
-                                       1: "icons/USB-96.png",
-                                       2: "icons/LAN-96.png",
-                                       3: "icons/Globe-96.png"
-                                   }[connectionType]) 
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                                    text: name
-                                    horizontalAlignment: Text.AlignHCenter
-                                    color: Utility.getAppHexColor("lightText")
-                                    wrapMode: Text.WordWrap
-                                }
+                                width: 26
+                                height: 26
+                                source: "qrc" + Utility.getThemePath() + lastDeviceIcon
                             }
                         }
 
                         ColumnLayout {
-                            visible: connectionType === 0
+                            Layout.fillWidth: true
+                            spacing: 1
 
                             Text {
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                                Layout.rightMargin: 5
-                                color: Utility.getAppHexColor("lightText")
-                                text: "Preferred"
-                                horizontalAlignment: Text.AlignHCenter
+                                Layout.fillWidth: true
+                                text: lastDeviceName
+                                elide: Text.ElideRight
+                                font.pointSize: 15
+                                font.weight: Font.Medium
+                                color: Utility.getAppHexColor("titleText")
                             }
 
-                            Switch {
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                                enabled: true
-                                checked: preferred
-                                onToggled: {
-                                    VescIf.storeBlePreferred(bleAddr, checked)
-                                    bleModel.clear()
-                                    mBle.emitScanDone()
-                                }
+                            Text {
+                                text: timeAgo(lastDeviceTime)
+                                font.pointSize: 9
+                                color: Utility.getAppHexColor("normalText")
                             }
                         }
 
-                        ColumnLayout {
-                            Layout.rightMargin: 10
-                            spacing: -5
+                        Button {
+                            text: qsTr("Reconnect")
+                            highlighted: true
+                            onClicked: VescIf.reconnectLastPort()
+                        }
+                    }
+                }
+            }
 
-                            Timer {
-                                id: workaroundTimerConnect
-                                property string bleAddr: ""
-                                interval: 0
-                                repeat: false
-                                running: false
-                                onTriggered: {
-                                    VescIf.connectBle(workaroundTimerConnect.bleAddr)
-                                }
+            delegate: Rectangle {
+                readonly property var nameLines: name.split("\n")
+                readonly property int rssi: connectionType === 0 ? mBle.getRssi(bleAddr) : 0
+                readonly property color transportColor: Utility.getAppHexColor(
+                                                            ["positive", "warning", "lightAccent", "magenta"][connectionType])
+
+                width: bleList.width
+                height: 62
+                radius: 12
+                color: Utility.getAppHexColor("cardBackground")
+                border.color: Utility.getAppHexColor("raisedBackground")
+
+                TapHandler {
+                    onLongPressed: {
+                        if (connectionType === 0) {
+                            bleNameDialog.addr = bleAddr
+                            stringInput.text = setName
+                            bleNameDialog.open()
+                        } else if (connectionType === 3) {
+                            hubPassDialog.uuid = hubUuid
+                            hubPassDialog.open()
+                        }
+                    }
+                }
+
+                Timer {
+                    id: workaroundTimerConnect
+                    property string bleAddr: ""
+                    interval: 0
+                    repeat: false
+                    running: false
+                    onTriggered: {
+                        VescIf.connectBle(workaroundTimerConnect.bleAddr)
+                    }
+                }
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 10
+
+                    Rectangle {
+                        width: 38
+                        height: 38
+                        radius: 19
+                        color: Qt.alpha(transportColor, 0.12)
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 22
+                            height: 22
+                            source: "qrc" + Utility.getThemePath() + ({
+                                0: "icons/bluetooth.png",
+                                1: "icons/USB-96.png",
+                                2: "icons/LAN-96.png",
+                                3: "icons/Globe-96.png"
+                            }[connectionType])
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 1
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: nameLines[0]
+                            elide: Text.ElideRight
+                            font.weight: Font.Medium
+                            color: Utility.getAppHexColor("titleText")
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: nameLines.length > 1 ? nameLines[1].replace("[", "").replace("]", "") : ""
+                            elide: Text.ElideRight
+                            font.family: "DejaVu Sans Mono"
+                            font.pointSize: 9
+                            color: Utility.getAppHexColor("disabledText")
+                        }
+                    }
+
+                    // Signal strength from the BLE scan
+                    Row {
+                        spacing: 2
+                        visible: rssi < 0
+
+                        Repeater {
+                            model: 4
+
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                width: 3
+                                height: 5 + index * 3
+                                radius: 1
+                                color: rssi > -100 + (index + 1) * 12 ? Utility.getAppHexColor("positiveText") :
+                                                                       Utility.getAppHexColor("lightestBackground")
                             }
+                        }
+                    }
 
-                            Button {
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                                Layout.preferredHeight: 55
-                                Layout.preferredWidth: {
-                                    if (connectionType === 0) {
-                                        nameButton.width
-                                    } else if (connectionType === 3) {
-                                        passButton.width
-                                    } else {
-                                        nameButton.width
-                                    }
-                                }
-
-                                text: "Connect"
-
-                                onClicked: {
-                                    if (connectionType === 1) {
-                                        if (bleAddr === "") {
-                                            VescIf.autoconnect()
-                                        } else {
-                                            VescIf.connectSerial(bleAddr, 115200)
-                                        }
-                                    } else if (connectionType === 2) {
-                                        VescIf.connectTcp(bleAddr, tcpPort)
-                                    } else if (connectionType === 3) {
-                                        VescIf.connectTcpHubUuid(hubUuid)
-                                    } else {
-                                        disableDialog()
-                                        workaroundTimerConnect.bleAddr = bleAddr
-                                        workaroundTimerConnect.start()
-                                    }
-                                }
+                    ToolButton {
+                        icon.source: "qrc" + Utility.getThemePath() + (preferred ? "icons/Star-96.png" : "icons/Star Outline-96.png")
+                        icon.color: "transparent"
+                        Accessible.name: qsTr("Preferred")
+                        onClicked: {
+                            VescIf.storeBlePreferred(connectionType === 3 ? hubUuid : bleAddr, !preferred)
+                            VescIf.storeSettings()
+                            if (connectionType === 3) {
+                                // Rebuilding the list would drop the TCP hub devices
+                                bleModel.setProperty(index, "preferred", !preferred)
+                            } else {
+                                bleModel.clear()
+                                mBle.emitScanDone()
                             }
+                        }
+                    }
 
-                            Button {
-                                id: passButton
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                                Layout.preferredHeight: 55
-                                text: "Update Password"
-                                visible: connectionType === 3
+                    Button {
+                        text: "Connect"
 
-                                onClicked: {
-                                    hubPassDialog.uuid = hubUuid
-                                    hubPassDialog.open()
+                        onClicked: {
+                            if (connectionType === 1) {
+                                if (bleAddr === "") {
+                                    VescIf.autoconnect()
+                                } else {
+                                    VescIf.connectSerial(bleAddr, 115200)
                                 }
-                            }
-
-                            Button {
-                                id: nameButton
-                                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                                Layout.preferredHeight: 55
-                                text: "Set Name"
-                                visible: connectionType === 0
-
-                                onClicked: {
-                                    bleNameDialog.addr = bleAddr
-                                    stringInput.text = setName
-                                    bleNameDialog.open()
-                                }
+                            } else if (connectionType === 2) {
+                                VescIf.connectTcp(bleAddr, tcpPort)
+                            } else if (connectionType === 3) {
+                                VescIf.connectTcpHubUuid(hubUuid)
+                            } else {
+                                disableDialog()
+                                workaroundTimerConnect.bleAddr = bleAddr
+                                workaroundTimerConnect.start()
                             }
                         }
                     }
                 }
             }
 
-            model: bleModel
-            delegate: bleDelegate
+            footer: ColumnLayout {
+                width: bleList.width
 
-            footer: BusyIndicator {
-                Layout.alignment: Qt.AlignCenter
-                Layout.fillHeight: true
-                running: scanning && rootItem.opened
-                width: parent.width
-                height: BusyIndicator.implicitHeight*1.5
-
-                Behavior on y {
-                    NumberAnimation {
-                        duration: 300;
-                        easing.type: Easing.InOutSine
-                    }
+                Text {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    visible: bleList.count > 0
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    font.pointSize: 9
+                    color: Utility.getAppHexColor("normalText")
+                    text: qsTr("Long-press a device to Set Name (Bluetooth) or Update Password (TCP hub)")
                 }
 
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 10
+                    implicitHeight: helpRow.implicitHeight + 20
+                    radius: 12
+                    color: "transparent"
+                    border.color: Qt.alpha(Utility.getAppHexColor("lightAccent"), 0.33)
+
+                    RowLayout {
+                        id: helpRow
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 10
+
+                        Image {
+                            Layout.preferredWidth: 20
+                            Layout.preferredHeight: 20
+                            source: "qrc" + Utility.getThemePath() + "icons/Help-96.png"
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            wrapMode: Text.WordWrap
+                            font.pointSize: 10
+                            color: Utility.getAppHexColor("normalText")
+                            text: qsTr("Can't find your VESC? Check that Bluetooth and location access are enabled and that the VESC device is powered on.")
+                        }
+
+                        Button {
+                            visible: !Utility.hasLocationPermission()
+                            flat: true
+                            text: qsTr("Allow")
+                            onClicked: startBleScan()
+                        }
+                    }
+                }
             }
         }
     }
@@ -582,19 +697,21 @@ Item {
                 "bleAddr": addr,
                 "tcpPort": 0,
                 "hubUuid": "",
-                "connectionType": 0
+                "connectionType": 0,
+                "group": 0
             }        
         }
         
         function formatUDPDevice(device){
            return {
-                "name": device.name + " (TCP)\n" + device.ip + ":" + device.port,
+                "name": device.name + "\n" + device.ip + ":" + device.port,
                 "setName": "",
-                "preferred": true,
+                "preferred": VescIf.getBlePreferred(device.ip),
                 "bleAddr": device.ip,
                 "tcpPort": device.port,
                 "hubUuid": "",
-                "connectionType": 2
+                "connectionType": 2,
+                "group": 0
             }
         }
         
@@ -604,23 +721,25 @@ Item {
                     (port.isVesc ? "STM32" : port.isEsp ? "ESP32" : "") + 
                     "\n" + port.systemPath,
                 "setName": "",
-                "preferred": true,
+                "preferred": VescIf.getBlePreferred(port.systemPath),
                 "bleAddr": port.systemPath,
                 "tcpPort": 0,
                 "hubUuid": "",
-                "connectionType": 1
+                "connectionType": 1,
+                "group": 0
             }
         }
         
         function formatTcpHubDevice(tcpHubDevice){
            return {                         
-               "name": tcpHubDevice.id + " (TCP Hub)\n" + tcpHubDevice.server,
+               "name": tcpHubDevice.id + "\n" + tcpHubDevice.server,
                "setName": "",
-               "preferred": true,
+               "preferred": VescIf.getBlePreferred(tcpHubDevice.uuid()),
                "bleAddr": "",
                "tcpPort": 0,
                "hubUuid": tcpHubDevice.uuid(),
-               "connectionType": 3
+               "connectionType": 3,
+               "group": 1
            }
         }
         function isModelUpdated(array, model) {
@@ -634,9 +753,7 @@ Item {
         }
         function onScanDone(bleDevices, done) {
             if (done) {
-                scanDotTimer.running = false
                 scanning = false
-                scanButton.text = qsTr("Scan...")
             }
             var devices = [];
             
@@ -660,7 +777,7 @@ Item {
                 pingTcpHub = false
                 disableDialog()
                 var hubDevs = VescIf.getTcpHubDevs()
-                for (tcpHubDevice of hubDevs) {
+                for (var tcpHubDevice of hubDevs) {
                     if (tcpHubDevice.ping()) {
                         devices.push(formatTcpHubDevice(tcpHubDevice))
                     }
@@ -669,17 +786,26 @@ Item {
             }
 
             devices.sort((a, b) => {
+                             if (a.group !== b.group) {
+                                 return a.group - b.group
+                             }
+
                              if (a.preferred === b.preferred) {
                                  if (a.connectionType === b.connectionType) {
                                      return a.name.localeCompare(b.name)
                                  }
 
-                                 return a.connectionType - b.connectionType
+                                 // Bluetooth devices after the others
+                                 return (a.connectionType === 0) - (b.connectionType === 0) || a.connectionType - b.connectionType
                              } else {
                                 return a.preferred ? -1 : 1
                              }
                          })
             
+            typeCounts = [0, 1, 2, 3].map(t => devices.filter(d => d.connectionType === t).length)
+            foundAddrs = devices.map(d => d.bleAddr)
+            devices = devices.filter(d => filterType < 0 || d.connectionType === filterType)
+
            if (isModelUpdated(devices, bleModel)){
                bleModel.clear()
                for (var device of devices){
@@ -721,63 +847,27 @@ Item {
         }
     }
 
-    Dialog {
+    BusyDialog {
         id: commDialog
         title: "Connecting..."
-        closePolicy: Popup.NoAutoClose
-        modal: true
-        focus: true
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        x: parent.width/2 - width/2
-        y: parent.height / 2 - height / 2
-        parent: rootItem.dialogParent
-        ProgressBar {
-            anchors.fill: parent
-            indeterminate: visible
-        }
     }
 
-    Dialog {
+    SheetDialog {
         property string addr: ""
 
         id: bleNameDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
+        acceptText: qsTr("Save")
         title: "Set BLE Device Name"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
+        InputField {
+            id: stringInput
+            width: parent.width
+            placeholderText: qsTr("Name")
+            onAccepted: bleNameDialog.accept()
         }
 
-        width: parent.width - 20 - notchLeft - notchRight
-        height: 200
-        closePolicy: Popup.CloseOnEscape
-        x: parent.width/2 - width/2
-        y: Math.max(parent.height / 4 - height / 2, 20)
-        parent: rootItem.dialogParent
-
-        Rectangle {
-            anchors.fill: parent
-            height: stringInput.implicitHeight + 14
-            border.width: 2
-            border.color: Utility.getAppHexColor("lightestBackground")
-            color: Utility.getAppHexColor("normalBackground")
-            radius: 3
-            TextInput {
-                id: stringInput
-                color: Utility.getAppHexColor("lightText")
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                focus: true
-            }
-        }
+        // Qt moves the window up by the height of the keyboard on iOS when it covers the field
+        onOpened: stringInput.forceActiveFocus()
 
         onAccepted: {
             VescIf.storeBleName(addr, stringInput.text)
@@ -787,59 +877,31 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         property string uuid: ""
 
         id: hubPassDialog
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        modal: true
-        focus: true
+        acceptText: qsTr("Save")
         title: "Set TCP Hub Password"
 
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
+        InputField {
+            id: hubPassInput
+            width: parent.width
+            placeholderText: qsTr("Password")
+            onAccepted: hubPassDialog.accept()
         }
 
-        width: parent.width - 20 - notchLeft - notchRight
-        height: 200
-        closePolicy: Popup.CloseOnEscape
-        x: parent.width/2 - width/2
-        y: Math.max(parent.height / 4 - height / 2, 20)
-        parent: rootItem.dialogParent
-
-        Rectangle {
-            anchors.fill: parent
-            height: hubPassInput.implicitHeight + 14
-            border.width: 2
-            border.color: Utility.getAppHexColor("lightestBackground")
-            color: Utility.getAppHexColor("normalBackground")
-            radius: 3
-            TextInput {
-                id: hubPassInput
-                color: Utility.getAppHexColor("lightText")
-                anchors.fill: parent
-                anchors.margins: 7
-                font.pointSize: 12
-                focus: true
-            }
-        }
+        onOpened: hubPassInput.forceActiveFocus()
 
         onAccepted: {
             VescIf.updateTcpHubPassword(uuid, hubPassInput.text)
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: bleEn
-        standardButtons: Dialog.Ok
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-        anchors.centerIn: parent
-        parent: rootItem.dialogParent
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        acceptText: qsTr("OK")
+        rejectText: ""
 
         title: "BLE scan"
 
@@ -853,28 +915,13 @@ Item {
         }
     }
 
-    Dialog {
+    SheetDialog {
         id: bleScanStart
-        standardButtons: Dialog.Ok | Dialog.No
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-        anchors.centerIn: parent
-
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 40 - notchBot - notchTop)
-        x: (parent.width - width) / 2
-        y: (parent.height - height + notchTop) / 2
-
-        parent: rootItem.dialogParent
-
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
+        acceptText: qsTr("Continue")
+        rejectText: qsTr("Not now")
 
         onAccepted: {
             scanning = true
-            scanDotTimer.running = true
             bleModel.clear()
             vescsUdp = []
             mBle.startScan()

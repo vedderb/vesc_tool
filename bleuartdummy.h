@@ -31,6 +31,7 @@ public:
 
     Q_INVOKABLE void startScan();
     Q_INVOKABLE void emitScanDone();
+    Q_INVOKABLE int getRssi(QString addr) {(void)addr; return 0;}
 
 signals:
     void scanDone(QVariantMap devs, bool done);

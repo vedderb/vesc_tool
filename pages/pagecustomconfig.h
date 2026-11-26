@@ -41,6 +41,7 @@ public:
 
 private slots:
     void customConfigLoadDone();
+    void updateWriteButton();
 
     void on_readButton_clicked();
     void on_readDefaultButton_clicked();

@@ -8,6 +8,9 @@
 #include <QRegularExpression>
 #include <QVector>
 
+// std
+#include <functional>
+
 class QSyntaxStyle;
 
 /**
@@ -24,6 +27,13 @@ public:
      * @param document Pointer to document.
      */
     explicit LispHighlighter(QTextDocument* document=nullptr);
+
+    /**
+     * @brief Calls apply(start, length, formatName) for every match in text.
+     * Later matches override earlier ones where they overlap.
+     */
+    void forEachMatch(const QString& text,
+                      const std::function<void(int, int, const QString&)>& apply) const;
 
 protected:
     void highlightBlock(const QString& text) override;

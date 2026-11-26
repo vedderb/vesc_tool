@@ -10,6 +10,9 @@
 #include <string>
 #include <regex>
 
+#include <LispHighlighter>
+#include <QSyntaxStyle>
+
 #include "maddy/blockparser.h"
 #include "utility.h"
 
@@ -107,36 +110,72 @@ protected:
     void
     parseBlock(std::string& line) override
     {
-        QString style = QString("\"background: %1; margin-left:12px; color:%2;\"").
-                arg(Utility::getAppHexColor("lightBackground"), Utility::getAppHexColor("lightText"));
-
-        if (line == "```") {
-            if (!this->isStarted) {
-                line = "<pre style=" + style.toStdString() +
-                        "><span style=\"font-family:'DejaVu Sans Mono';\"<code>\n";
-                this->isStarted = true;
-                this->isFinished = false;
-                return;
-            } else {
-                line = "</span></code></pre>";
-                this->isFinished = true;
-                this->isStarted = false;
-                return;
-            }
-        } else if (!this->isStarted && line.substr(0, 3) == "```") {
-            line = "<pre style=" + style.toStdString() + " class=\"" +
-                    line.substr(3) + "\"><span style=\"font-family:'DejaVu Sans Mono';\"<code>\n";
+        if (!this->isStarted) {
+            this->language = QString::fromStdString(line.substr(3)).trimmed();
             this->isStarted = true;
-            this->isFinished = false;
+            line = "";
             return;
         }
 
-        line += "\n";
+        if (line != "```") {
+            this->code.append(QString::fromStdString(line));
+            line = "";
+            return;
+        }
+
+        QString style = QString("\"background: %1; margin-left:12px; color:%2;\"").
+                arg(Utility::getAppHexColor("lightBackground"), Utility::getAppHexColor("lightText"));
+        QString cls = this->language.isEmpty() ? "" : " class=\"" + this->language.toHtmlEscaped() + "\"";
+
+        line = "<pre style=" + style.toStdString() + cls.toStdString() +
+                "><code><span style=\"font-family:'DejaVu Sans Mono';\">\n" +
+                codeToHtml().toStdString() + "</span></code></pre>";
+        this->isFinished = true;
     }
 
 private:
     bool isStarted;
     bool isFinished;
+    QString language;
+    QStringList code;
+
+    // Escapes the code and, for LispBM blocks, colors it like the Lisp editor
+    QString
+    codeToHtml() const
+    {
+        bool isLisp = this->language == "lisp" || this->language == "clj";
+        QSyntaxStyle *syntaxStyle = Utility::isDarkMode() ?
+                    QSyntaxStyle::darkStyle() : QSyntaxStyle::defaultStyle();
+        QString html;
+
+        for (const QString &text: this->code) {
+            QVector<QString> formats(text.size());
+
+            if (isLisp) {
+                static const LispHighlighter highlighter;
+                highlighter.forEachMatch(text, [&formats](int start, int length, const QString &format) {
+                    std::fill(formats.begin() + start, formats.begin() + start + length, format);
+                });
+            }
+
+            for (int start = 0, end = 0; start < text.size(); start = end) {
+                while (end < text.size() && formats.at(end) == formats.at(start)) {
+                    end++;
+                }
+
+                QString part = text.mid(start, end - start).toHtmlEscaped();
+                QBrush color = syntaxStyle->getFormat(formats.at(start)).foreground();
+                if (color.style() != Qt::NoBrush) {
+                    part = QString("<span style=\"color:%1;\">%2</span>").arg(color.color().name(), part);
+                }
+                html += part;
+            }
+
+            html += "\n";
+        }
+
+        return html;
+    }
 }; // class CodeBlockParser
 
 // -----------------------------------------------------------------------------

@@ -19,6 +19,7 @@
 
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Controls.Material
 import QtQuick.Layouts 1.3
 import QtQuick.Dialogs
 
@@ -34,6 +35,13 @@ Item {
     property ConfigParams mAppConf: VescIf.appConfig()
     property Commands mCommands: VescIf.commands()
     property var mPkgs: []
+    // Wide enough to show the selected package beside the list
+    readonly property bool split: mainIsTablet && width >= 700
+    property int selectedInd: -1
+    property bool installing: false
+    property bool installCancelled: false
+
+    onSplitChanged: installFromPathDialog.close()
 
     function updateArchive() {
         disableDialog()
@@ -65,52 +73,149 @@ Item {
         pkgModel.clear()
         mPkgs = mLoader.reloadPackageArchive()
 
-        var filter = filterInput.text
+        var filter = filterInput.displayText
 
         for (var i = 0;i < mPkgs.length;i++) {
             if (filter.length === 0  || mPkgs[i].name.toLowerCase().indexOf(filter.toLowerCase()) !== -1) {
                 if (!mPkgs[i].isLibrary && mLoader.shouldShowPackage(mPkgs[i])) {
                     pkgModel.append({"pkgName": mPkgs[i].name,
-                                        "pkgDescription": mPkgs[i].description,
+                                        "pkgDescription": descriptionLine(mPkgs[i]),
                                         "ind": i})
                 }
+            }
+        }
+
+        // Refresh the detail pane for the new archive or device
+        if (split && selectedInd >= 0) {
+            selectedInd = mPkgs.findIndex(p => p.name === workaroundTimerInstall.pkg.name)
+            if (selectedInd >= 0) {
+                openPkgDialog(mPkgs[selectedInd], selectedInd)
+            } else {
+                workaroundTimerInstall.pkg = []
             }
         }
 
         enableDialog()
     }
 
-    ColumnLayout {
+    // First text line of the description, shown under the package name
+    function descriptionLine(pkg) {
+        var desc = pkg.description_md !== "" ? pkg.description_md : pkg.description
+        if (desc.toUpperCase().includes("<!DOCTYPE HTML")) {
+            return ""
+        }
+
+        // Skips headings, HTML, images, links and code on their own line
+        var line = desc.split("\n").map(l => l.trim()).find(l => /^[^#<!\[`]/.test(l))
+        return line ? line.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[*`]/g, "") : ""
+    }
+
+    // Phone landscape: the buttons beside the search field, to leave the height to the list
+    GridLayout {
         id: column
         anchors.fill: parent
-        anchors.leftMargin: notchLeft
-        anchors.rightMargin: notchRight
+        anchors.rightMargin: split ? parent.width - 320 : 0
+        rowSpacing: 8
+        columnSpacing: 8
 
         ListModel {
             id: pkgModel
         }
 
+        InputField {
+            id: filterInput
+            Layout.row: 0
+            Layout.column: 0
+            Layout.fillWidth: true
+            placeholderText: qsTr("Search packages")
+            inputMethodHints: Qt.ImhNoPredictiveText
+            onDisplayTextChanged: reloadArchive()
+        }
+
         ListView {
             id: pkgList
+            Layout.row: 1
+            Layout.column: 0
+            Layout.columnSpan: phoneLandscape ? 2 : 1
             Layout.fillWidth: true
             Layout.fillHeight: true
             focus: true
             clip: true
-            spacing: 5
+
+            Text {
+                anchors.centerIn: parent
+                width: parent.width - 40
+                visible: pkgModel.count === 0
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                text: qsTr("No packages loaded. Update the archive to download the package list.")
+                color: Utility.getAppHexColor("disabledText")
+            }
 
             Component {
                 id: pkgDelegate
 
-                ImageButton {
-                    id: connectButton
+                ItemDelegate {
                     width: pkgList.width
-                    height: 80
-
-                    buttonText: pkgName
-                    imageSrc: typeof mPkgs[ind] !== "undefined" ? mPkgs[ind].iconSrc() : "qrc" + Utility.getThemePath() + "icons/Package-96.png"
-
+                    highlighted: split && ind === selectedInd
                     onClicked: {
-                        openPkgDialog(mPkgs[ind])
+                        openPkgDialog(mPkgs[ind], ind)
+                    }
+
+                    background: Rectangle {
+                        radius: 10
+                        color: highlighted ? Qt.alpha(Material.accent, 0.12) :
+                               down ? Qt.alpha(Material.foreground, 0.08) : "transparent"
+                    }
+
+                    contentItem: RowLayout {
+                        spacing: 11
+
+                        Rectangle {
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            radius: 12
+                            color: Utility.getAppHexColor("raisedBackground")
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: 24
+                                height: 24
+                                source: typeof mPkgs[ind] !== "undefined" ? mPkgs[ind].iconSrc() :
+                                                                            "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+                                smooth: true
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: pkgName
+                                elide: Text.ElideRight
+                                color: Utility.getAppHexColor(highlighted ? "accentText" : "lightText")
+                            }
+
+                            Text {
+                                Layout.fillWidth: true
+                                visible: text !== ""
+                                text: pkgDescription
+                                textFormat: Text.PlainText
+                                elide: Text.ElideRight
+                                font.pointSize: 9
+                                color: Utility.getAppHexColor("normalText")
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 1
+                        color: Utility.getAppHexColor("lightestBackground")
                     }
                 }
             }
@@ -120,45 +225,14 @@ Item {
         }
 
         RowLayout {
-            Layout.fillWidth: true
-
-            Text {
-                id: nameText
-                color: Utility.getAppHexColor("lightText")
-                text: "Filter"
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: false
-                font.pointSize: 12
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: filterInput.implicitHeight + 14
-                border.width: 2
-                border.color: Utility.getAppHexColor("disabledText")
-                color: Utility.getAppHexColor("normalBackground")
-                radius: 3
-                TextInput {
-                    id: filterInput
-                    color: Utility.getAppHexColor("lightText")
-                    anchors.fill: parent
-                    anchors.margins: 7
-                    font.pointSize: 12
-                    focus: true
-
-                    onTextChanged: {
-                        reloadArchive()
-                    }
-                }
-            }
-        }
-
-        RowLayout {
+            Layout.row: phoneLandscape ? 0 : 2
+            Layout.column: phoneLandscape ? 1 : 0
             Layout.fillWidth: true
 
             Button {
                 text: "Update Archive"
                 Layout.fillWidth: true
+                highlighted: true
                 onClicked: {
                     disableDialog()
                     workaroundTimerArchive.start()
@@ -180,6 +254,7 @@ Item {
             Button {
                 text: "Uninstall Current"
                 Layout.fillWidth: true
+                flat: true
                 onClicked: {
                     disableDialog()
                     workaroundTimerUninstall.start()
@@ -211,21 +286,16 @@ Item {
             }
 
             Button {
-                Layout.preferredWidth: 50
-                Layout.fillWidth: true
+                Layout.preferredWidth: 56
                 text: "..."
                 onClicked: menu.open()
 
-                Menu {
+                BottomMenu {
                     id: menu
-                    leftPadding: notchLeft
-                    rightPadding: notchRight
-                    parent: appPageItem
-                    y: parent.height - implicitHeight
-                    width: parent.width
 
-                    MenuItem {
+                    MenuEntry {
                         text: "Install from file..."
+                        iconFile: "Open Folder-96.png"
                         onTriggered: {
                             if (Utility.requestFilePermission()) {
                                 fileDialogLoad.close()
@@ -265,8 +335,25 @@ Item {
         }
     }
 
+    Item {
+        id: detailPane
+        anchors.left: column.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        visible: split
+
+        Text {
+            anchors.centerIn: parent
+            visible: !installContent.visible
+            text: qsTr("Select a package")
+            color: Utility.getAppHexColor("disabledText")
+        }
+    }
+
     // HERE install
-    function openPkgDialog(pkg) {
+    function openPkgDialog(pkg, ind) {
         var line1 = pkg.description.slice(0, pkg.description.indexOf("\n"))
         if (line1.toUpperCase().includes("<!DOCTYPE HTML PUBLIC")) {
             installFromPathText.text = pkg.description
@@ -276,7 +363,16 @@ Item {
 
         installPkgCompatibleText.visible = !mLoader.shouldShowPackage(pkg)
         workaroundTimerInstall.pkg = pkg
-        installFromPathDialog.open()
+
+        if (split && ind !== selectedInd) {
+            vescDialogScroll.contentItem.contentY = 0
+        }
+
+        selectedInd = ind ?? -1
+
+        if (!split) {
+            installFromPathDialog.open()
+        }
     }
 
     function disableDialog() {
@@ -285,55 +381,42 @@ Item {
     }
 
     function enableDialog() {
+        if (installing) return
         dlDialog.close()
         column.enabled = true
     }
 
-    Dialog {
+    BusyDialog {
         id: dlDialog
         title: "Processing..."
-        closePolicy: Popup.NoAutoClose
-        standardButtons: Dialog.Cancel
-        modal: true
-        focus: true
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20
-        x: 10
-        y: parent.height / 2 - height / 2
-        parent: dialogParent
+        spinner: !installing
+        cancelText: "Cancel"
 
         onRejected: {
+            installCancelled = true
             mLoader.abortDownloadUpload()
         }
 
         ProgressBar {
-            id: dlProgress
-            anchors.fill: parent
+            id: installProgress
+            visible: installing
+            Layout.fillWidth: true
+            indeterminate: to === 0
         }
     }
 
-    Dialog {
+    SheetDialog {
         title: "Install Package"
 
         id: installFromPathDialog
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape
-        Overlay.modal: Rectangle {
-            color: "#AA000000"
-        }
-
-        width: parent.width - 20 - notchLeft - notchRight
-        height: Math.min(implicitHeight, parent.height - 20)
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        parent: dialogParent
+        iconSource: "qrc" + Utility.getThemePath() + "icons/Package-96.png"
+        rejectText: ""
 
         ColumnLayout {
+            id: installContent
+            parent: split ? detailPane : installFromPathDialog.contentItem
             anchors.fill: parent
+            visible: !split || workaroundTimerInstall.pkg.compressedData !== undefined
 
             ScrollView {
                 id: vescDialogScroll
@@ -347,7 +430,7 @@ Item {
                     color: {color = Utility.getAppHexColor("lightText")}
                     linkColor: {linkColor = Utility.getAppHexColor("lightAccent")}
                     verticalAlignment: Text.AlignVCenter
-                    anchors.fill: parent
+                    width: vescDialogScroll.availableWidth
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
                     onLinkActivated: {
@@ -356,16 +439,12 @@ Item {
                 }
             }
 
-            Text {
+            WarningBanner {
                 id: installPkgCompatibleText
                 visible: false
-                color: {color = Utility.getAppHexColor("red")}
-                verticalAlignment: Text.AlignVCenter
                 Layout.fillWidth: true
-                font.bold: true
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                text: "Warning: This package is NOT compatble with the connected device. " +
-                      "Install it only if you know what you are doing!"
+                text: qsTr("This package is NOT compatible with the connected device. " +
+                           "Install it only if you know what you are doing!")
             }
 
             RowLayout {
@@ -374,9 +453,14 @@ Item {
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
+                    highlighted: true
                     text: "Install Package"
 
                     onClicked: {
+                        installing = true
+                        installCancelled = false
+                        installProgress.to = 0
+                        installProgress.value = 0
                         disableDialog()
                         installFromPathDialog.close()
                         workaroundTimerInstall.start()
@@ -386,6 +470,8 @@ Item {
                 Button {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 500
+                    visible: !split
+                    flat: true
                     text: "Cancel"
 
                     onClicked: {
@@ -401,18 +487,19 @@ Item {
                 repeat: false
                 running: false
                 onTriggered: {
-                    if (mLoader.installVescPackage(pkg.compressedData)) {
-                        enableDialog()
+                    var ok = mLoader.installVescPackage(pkg.compressedData)
+                    installing = false
+                    enableDialog()
+                    if (ok) {
                         VescIf.emitMessageDialog("Install Package",
                                                  "Installation Done!",
                                                  true, false)
                     } else {
-                        if (dlDialog.result !== Dialog.rejected()) {
+                        if (!installCancelled) {
                             VescIf.emitMessageDialog("Install Package",
                                                      "Installation failed",
                                                      false, false)
                         }
-                        enableDialog()
                     }
                 }
             }
@@ -422,10 +509,9 @@ Item {
     Connections {
         target: mLoader
 
-        function onPkgInstallProgress (bytes, bytesTotal) {
-            dlProgress.from = 0
-            dlProgress.to = bytesTotal
-            dlProgress.value = bytes
+        function onPkgInstallProgress(bytes, bytesTotal) {
+            installProgress.to = bytesTotal
+            installProgress.value = bytes
         }
     }
 

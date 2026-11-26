@@ -78,6 +78,30 @@ Item {
         return component.createObject(parent, {"sepName": text});
     }
 
+    // Scroll to the editor of a parameter once it has been laid out and highlight it
+    function showParam(scroll, container, name) {
+        showTimer.args = [scroll, container, name]
+        showTimer.restart()
+    }
+
+    Timer {
+        id: showTimer
+        property var args: []
+        interval: 100
+
+        onTriggered: {
+            var scroll = args[0], container = args[1]
+            for (var i = container.children.length - 1;i >= 0;i--) {
+                var e = container.children[i]
+                if (e.paramName === args[2]) {
+                    scroll.contentItem.contentY = Math.max(0, Math.min(e.y, container.height - scroll.height))
+                    e.flash()
+                    break
+                }
+            }
+        }
+    }
+
     function createSpacer(parent) {
         return Qt.createQmlObject(
                     'import QtQuick 2.7; import QtQuick.Layouts 1.3; Rectangle {Layout.fillHeight: true}',

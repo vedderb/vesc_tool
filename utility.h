@@ -73,8 +73,10 @@ public:
     Q_INVOKABLE static void keepScreenOn(bool on);
     Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
+    Q_INVOKABLE static bool writeConfigBlocking(VescInterface *vesc, bool motor);
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);
     Q_INVOKABLE static bool canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud);
+    Q_INVOKABLE static QString faultToDescription(mc_fault_code fault);
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,
                                             bool detect_can, double max_power_loss, double min_current_in,
                                             double max_current_in, double openloop_rpm, double sl_erpm);
@@ -157,6 +159,8 @@ public:
     static QString waitForLine(QTcpSocket *socket, int timeoutMs);
 
     static QPixmap getIcon(QString path);
+    static QPixmap getIconWithDot(QString path);
+    static QPixmap getChangedDot();
 
     Q_INVOKABLE static bool downloadUrlEventloop(QString path, QString dest);
 
@@ -173,6 +177,7 @@ public:
     Q_INVOKABLE static QVariantList listFilesInDir(QString dirPath);
     Q_INVOKABLE static bool removeFile(QString path);
     Q_INVOKABLE static QVariantMap getFileInfo(QString path);
+    Q_INVOKABLE static double logDistance(QString path);
 
     Q_INVOKABLE static QVariant getSetting(QString key, QVariant defaultValue);
     Q_INVOKABLE static void setSetting(QString key, QVariant value);

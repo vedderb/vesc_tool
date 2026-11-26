@@ -192,6 +192,13 @@ build_mobile {
 }
 
 SOURCES += main.cpp\
+    mcp/mcpserver.cpp \
+    mcp/mcpparamvalidator.cpp \
+    mcp/mcpwritetransaction.cpp \
+    mcp/mcpdeviceoperations.cpp \
+    mcp/mcpdatahelpers.cpp \
+    mcp/vescmcpdevice.cpp \
+    mcp/vescmcptools.cpp \
     bleuartdummy.cpp \
     codeloader.cpp \
     datatypes.cpp \
@@ -221,6 +228,14 @@ SOURCES += main.cpp\
     phoneimu.cpp
 
 HEADERS  += mainwindow.h \
+    mcp/mcpserver.h \
+    mcp/mcpparamvalidator.h \
+    mcp/mcpwritetransaction.h \
+    mcp/mcpdevice.h \
+    mcp/mcpdeviceoperations.h \
+    mcp/mcpdatahelpers.h \
+    mcp/vescmcpdevice.h \
+    mcp/vescmcptools.h \
     bleuartdummy.h \
     codeloader.h \
     boardsetupwindow.h \

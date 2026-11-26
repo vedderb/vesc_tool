@@ -29,8 +29,8 @@ PageBms::PageBms(QWidget *parent) :
     QWidget(parent)
 {
     mVesc = nullptr;
-    mUtil = new Utility(this);
     mQml = new QQuickWidget(this);
+    mUtil = new Utility(this);
     mQml->setResizeMode(QQuickWidget::SizeRootObjectToView);
 
     auto layout = new QVBoxLayout(this);

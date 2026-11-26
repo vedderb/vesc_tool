@@ -54,7 +54,7 @@ apt-get install -y --no-install-recommends \
 
 echo "=== 2. Installing LLVM / Clang $LLVM_VER & LLD ==="
 if ! command -v "clang++-$LLVM_VER" >/dev/null 2>&1; then
-  curl -fsSL https://llvm.org -o /tmp/llvm.sh
+  curl -fsSL https://apt.llvm.org/llvm.sh -o /tmp/llvm.sh
   chmod +x /tmp/llvm.sh
   /tmp/llvm.sh "$LLVM_VER"
   rm -f /tmp/llvm.sh

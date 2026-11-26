@@ -35,6 +35,7 @@
 
 #include <QApplication>
 #include <QStyleFactory>
+#include <QStyleHints>
 #include <QSettings>
 #include <QFontDatabase>
 #include <QPixmapCache>
@@ -1637,6 +1638,8 @@ int main(int argc, char *argv[])
                             " border: none;} ");
         QStyle *myStyle = new Style_tweaks("Fusion");
         a->setStyle(myStyle);
+        // Otherwise the standard palette and the window frame follow the system appearance
+        a->styleHints()->setColorScheme(isDark ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light);
 
         if (isDark) {
             QPalette darkPalette;

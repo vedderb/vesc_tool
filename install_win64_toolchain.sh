@@ -71,7 +71,7 @@ python3 -m venv "$TOOLS_VENV"
 XWIN_VER="0.6.7"
 XWIN_ARCH="x86_64-unknown-linux-musl"
 if [ ! -x "$TOOLS_VENV/bin/xwin" ]; then
-  curl -fsSL "https://github.com{XWIN_VER}/xwin-${XWIN_VER}-${XWIN_ARCH}.tar.gz" \
+  curl -fsSL "https://github.com/Jake-Shadle/xwin/releases/download/${XWIN_VER}/xwin-${XWIN_VER}-${XWIN_ARCH}.tar.gz" \
     -o /tmp/xwin.tar.gz
   tar -xzf /tmp/xwin.tar.gz -C /tmp
   mv "/tmp/xwin-${XWIN_VER}-${XWIN_ARCH}/xwin" "$TOOLS_VENV/bin/xwin"

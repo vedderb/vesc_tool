@@ -213,6 +213,9 @@ done
 # Copy runtime shader compiler if available
 [ -f "$QT_WIN/bin/d3dcompiler_47.dll" ] && cp -f "$QT_WIN/bin/d3dcompiler_47.dll" "$DIST_DIR/"
 
+# Software OpenGL if needed
+[ -f "$QT_WIN/bin/opengl32sw.dll" ] && cp -f "$QT_WIN/bin/opengl32sw.dll" "$DIST_DIR/"
+
 # Write qt.conf for relative plugin/QML resolution on Windows
 cat << 'EOF' > "$DIST_DIR/qt.conf"
 [Paths]

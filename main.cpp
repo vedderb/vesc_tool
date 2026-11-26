@@ -39,6 +39,7 @@
 #include <QSettings>
 #include <QFontDatabase>
 #include <QPixmapCache>
+#include <QQuickWindow>
 
 #include "tcphub.h"
 
@@ -1054,6 +1055,10 @@ int main(int argc, char *argv[])
     if (scale > 1.01 || scale < 0.99) {
         qputenv("QT_SCALE_FACTOR", QString::number(scale).toLocal8Bit());
     }
+#endif
+
+#if defined(Q_OS_WIN) && QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 #endif
 
     QCoreApplication *app;

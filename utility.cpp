@@ -1678,6 +1678,20 @@ void Utility::stopGnssForegroundService()
 #endif
 }
 
+bool Utility::isForegroundServiceRunning()
+{
+#ifdef Q_OS_ANDROID
+    jboolean running = QJniObject::callStaticMethod<jboolean>(
+        "com/vedder/vesc/Utils",
+        "isVForegroundServiceRunning",
+        "()Z"
+    );
+    return (running == JNI_TRUE);
+#else
+    return false;
+#endif
+}
+
 bool Utility::isBleScanEnabled()
 {
 #ifdef Q_OS_ANDROID

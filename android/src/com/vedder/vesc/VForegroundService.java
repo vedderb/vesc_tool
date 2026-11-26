@@ -105,12 +105,15 @@ public class VForegroundService extends Service {
         builder.addAction(prevAction);
 
         startForeground(1, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+
+        Utils.setVForegroundServiceRunning(true);
     }
 
     private void stopForegroundService()
     {
         stopForeground(true);
         stopSelf();
+        Utils.setVForegroundServiceRunning(false);
     }
 }
 

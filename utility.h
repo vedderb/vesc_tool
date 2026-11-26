@@ -110,6 +110,7 @@ public:
     Q_INVOKABLE static QVariantList getNetworkAddresses();
     Q_INVOKABLE static void startGnssForegroundService();
     Q_INVOKABLE static void stopGnssForegroundService();
+    Q_INVOKABLE static bool isForegroundServiceRunning();
     Q_INVOKABLE static bool isBleScanEnabled();
     Q_INVOKABLE static QString strCrc32(QString str);
     Q_INVOKABLE static QString readInternalImuType(VescInterface *vesc);

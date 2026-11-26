@@ -34,6 +34,8 @@ import android.graphics.Rect;
 
 public class Utils
 {
+    private static volatile boolean sIsForegroundServiceRunning = false;
+
     public static void startVForegroundService(Context ctx) {
         Intent intent = new Intent(ctx, VForegroundService.class);
         intent.setAction(VForegroundService.ACTION_START_FOREGROUND_SERVICE);
@@ -48,6 +50,14 @@ public class Utils
         Intent intent = new Intent(ctx, VForegroundService.class);
         intent.setAction(VForegroundService.ACTION_STOP_FOREGROUND_SERVICE);
         ctx.startService(intent);
+    }
+
+    public static boolean isVForegroundServiceRunning() {
+       return sIsForegroundServiceRunning;
+    }
+
+    public static void setVForegroundServiceRunning(boolean running) {
+       sIsForegroundServiceRunning = running;
     }
 
     public static boolean checkLocationEnabled(Context ctx) {

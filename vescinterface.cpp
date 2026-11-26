@@ -3427,6 +3427,17 @@ void VescInterface::timerSlot()
 
         emit portConnectedChanged();
     }
+
+#ifdef Q_OS_ANDROID
+    static int servicePollDiv = 0;
+    if (++servicePollDiv >= 25) { // Poll ~2 times per second
+        servicePollDiv = 0;
+
+        if (isRtLogOpen() && !Utility::isForegroundServiceRunning()) {
+            closeRtLogFile();
+        }
+    }
+#endif
 }
 
 void VescInterface::packetDataToSend(QByteArray &data)

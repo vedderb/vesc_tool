@@ -137,7 +137,7 @@ def avail_qt_modules(qtdir):
             module = {}
 
             for line in fp.readlines():
-                m = re.match(r'^\s*QT\.[a-zA-Z]+\.(\S+)\s*=\s*(.*)', line)
+                m = re.match(r'^\s*QT\.[a-zA-Z0-9_]+\.(\S+)\s*=\s*(.*)', line)
                 if m:
                     module[m.group(1)] = m.group(2)
 
@@ -163,10 +163,12 @@ def avail_qt_translations():
         'Qt6Declarative': 'qtquick1',
         'Qt6Gui': 'qtbase',
         'Qt6Help': 'qt_help',
+        'Qt6Location': 'qtlocation',
         'Qt6Multimedia': 'qtmultimedia',
         'Qt6MultimediaWidgets': 'qtmultimedia',
         'Qt6MultimediaQuick': 'qtmultimedia',
         'Qt6Network': 'qtbase',
+        'Qt6Positioning': 'qtlocation',
         'Qt6Qml': 'qtdeclarative',
         'Qt6Quick': 'qtdeclarative',
         'Qt6Script': 'qtscript',
@@ -207,18 +209,24 @@ def find_qt_module_translations(qtdir, module):
     lang_list = avail_qt_langs(qtdir)
     tr_map = avail_qt_translations()
 
-    if module.name in tr_map:
-        for lang_name in lang_list:
-            tr_file = os.path.join(qtdir, 'translations', '%s_%s.qm' % (
-                tr_map[module.name], lang_name))
+    modules_to_check = [module.name]
+    if module.name == 'Qt6Gui':
+        modules_to_check.extend(['Qt6Location', 'Qt6Positioning'])
 
-            if os.path.isfile(tr_file):
-                yield QtTranslation(os.path.basename(tr_file), tr_file)
+    for mod_name in modules_to_check:
+        if mod_name in tr_map:
+            for lang_name in lang_list:
+                tr_file = os.path.join(qtdir, 'translations', '%s_%s.qm' % (
+                    tr_map[mod_name], lang_name))
+
+                if os.path.isfile(tr_file):
+                    yield QtTranslation(os.path.basename(tr_file), tr_file)
 
     if is_webengine_module(module):
         yield QtTranslation(
             'qtwebengine_locales',
             os.path.join(qtdir, 'translations', 'qtwebengine_locales'))
+
 
 @memoize
 def find_qt_module_plugins(qtdir, module):
@@ -533,6 +541,14 @@ for qmlscandir in (args.qmlscandir or []):
 
         for lib in find_qml_module_libs(args.qtdir, qml_module):
             all_libs.add(lib)
+            mod_name = parse_lib_name(lib.name)
+            if mod_name:
+                qt_mod = QtModule(mod_name, lib)
+                all_qt_modules.add(qt_mod)
+                for plugin in find_qt_module_plugins(args.qtdir, qt_mod):
+                    all_qt_plugins.add(plugin)
+                    for plugin_lib in find_qt_plugin_libs(args.qtdir, plugin):
+                        all_libs.add(plugin_lib)
 
 log_normal('Deploying files ...')
 

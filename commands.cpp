@@ -1444,7 +1444,6 @@ void Commands::setMcconf(bool check)
         mMcConfig->serialize(vb);
 
         emitData(vb);
-        emitData(vb);
 
         if (check) {
             checkMcConfig();
@@ -1489,7 +1488,6 @@ void Commands::setAppConf()
         mAppConfig->recordWrite();
         mAppConfig->serialize(vb);
         emitData(vb);
-        emitData(vb);
 
         emit appConfigWriteSent();
     }
@@ -1502,7 +1500,6 @@ void Commands::setAppConfNoStore()
         vb.vbAppendInt8(COMM_SET_APPCONF_NO_STORE);
 
         mAppConfig->serialize(vb);
-        emitData(vb);
         emitData(vb);
     }
 }

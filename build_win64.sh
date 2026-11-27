@@ -13,7 +13,8 @@ DIST_DIR="$REPO_DIR/$DIST_NAME"
 ZIP_FILE="$REPO_DIR/${DIST_NAME}.zip"
 SINGLE_EXE="$REPO_DIR/${DIST_NAME}.exe"
 
-QT_VER="6.12.0"
+#QT_VER="6.12.0"
+QT_VER="6.10.3"
 QT_HOST="/opt/qt-host/$QT_VER/gcc_64"
 QT_WIN="/opt/qt-win/$QT_VER/msvc2022_64"
 XWIN_DIR="/opt/xwin"
@@ -194,10 +195,14 @@ for qml_mod in QtQuick QtQml Qt5Compat QtCore Qt Qt3D QtLocation QtPositioning; 
   fi
 done
 
-# Remove debug symbols (.pdb) and debug DLLs (*d.dll), preserving *backend.dll (TLS plugins)
+# Remove debug symbols (.pdb) and ONLY debug DLLs that have a corresponding release DLL
 find "$DIST_DIR/plugins" "$DIST_DIR/qml" -name "*.pdb" -delete
-find "$DIST_DIR/plugins" "$DIST_DIR/qml" -name "*d.dll" ! -name "*backend.dll" ! -name "Qt6Quick3D*.dll" ! -name "qtquick3d*.dll" \
-  -delete
+find "$DIST_DIR/plugins" "$DIST_DIR/qml" -name "*d.dll" | while read -r d_dll; do
+  rel_dll="${d_dll%d.dll}.dll"
+  if [ -f "$rel_dll" ]; then
+    rm -f "$d_dll"
+  fi
+done
 
 # Resolve all direct and transitive Qt6 DLL dependencies across .exe, plugins/, and qml/
 for pass in 1 2 3 4; do
@@ -214,7 +219,7 @@ done
 [ -f "$QT_WIN/bin/d3dcompiler_47.dll" ] && cp -f "$QT_WIN/bin/d3dcompiler_47.dll" "$DIST_DIR/"
 
 # Software OpenGL if needed
-# [ -f "$QT_WIN/bin/opengl32sw.dll" ] && cp -f "$QT_WIN/bin/opengl32sw.dll" "$DIST_DIR/"
+[ -f "$QT_WIN/bin/opengl32sw.dll" ] && cp -f "$QT_WIN/bin/opengl32sw.dll" "$DIST_DIR/"
 
 # Write qt.conf for relative plugin/QML resolution on Windows
 cat << 'EOF' > "$DIST_DIR/qt.conf"

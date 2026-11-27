@@ -1,47 +1,61 @@
 /*
     Copyright 2018 - 2026 Benjamin Vedder	benjamin@vedder.se
-
-    This file is part of VESC Tool.
-
-    VESC Tool is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    VESC Tool is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    */
+*/
 
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls as Controls
 import Vedder.vesc.utility 1.0
 
-DoubleSpinBox {
+Controls.SpinBox {
     id: root
     locale: Qt.locale("C")
 
-    // Intercept typing before the validator runs, or normalize in valueFromText:
-    validator: RegularExpressionValidator { regularExpression: /[-+]?[0-9]*[.,]?[0-9]*/ }
-    valueFromText: function(text, locale) { return parseFloat(text.replace(",", ".")) || 0 }
-
-    property alias realValue: root.value
-    property alias realFrom: root.from
-    property alias realTo: root.to
-    property alias realStepSize: root.stepSize
+    property int decimals: 2
+    property real realValue: 0.0
+    property real realFrom: 0.0
+    property real realTo: 100.0
+    property real realStepSize: 1.0
     property string suffix: ""
     property string prefix: ""
 
+    readonly property int factor: Math.pow(10, decimals)
+
+    from: Math.round(realFrom * factor)
+    to: Math.round(realTo * factor)
+    stepSize: Math.max(1, Math.round(realStepSize * factor))
+
+    onRealValueChanged: {
+        var target = Math.round(realValue * factor)
+        if (value !== target) {
+            value = target
+        }
+    }
+
+    onValueChanged: {
+        var nextReal = value / factor
+        if (Math.abs(realValue - nextReal) > (0.5 / factor)) {
+            realValue = nextReal
+        }
+    }
+
+    validator: DoubleValidator {
+        bottom: Math.min(root.realFrom, root.realTo)
+        top: Math.max(root.realFrom, root.realTo)
+        decimals: root.decimals
+        notation: DoubleValidator.StandardNotation
+    }
+
+    textFromValue: function(value, locale) {
+        return Number(value / factor).toFixed(decimals)
+    }
+
+    valueFromText: function(text, locale) {
+        var num = parseFloat(text.replace(",", "."))
+        return isNaN(num) ? 0 : Math.round(num * factor)
+    }
+
     background: InputBackground {}
     editable: true
-    decimals: 2
-    from: 0.0
-    to: 100.0
-    stepSize: 1.0
 
     inputMethodHints: Qt.platform.os === "ios"
                       ? (Qt.ImhPreferNumbers | Qt.ImhNoPredictiveText)

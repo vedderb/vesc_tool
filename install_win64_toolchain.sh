@@ -7,7 +7,8 @@ set -euo pipefail
 #           Qt 6.12.0 Linux Host Tools, and Qt 6.12.0 Windows MSVC 2022 Target
 # ==============================================================================
 
-QT_VER="6.12.0"
+#QT_VER="6.12.0"
+QT_VER="6.10.3"
 LLVM_VER="21"
 QT_HOST_DIR="/opt/qt-host"
 QT_WIN_DIR="/opt/qt-win"
@@ -54,7 +55,7 @@ apt-get install -y --no-install-recommends \
 
 echo "=== 2. Installing LLVM / Clang $LLVM_VER & LLD ==="
 if ! command -v "clang++-$LLVM_VER" >/dev/null 2>&1; then
-  curl -fsSL https://llvm.org -o /tmp/llvm.sh
+  curl -fsSL https://apt.llvm.org/llvm.sh -o /tmp/llvm.sh
   chmod +x /tmp/llvm.sh
   /tmp/llvm.sh "$LLVM_VER"
   rm -f /tmp/llvm.sh
@@ -68,10 +69,10 @@ python3 -m venv "$TOOLS_VENV"
 "$TOOLS_VENV/bin/pip" install aqtinstall
 
 # Download prebuilt xwin binary (avoids long Rust/cargo compile times)
-XWIN_VER="0.6.7"
+XWIN_VER="0.10.0"
 XWIN_ARCH="x86_64-unknown-linux-musl"
 if [ ! -x "$TOOLS_VENV/bin/xwin" ]; then
-  curl -fsSL "https://github.com{XWIN_VER}/xwin-${XWIN_VER}-${XWIN_ARCH}.tar.gz" \
+  curl -fsSL "https://github.com/Jake-Shadle/xwin/releases/download/${XWIN_VER}/xwin-${XWIN_VER}-${XWIN_ARCH}.tar.gz" \
     -o /tmp/xwin.tar.gz
   tar -xzf /tmp/xwin.tar.gz -C /tmp
   mv "/tmp/xwin-${XWIN_VER}-${XWIN_ARCH}/xwin" "$TOOLS_VENV/bin/xwin"
